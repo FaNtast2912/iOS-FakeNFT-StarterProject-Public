@@ -1,0 +1,19 @@
+
+Настройка NavigationModel (iOS 16+)
+
+1. Создание и настройка:
+   - В корневом View: @StateObject var navigationModel = NavigationModel()
+   - Подключение к TabView: TabView(selection: $navigationModel.selectedTab)
+   - В каждом табе: NavigationStack(path: $navigationModel.path)
+   - Настройка destinationView: .navigationDestination(for: Screens.self)
+   - Прикрепление к Environment: .withNavigationModel(navigationModel)
+   - Для модальных окон: .sheet(item: $navigationModel.presentedScreen)
+
+2. Использование в дочерних View:
+   - Доступ: @Environment(\.navigationModel) var nav
+   - Переход вперед: nav.navigate(to: .screenName)
+   - Возврат назад: nav.navigateBack()
+   - Возврат к началу: nav.navigateToRoot()
+   - Переключение таба: nav.switchToTab(1)
+   - Открытие модального окна: nav.presentScreen(.settings)
+   - Закрытие модального окна: nav.dismissPresentedScreen()
