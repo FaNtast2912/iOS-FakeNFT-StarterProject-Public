@@ -21,62 +21,49 @@
 Пример -
 
 struct MainTabView: View {
-    @StateObject private var navigationModel = NavigationModel() 
+    @StateObject private var navigationModel = NavigationModel()
     
     var body: some View {
-        TabView(selection: $navigationModel.selectedTab) {
-            // Tab 1: Каталог
-            NavigationStack(path: $navigationModel.path) {
+        NavigationStack(path: $navigationModel.path) {
+            TabView(selection: $navigationModel.selectedTab) {
+                // Tab 1: Каталог
                 CatalogView()
-                    .navigationDestination(for: Screens.self) { screen in
-                        switch screen {
-                        case .nftDetails:
-                            NftDetailsView()
-                        case .productDetails:
-                            ProductDetailsView()
-                        default:
-                            EmptyView()
-                        }
+                    .tabItem {
+                        Label("Каталог", systemImage: "square.grid.2x2")
                     }
-            }
-            .tabItem {
-                Label("Каталог", systemImage: "square.grid.2x2")
-            }
-            .tag(0)
-            
-            // Tab 2: Профиль
-            NavigationStack(path: $navigationModel.path) {
+                    .tag(0)
+                
+                // Tab 2: Профиль
                 ProfileView()
-                    .navigationDestination(for: Screens.self) { screen in
-                        switch screen {
-                        case .settings:
-                            SettingsView()
-                        default:
-                            EmptyView()
-                        }
+                    .tabItem {
+                        Label("Профиль", systemImage: "person")
                     }
-            }
-            .tabItem {
-                Label("Профиль", systemImage: "person")
-            }
-            .tag(1)
-            
-            // Tab 3: Избранное
-            NavigationStack(path: $navigationModel.path) {
+                    .tag(1)
+                
+                // Tab 3: Избранное
                 FavoritesView()
-                    .navigationDestination(for: Screens.self) { screen in
-                        switch screen {
-                        case .nftDetails:
-                            NftDetailsView()
-                        default:
-                            EmptyView()
-                        }
+                    .tabItem {
+                        Label("Избранное", systemImage: "heart")
                     }
+                    .tag(2)
             }
-            .tabItem {
-                Label("Избранное", systemImage: "heart")
+            // Общая обработка навигации для всех табов
+            .navigationDestination(for: Screens.self) { screen in
+                switch screen {
+                case .nftDetails:
+                    NftDetailsView()
+                case .productDetails:
+                    ProductDetailsView()
+                case .settings:
+                    SettingsView()
+                case .profile:
+                    ProfileView()
+                case .catalog:
+                    CatalogView()
+                case .favorites:
+                    FavoritesView()
+                }
             }
-            .tag(2)
         }
         .withNavigationModel(navigationModel) // Важно! Передаём модель в environment
         .sheet(item: $navigationModel.presentedScreen) { screen in
