@@ -66,10 +66,16 @@ final class NavigationModel: ObservableObject {
             navigate(to: .webView(url: url))
         }
     }
+    
+    func IOScource() {
+        if let url = URL(string: "https://practicum.yandex.ru/ios-developer/?from=catalog") { // экран "Подробнее об авторе"
+            navigate(to: .webView(url: url))
+        }
+    }
 }
-    
+
 // MARK: - Интеграция с Environment
-    
+
 /// Ключ для передачи NavigationModel через Environment
 struct NavigationModelKey: EnvironmentKey {
     static var defaultValue: NavigationModel{
