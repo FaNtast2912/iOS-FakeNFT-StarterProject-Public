@@ -15,6 +15,7 @@ enum Screens: Hashable {
     case favorites
     case settings
     case productDetails
+    case webView(url: URL)
 }
 
 // MARK: - Модель навигации
@@ -58,6 +59,12 @@ final class NavigationModel: ObservableObject {
     /// Закрыть модальный экран
     func dismissPresentedScreen() {
         presentedScreen = nil
+    }
+    
+    func openPracticumTerms() {
+        if let url = URL(string: "https://yandex.ru/legal/practicum_termsofuse/") {
+            navigate(to: .webView(url: url))
+        }
     }
 }
     
