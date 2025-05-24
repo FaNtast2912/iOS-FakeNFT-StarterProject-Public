@@ -1,0 +1,138 @@
+
+Настройка NavigationModel (iOS 16+)
+
+1. Создание и настройка:
+   - В корневом View: @StateObject var navigationModel = NavigationModel()
+   - Подключение к TabView: TabView(selection: $navigationModel.selectedTab)
+   - В каждом табе: NavigationStack(path: $navigationModel.path)
+   - Настройка destinationView: .navigationDestination(for: Screens.self)
+   - Прикрепление к Environment: .withNavigationModel(navigationModel)
+   - Для модальных окон: .sheet(item: $navigationModel.presentedScreen)
+
+2. Использование в дочерних View:
+   - Доступ: @Environment(\.navigationModel) var nav
+   - Переход вперед: nav.navigate(to: .screenName)
+   - Возврат назад: nav.navigateBack()
+   - Возврат к началу: nav.navigateToRoot()
+   - Переключение таба: nav.switchToTab(1)
+   - Открытие модального окна: nav.presentScreen(.settings)
+   - Закрытие модального окна: nav.dismissPresentedScreen()
+
+Пример -
+
+struct MainTabView: View {
+    @StateObject private var navigationModel = NavigationModel()
+    
+    var body: some View {
+        NavigationStack(path: $navigationModel.path) {
+            TabView(selection: $navigationModel.selectedTab) {
+                // Tab 1: Каталог
+                CatalogView()
+                    .tabItem {
+                        Label("Каталог", systemImage: "square.grid.2x2")
+                    }
+                    .tag(0)
+                
+                // Tab 2: Профиль
+                ProfileView()
+                    .tabItem {
+                        Label("Профиль", systemImage: "person")
+                    }
+                    .tag(1)
+                
+                // Tab 3: Избранное
+                FavoritesView()
+                    .tabItem {
+                        Label("Избранное", systemImage: "heart")
+                    }
+                    .tag(2)
+            }
+            // Общая обработка навигации для всех табов
+            .navigationDestination(for: Screens.self) { screen in
+                switch screen {
+                case .nftDetails:
+                    NftDetailsView()
+                case .productDetails:
+                    ProductDetailsView()
+                case .settings:
+                    SettingsView()
+                case .profile:
+                    ProfileView()
+                case .catalog:
+                    CatalogView()
+                case .favorites:
+                    FavoritesView()
+                }
+            }
+        }
+        .withNavigationModel(navigationModel) // Важно! Передаём модель в environment
+        .sheet(item: $navigationModel.presentedScreen) { screen in
+            // Обработка модальных экранов
+            switch screen {
+            case .settings:
+                SettingsView()
+            case .profile:
+                ProfileView()
+            default:
+                EmptyView()
+            }
+        }
+    }
+}
+
+struct CatalogView: View {
+    @Environment(\.navigationModel) var nav
+    
+    var body: some View {
+        List {
+            // Обычная навигация на новый экран
+            Button("Открыть детали NFT") {
+                nav.navigate(to: .nftDetails)
+            }
+            
+            // Переход с новым модальным окном
+            Button("Показать настройки") {
+                nav.presentScreen(.settings)
+            }
+            
+            // Переключение на другой таб
+            Button("Перейти к избранному") {
+                nav.switchToTab(2)
+            }
+            
+            // Переключение на другой таб и открытие экрана там
+            Button("Открыть профиль и настройки") {
+                nav.switchToTab(1)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    nav.navigate(to: .settings)
+                }
+            }
+        }
+        .navigationTitle("Каталог")
+    }
+}
+
+struct NftDetailsView: View {
+    @Environment(\.navigationModel) var nav
+    
+    var body: some View {
+        VStack {
+            Text("Детали NFT")
+            
+            // Возврат назад
+            Button("Назад") {
+                nav.navigateBack()
+            }
+            
+            // Возврат в корень
+            Button("В начало") {
+                nav.navigateToRoot()
+            }
+            
+            // Открытие другого экрана в текущем стеке
+            Button("К деталям продукта") {
+                nav.navigate(to: .productDetails)
+            }
+        }
+    }
+}
