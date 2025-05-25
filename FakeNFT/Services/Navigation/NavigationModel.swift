@@ -13,7 +13,7 @@ enum Screens: Hashable {
     case nftDetails
     case profile
     case favorites
-    case settings
+    case statistics
     case productDetails
     case webView(url: URL)
 }
@@ -78,7 +78,7 @@ final class NavigationModel: ObservableObject {
 
 /// Ключ для передачи NavigationModel через Environment
 struct NavigationModelKey: EnvironmentKey {
-    static var defaultValue: NavigationModel{
+    static var defaultValue: NavigationModel {
         fatalError("NavigationModel должен быть передан через environment!")
     }
 }
