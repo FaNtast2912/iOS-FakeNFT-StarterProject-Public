@@ -34,6 +34,7 @@
 		D04790C32DE3A5BE000585F0 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D04790C22DE3A5BE000585F0 /* ProfileView.swift */; };
 		D04790C62DE3A628000585F0 /* CartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D04790C52DE3A628000585F0 /* CartView.swift */; };
 		D04790C92DE3A64A000585F0 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D04790C82DE3A64A000585F0 /* StatisticsView.swift */; };
+		D0593DD62DE3B30E00619DB0 /* ColorsExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0593DD52DE3B30E00619DB0 /* ColorsExtension.swift */; };
 		E1CD40DC2A96BECC00BE7FE8 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E1CD40DB2A96BECC00BE7FE8 /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
@@ -85,6 +86,7 @@
 		D04790C22DE3A5BE000585F0 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		D04790C52DE3A628000585F0 /* CartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartView.swift; sourceTree = "<group>"; };
 		D04790C82DE3A64A000585F0 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
+		D0593DD52DE3B30E00619DB0 /* ColorsExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorsExtension.swift; sourceTree = "<group>"; };
 		E1CD40D92A96BE7D00BE7FE8 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		E1CD40DB2A96BECC00BE7FE8 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -172,6 +174,7 @@
 		3F478ECD29DB473000F6D39E /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				D0593DD52DE3B30E00619DB0 /* ColorsExtension.swift */,
 			);
 			path = DesignSystem;
 			sourceTree = "<group>";
@@ -526,6 +529,7 @@
 				D04790C12DE3A59E000585F0 /* CatalogView.swift in Sources */,
 				3FC8C39329D246BA0081F015 /* DateFormatters+Presets.swift in Sources */,
 				D04790BD2DE393EC000585F0 /* MainView.swift in Sources */,
+				D0593DD62DE3B30E00619DB0 /* ColorsExtension.swift in Sources */,
 				0CFCB7422A78013E0009A829 /* Nft.swift in Sources */,
 				D04790C62DE3A628000585F0 /* CartView.swift in Sources */,
 				0CF2C2DD2A783CE600FDC837 /* ErrorView.swift in Sources */,
