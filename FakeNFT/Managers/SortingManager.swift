@@ -18,25 +18,28 @@ final class SortingManager {
     static let shared = SortingManager()
     private init() {}
 
-    func sort(products: [Product], by option: ProductSortOption) -> [Product] {
+    func sort(products: [Nft], by option: ProductSortOption) -> [Nft] {
         switch option {
         case .name(let ascending):
             return products.sorted {
-                ascending ?
-                    ($0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending) :
-                    ($0.name.localizedCaseInsensitiveCompare($1.name) == .orderedDescending)
+                let result = $0.name.localizedCaseInsensitiveCompare($1.name)
+                return ascending ? (result == .orderedAscending) : (result == .orderedDescending)
             }
+
         case .price(let ascending):
             return products.sorted {
-                ascending ? $0.price < $1.price : $0.price > $1.price
+                ascending ? ($0.price < $1.price) : ($0.price > $1.price)
             }
+
         case .rating(let ascending):
             return products.sorted {
-                ascending ? $0.rating < $1.rating : $0.rating > $1.rating
+                ascending ? ($0.raiting < $1.raiting) : ($0.raiting > $1.raiting)
             }
+
         case .nftCount(let ascending):
+            let lhsCount: (Nft) -> Int = { $0.images.count }
             return products.sorted {
-                ascending ? $0.nftCount < $1.nftCount : $0.nftCount > $1.nftCount
+                ascending ? (lhsCount($0) < lhsCount($1)) : (lhsCount($0) > lhsCount($1))
             }
         }
     }

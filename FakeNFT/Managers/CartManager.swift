@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 final class CartManager: ObservableObject {
-    @Published private(set) var cartItems: [Product] = []
+    @Published private(set) var cartItems: [Nft] = []
 
     private let userDefaultsKey = "FakeNFT_CartItems"
     private var cancellables = Set<AnyCancellable>()
@@ -23,20 +23,20 @@ final class CartManager: ObservableObject {
             .store(in: &cancellables)
     }
 
-    func addToCart(_ product: Product) {
-        guard !cartItems.contains(product) else { return }
+    func addToCart(_ product: Nft) {
+        guard !cartItems.contains(where: { $0.id == product.id }) else { return }
         cartItems.append(product)
     }
 
-    func removeFromCart(_ product: Product) {
+    func removeFromCart(_ product: Nft) {
         cartItems.removeAll { $0.id == product.id }
     }
 
-    func isInCart(_ product: Product) -> Bool {
+    func isInCart(_ product: Nft) -> Bool {
         cartItems.contains(where: { $0.id == product.id })
     }
 
-    private func saveCart(items: [Product]) {
+    private func saveCart(items: [Nft]) {
         if let encoded = try? JSONEncoder().encode(items) {
             UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
         }
@@ -48,7 +48,7 @@ final class CartManager: ObservableObject {
 
     private func loadCart() {
         if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
-           let decoded = try? JSONDecoder().decode([Product].self, from: data) {
+           let decoded = try? JSONDecoder().decode([Nft].self, from: data) {
             cartItems = decoded
         }
     }
