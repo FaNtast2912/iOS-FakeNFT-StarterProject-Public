@@ -73,29 +73,3 @@ final class NavigationModel: ObservableObject {
         }
     }
 }
-
-// MARK: - Интеграция с Environment
-
-/// Ключ для передачи NavigationModel через Environment
-struct NavigationModelKey: EnvironmentKey {
-    static var defaultValue: NavigationModel {
-        fatalError("NavigationModel должен быть передан через environment!")
-    }
-}
-
-extension EnvironmentValues {
-    var navigationModel: NavigationModel {
-        get {
-            self[NavigationModelKey.self]
-        } set {
-            self[NavigationModelKey.self] = newValue
-        }
-    }
-}
-
-/// Модификатор для View
-extension View {
-    func withNavigationModel(_ model: NavigationModel) -> some View {
-        environment(\.navigationModel, model)
-    }
-}
