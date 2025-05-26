@@ -12,4 +12,5 @@ struct Product: Identifiable, Codable, Equatable {
     let name: String
     let rating: Double
     let price: Double
+    let nftCount: Int
 }
