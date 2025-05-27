@@ -63,7 +63,7 @@ struct AppTabView: View {
             }
             // Общая обработка навигации для всех табов
             .navigationDestination(for: Screens.self) { screen in
-                
+                navigationModel.destination(for: screen)
             }
         }
         .environmentObject(navigationModel)

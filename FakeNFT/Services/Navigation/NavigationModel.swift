@@ -73,3 +73,27 @@ final class NavigationModel: ObservableObject {
         }
     }
 }
+
+// MARK: - Обработка переходов
+
+extension NavigationModel {
+    @ViewBuilder
+    func destination(for screen: Screens) -> some View {
+        switch screen {
+        case .catalog:
+            CatalogView()
+        case .nftDetails:
+            Text("NFT Details") // placeholder
+        case .profile:
+            ProfileView()
+        case .favorites:
+            Text("favorites") // placeholder
+        case .statistics:
+            StatisticsView()
+        case .productDetails:
+            Text("productDetails") // placeholder
+        case .webView(let url):
+            WebViewScreen(url: url)
+        }
+    }
+}
