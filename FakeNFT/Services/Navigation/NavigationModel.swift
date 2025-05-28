@@ -9,12 +9,25 @@ import SwiftUI
 
 // MARK: - Экраны
 enum Screens: Hashable {
-    case catalog
-    case nftDetails
-    case profile
-    case favorites
-    case statistics
-    case productDetails
+    // Catalog
+    case catalogListView
+    case collectionDetailView
+    
+    // Nft(profile)
+    case myNFTView
+    case myFavoriteNFTView
+    
+    // Statistics
+    case statisticsView
+    case userCard
+    case userCollection
+    
+    // Cart
+    case cartView
+    case paymentMethodView
+    case paymentDoneView
+    
+    // WebView
     case webView(url: URL)
 }
 
@@ -80,18 +93,36 @@ extension NavigationModel {
     @ViewBuilder
     func destination(for screen: Screens) -> some View {
         switch screen {
-        case .catalog:
+            
+            // Catalog
+        case .catalogListView:
             CatalogView()
-        case .nftDetails:
-            Text("NFT Details") // placeholder
-        case .profile:
+        case .collectionDetailView:
+            CollectonDetailView()
+            
+            // Nft(profile)
+        case .myNFTView:
             ProfileView()
-        case .favorites:
-            Text("favorites") // placeholder
-        case .statistics:
+        case .myFavoriteNFTView:
+            MyFavoriteNFTView()
+            
+            // Statistics
+        case .statisticsView:
             StatisticsView()
-        case .productDetails:
-            Text("productDetails") // placeholder
+        case .userCard:
+            UserCardView()
+        case .userCollection:
+            UserCollectionView()
+            
+            // Cart
+        case .cartView:
+            CartView()
+        case .paymentMethodView:
+            PaymentMethodView()
+        case .paymentDoneView:
+            PaymentDoneView()
+            
+            // WebView
         case .webView(let url):
             WebViewScreen(url: url)
         }
