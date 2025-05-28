@@ -1,46 +1,124 @@
 import Foundation
 
-enum NetworkClientError: Error {
+/// Ошибки, которые могут возникнуть при работе с сетевым клиентом
+enum NetworkClientError: LocalizedError {
     case httpStatusCode(Int)
     case urlRequestError(Error)
     case urlSessionError
     case parsingError
+    case invalidEndpoint
+    case invalidResponse
+    
+    var errorDescription: String? {
+        switch self {
+        case .httpStatusCode(let code):
+            return "Ошибка HTTP с кодом: \(code)"
+        case .urlRequestError(let error):
+            return "Ошибка URL запроса: \(error.localizedDescription)"
+        case .urlSessionError:
+            return "Произошла ошибка URL сессии"
+        case .parsingError:
+            return "Не удалось распарсить данные ответа"
+        case .invalidEndpoint:
+            return "Некорректный URL эндпоинта"
+        case .invalidResponse:
+            return "Некорректный ответ от сервера"
+        }
+    }
 }
 
+/// Протокол для работы с сетевыми запросами
 protocol NetworkClient {
+    /// Отправляет сетевой запрос и возвращает сырые данные
+    /// - Parameters:
+    ///   - request: Сетевой запрос для отправки
+    ///   - queue: Очередь для выполнения completion handler
+    /// - Returns: Сетевая задача, которую можно использовать для отмены запроса
+    @available(*, deprecated, message: "Используйте версию с async/await")
     @discardableResult
     func send(request: NetworkRequest,
               completionQueue: DispatchQueue,
               onResponse: @escaping (Result<Data, Error>) -> Void) -> NetworkTask?
-
+    
+    /// Отправляет сетевой запрос и декодирует ответ в указанный тип
+    /// - Parameters:
+    ///   - request: Сетевой запрос для отправки
+    ///   - type: Тип для декодирования ответа
+    ///   - queue: Очередь для выполнения completion handler
+    /// - Returns: Сетевая задача, которую можно использовать для отмены запроса
+    @available(*, deprecated, message: "Используйте версию с async/await")
     @discardableResult
     func send<T: Decodable>(request: NetworkRequest,
                             type: T.Type,
                             completionQueue: DispatchQueue,
                             onResponse: @escaping (Result<T, Error>) -> Void) -> NetworkTask?
+    
+    /// Отправляет сетевой запрос и возвращает сырые данные
+    /// - Parameter request: Сетевой запрос для отправки
+    /// - Returns: Данные ответа
+    /// - Throws: NetworkClientError если запрос завершился с ошибкой
+    func send(request: NetworkRequest) async throws -> Data
+    
+    /// Отправляет сетевой запрос и декодирует ответ в указанный тип
+    /// - Parameters:
+    ///   - request: Сетевой запрос для отправки
+    ///   - type: Тип для декодирования ответа
+    /// - Returns: Декодированный ответ
+    /// - Throws: NetworkClientError если запрос завершился с ошибкой
+    func send<T: Decodable>(request: NetworkRequest, type: T.Type) async throws -> T
 }
 
 extension NetworkClient {
-
+    @available(*, deprecated, message: "Используйте версию с async/await")
     @discardableResult
     func send(request: NetworkRequest,
               onResponse: @escaping (Result<Data, Error>) -> Void) -> NetworkTask? {
         send(request: request, completionQueue: .main, onResponse: onResponse)
     }
-
+    
+    @available(*, deprecated, message: "Используйте версию с async/await")
     @discardableResult
     func send<T: Decodable>(request: NetworkRequest,
                             type: T.Type,
                             onResponse: @escaping (Result<T, Error>) -> Void) -> NetworkTask? {
         send(request: request, type: type, completionQueue: .main, onResponse: onResponse)
     }
+    
+    // MARK: - Новые методы с async/await
+    
+    /// Отправляет сетевой запрос и возвращает сырые данные
+    /// - Parameter request: Сетевой запрос для отправки
+    /// - Returns: Данные ответа
+    /// - Throws: NetworkClientError если запрос завершился с ошибкой
+    func send(_ request: NetworkRequest) async throws -> Data {
+        try await send(request: request)
+    }
+    
+    /// Отправляет сетевой запрос и декодирует ответ в указанный тип
+    /// - Parameters:
+    ///   - request: Сетевой запрос для отправки
+    ///   - type: Тип для декодирования ответа
+    /// - Returns: Декодированный ответ
+    /// - Throws: NetworkClientError если запрос завершился с ошибкой
+    func send<T: Decodable>(_ request: NetworkRequest, as type: T.Type) async throws -> T {
+        try await send(request: request, type: type)
+    }
+    
+    /// Отправляет сетевой запрос и декодирует ответ в указанный тип
+    /// - Parameter request: Сетевой запрос для отправки
+    /// - Returns: Декодированный ответ
+    /// - Throws: NetworkClientError если запрос завершился с ошибкой
+    func send<T: Decodable>(_ request: NetworkRequest) async throws -> T {
+        try await send(request: request, type: T.self)
+    }
 }
 
+/// Реализация сетевого клиента по умолчанию
 struct DefaultNetworkClient: NetworkClient {
     private let session: URLSession
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder
-
+    
     init(session: URLSession = URLSession.shared,
          decoder: JSONDecoder = JSONDecoder(),
          encoder: JSONEncoder = JSONEncoder()) {
@@ -48,102 +126,160 @@ struct DefaultNetworkClient: NetworkClient {
         self.decoder = decoder
         self.encoder = encoder
     }
-
+    
+    // MARK: - Реализация с использованием async/await
+    
+    func send(request: NetworkRequest) async throws -> Data {
+        guard let urlRequest = try create(request: request) else {
+            throw NetworkClientError.invalidEndpoint
+        }
+        
+        do {
+            let (data, response) = try await session.data(for: urlRequest)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw NetworkClientError.invalidResponse
+            }
+            
+            guard 200..<300 ~= httpResponse.statusCode else {
+                throw NetworkClientError.httpStatusCode(httpResponse.statusCode)
+            }
+            
+            return data
+        } catch let error as NetworkClientError {
+            throw error
+        } catch {
+            throw NetworkClientError.urlRequestError(error)
+        }
+    }
+    
+    func send<T: Decodable>(request: NetworkRequest, type: T.Type) async throws -> T {
+        let data = try await send(request: request)
+        
+        do {
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            throw NetworkClientError.parsingError
+        }
+    }
+    
+    // MARK: - Устаревшая реализация с completion handlers
+    
     @discardableResult
-    func send(
-        request: NetworkRequest,
-        completionQueue: DispatchQueue,
-        onResponse: @escaping (Result<Data, Error>) -> Void
-    ) -> NetworkTask? {
-        let onResponse: (Result<Data, Error>) -> Void = { result in
+    func send(request: NetworkRequest,
+              completionQueue: DispatchQueue,
+              onResponse: @escaping (Result<Data, Error>) -> Void) -> NetworkTask? {
+        let wrappedResponse: (Result<Data, Error>) -> Void = { result in
             completionQueue.async {
                 onResponse(result)
             }
         }
-        guard let urlRequest = create(request: request) else { return nil }
-
-        let task = session.dataTask(with: urlRequest) { data, response, error in
-            guard let response = response as? HTTPURLResponse else {
-                onResponse(.failure(NetworkClientError.urlSessionError))
-                return
-            }
-
-            guard 200 ..< 300 ~= response.statusCode else {
-                onResponse(.failure(NetworkClientError.httpStatusCode(response.statusCode)))
-                return
-            }
-
-            if let data = data {
-                onResponse(.success(data))
-                return
-            } else if let error = error {
-                onResponse(.failure(NetworkClientError.urlRequestError(error)))
-                return
-            } else {
-                assertionFailure("Unexpected condition!")
-                return
-            }
+        
+        guard let urlRequest = try? create(request: request) else {
+            wrappedResponse(.failure(NetworkClientError.invalidEndpoint))
+            return nil
         }
-
+        
+        let task = session.dataTask(with: urlRequest) { data, response, error in
+            if let error = error {
+                wrappedResponse(.failure(NetworkClientError.urlRequestError(error)))
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                wrappedResponse(.failure(NetworkClientError.invalidResponse))
+                return
+            }
+            
+            guard 200..<300 ~= httpResponse.statusCode else {
+                wrappedResponse(.failure(NetworkClientError.httpStatusCode(httpResponse.statusCode)))
+                return
+            }
+            
+            guard let data = data else {
+                wrappedResponse(.failure(NetworkClientError.invalidResponse))
+                return
+            }
+            
+            wrappedResponse(.success(data))
+        }
+        
         task.resume()
-
         return DefaultNetworkTask(dataTask: task)
     }
-
+    
     @discardableResult
-    func send<T: Decodable>(
-        request: NetworkRequest,
-        type: T.Type,
-        completionQueue: DispatchQueue,
-        onResponse: @escaping (Result<T, Error>) -> Void
-    ) -> NetworkTask? {
+    func send<T: Decodable>(request: NetworkRequest,
+                            type: T.Type,
+                            completionQueue: DispatchQueue,
+                            onResponse: @escaping (Result<T, Error>) -> Void) -> NetworkTask? {
         return send(request: request, completionQueue: completionQueue) { result in
             switch result {
-            case let .success(data):
-                self.parse(data: data, type: type, onResponse: onResponse)
-            case let .failure(error):
+            case .success(let data):
+                do {
+                    let decoded = try self.decoder.decode(T.self, from: data)
+                    onResponse(.success(decoded))
+                } catch {
+#if DEBUG
+                    print("NetworkClient decoding error: \(error)")
+#endif
+                    onResponse(.failure(NetworkClientError.parsingError))
+                }
+            case .failure(let error):
                 onResponse(.failure(error))
             }
         }
     }
-
+    
     // MARK: - Private
-
-    private func create(request: NetworkRequest) -> URLRequest? {
+    
+    private func create(request: NetworkRequest) throws -> URLRequest? {
         guard let endpoint = request.endpoint else {
-            assertionFailure("Empty endpoint")
-            return nil
+            throw NetworkClientError.invalidEndpoint
         }
-
+        
         var urlRequest = URLRequest(url: endpoint)
         urlRequest.httpMethod = request.httpMethod.rawValue
-
+        
         urlRequest.addValue(RequestConstants.token, forHTTPHeaderField: "X-Practicum-Mobile-Token")
-
-        if let dtoDictionary = request.dto?.asDictionary() {
-            var urlComponents = URLComponents()
-            let queryItems = dtoDictionary.map { field in
-                URLQueryItem(
-                    name: field.key,
-                    value: field.value
-                    )
+        
+        if let dto = request.dto {
+            switch request.httpMethod {
+            case .get, .delete:
+                try appendQueryParameters(to: &urlRequest, from: dto, baseURL: endpoint)
+                
+            case .post, .put:
+                try appendJSONBody(to: &urlRequest, from: dto)
             }
-            urlComponents.queryItems = queryItems
-            urlRequest.httpBody = urlComponents.query?.data(using: .utf8)
-            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         }
-
-        urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-
+        
         return urlRequest
     }
-
-    private func parse<T: Decodable>(data: Data, type _: T.Type, onResponse: @escaping (Result<T, Error>) -> Void) {
+    
+    private func appendQueryParameters(to urlRequest: inout URLRequest,
+                                       from dto: Dto,
+                                       baseURL: URL) throws {
+        let dtoDictionary = dto.asDictionary()
+        
+        var urlComponents = URLComponents(url: baseURL, resolvingAgainstBaseURL: false)
+        let queryItems = dtoDictionary.compactMap { key, value in
+            URLQueryItem(name: key, value: value)
+        }
+        
+        if !queryItems.isEmpty {
+            urlComponents?.queryItems = queryItems
+            urlRequest.url = urlComponents?.url
+        }
+    }
+    
+    private func appendJSONBody(to urlRequest: inout URLRequest, from dto: Dto) throws {
         do {
-            let response = try decoder.decode(T.self, from: data)
-            onResponse(.success(response))
+            let dtoDictionary = dto.asDictionary()
+            let jsonData = try JSONSerialization.data(withJSONObject: dtoDictionary, options: [])
+            urlRequest.httpBody = jsonData
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         } catch {
-            onResponse(.failure(NetworkClientError.parsingError))
+            throw NetworkClientError.parsingError
         }
     }
 }
