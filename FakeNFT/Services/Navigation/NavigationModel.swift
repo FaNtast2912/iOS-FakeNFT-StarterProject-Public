@@ -74,28 +74,26 @@ final class NavigationModel: ObservableObject {
     }
 }
 
-// MARK: - Интеграция с Environment
+// MARK: - Обработка переходов
 
-/// Ключ для передачи NavigationModel через Environment
-struct NavigationModelKey: EnvironmentKey {
-    static var defaultValue: NavigationModel {
-        fatalError("NavigationModel должен быть передан через environment!")
-    }
-}
-
-extension EnvironmentValues {
-    var navigationModel: NavigationModel {
-        get {
-            self[NavigationModelKey.self]
-        } set {
-            self[NavigationModelKey.self] = newValue
+extension NavigationModel {
+    @ViewBuilder
+    func destination(for screen: Screens) -> some View {
+        switch screen {
+        case .catalog:
+            CatalogView()
+        case .nftDetails:
+            Text("NFT Details") // placeholder
+        case .profile:
+            ProfileView()
+        case .favorites:
+            Text("favorites") // placeholder
+        case .statistics:
+            StatisticsView()
+        case .productDetails:
+            Text("productDetails") // placeholder
+        case .webView(let url):
+            WebViewScreen(url: url)
         }
-    }
-}
-
-/// Модификатор для View
-extension View {
-    func withNavigationModel(_ model: NavigationModel) -> some View {
-        environment(\.navigationModel, model)
     }
 }

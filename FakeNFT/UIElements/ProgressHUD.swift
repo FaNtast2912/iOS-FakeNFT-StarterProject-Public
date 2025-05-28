@@ -36,7 +36,6 @@ struct ProgressHUD: View {
     }
 }
 
-
 // MARK: - Extention для использования в проекте
 // .progressHUD(isLoading:)
 
@@ -47,8 +46,6 @@ extension View {
         )
     }
 }
-
-
 struct ProgressHUD_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
