@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 
+@MainActor
 final class CartManager: ObservableObject {
     @Published private(set) var cartItems: [Nft] = []
 
@@ -15,10 +16,16 @@ final class CartManager: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init() {
-        loadCart()
+        Task {
+            await loadCart()
+        }
+
         $cartItems
+            .dropFirst()
             .sink { [weak self] items in
-                self?.saveCart(items: items)
+                Task {
+                    await self?.saveCart(items: items)
+                }
             }
             .store(in: &cancellables)
     }
@@ -36,20 +43,49 @@ final class CartManager: ObservableObject {
         cartItems.contains(where: { $0.id == product.id })
     }
 
-    private func saveCart(items: [Nft]) {
-        if let encoded = try? JSONEncoder().encode(items) {
-            UserDefaults.standard.set(encoded, forKey: userDefaultsKey)
-        }
-    }
-    
     func clearCart() {
         cartItems.removeAll()
     }
 
-    private func loadCart() {
-        if let data = UserDefaults.standard.data(forKey: userDefaultsKey),
-           let decoded = try? JSONDecoder().decode([Nft].self, from: data) {
-            cartItems = decoded
+    private func saveCart(items: [Nft]) async {
+        do {
+            let data = try JSONEncoder().encode(items)
+            try await saveToUserDefaults(data)
+        } catch {
+            print("Ошибка при сохранении корзины: \(error)")
+        }
+    }
+
+    private func loadCart() async {
+        do {
+            if let data = try await loadFromUserDefaults() {
+                do {
+                    let decoded = try JSONDecoder().decode([Nft].self, from: data)
+                    cartItems = decoded
+                } catch {
+                    print("Ошибка декодирования корзины: \(error)")
+                }
+            }
+        } catch {
+            print("Ошибка при загрузке корзины: \(error)")
+        }
+    }
+
+    private func saveToUserDefaults(_ data: Data) async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global().async {
+                UserDefaults.standard.set(data, forKey: self.userDefaultsKey)
+                continuation.resume()
+            }
+        }
+    }
+
+    private func loadFromUserDefaults() async throws -> Data? {
+        try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.global().async {
+                let data = UserDefaults.standard.data(forKey: self.userDefaultsKey)
+                continuation.resume(returning: data)
+            }
         }
     }
 }
