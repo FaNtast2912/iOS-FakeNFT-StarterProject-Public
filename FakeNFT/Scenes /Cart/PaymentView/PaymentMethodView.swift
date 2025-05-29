@@ -8,11 +8,90 @@
 import SwiftUI
 
 struct PaymentMethodView: View {
+    @EnvironmentObject var navigationModel: NavigationModel
+    @EnvironmentObject var mockData: MockData
+
+    @State private var selected: PaymentCrypto?
+
+    private let columns = [
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
+
     var body: some View {
-        Text("Hello, World!")
+        VStack(spacing: 0) {
+            // Заголовок
+            HStack {
+                Button(action: {
+                    navigationModel.navigateBack()
+                }) {
+                    Image(systemName: "chevron.backward")
+                        .foregroundColor(.black)
+                        .padding(.leading)
+                }
+                Spacer()
+                Text("Выберите способ оплаты")
+                    .font(.system(size: 17, weight: .semibold))
+                    .padding(.vertical, 18)
+                Spacer()
+            }
+            .background(Color.white)
+
+            // Сетка криптовалют
+            LazyVGrid(columns: columns, spacing: 12) {
+                ForEach(mockData.paymentCryptos) { crypto in
+                    CurrencyCellView(
+                        currency: crypto,
+                        isSelected: selected?.id == crypto.id
+                    )
+                    .onTapGesture { selected = crypto }
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 4)
+
+            Spacer()
+
+            // Соглашение + кнопка
+            VStack(spacing: 16) {
+                VStack(alignment: .leading) {
+                    Text("Совершая покупку, вы соглашаетесь с условиями")
+                        .font(.system(size: 13))
+                        .foregroundColor(.gray)
+                    Text("Пользовательского соглашения")
+                        .font(.system(size: 13))
+                        .foregroundColor(.blue)
+                        .underline()
+                        .onTapGesture {
+                            navigationModel.IOScource()
+                        }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Button(action: {
+                    navigationModel.navigate(to: .paymentDoneView)
+                }) {
+                    Text("Оплатить")
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, minHeight: 54)
+                        .background(Color.black)
+                        .cornerRadius(12)
+                }
+            }
+            .padding(16)
+            .background(Color(.systemGray6))
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .padding(.bottom, 0)
+        }
+        .background(Color(.systemGroupedBackground))
+        .ignoresSafeArea(.keyboard)
+        .navigationBarBackButtonHidden(true)
     }
 }
 
 #Preview {
     PaymentMethodView()
+        .environmentObject(NavigationModel())
+        .environmentObject(MockData())
 }

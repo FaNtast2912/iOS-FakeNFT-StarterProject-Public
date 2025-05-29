@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CartView: View {
-    @StateObject private var mockData = MockData()
+    @EnvironmentObject var mockData: MockData
     @EnvironmentObject var navigation: NavigationModel
 
     var body: some View {
@@ -56,7 +56,8 @@ struct CartView: View {
                     Spacer()
 
                     Button(action: {
-                        // сделать навигацию
+                        navigation.navigate(to: .paymentMethodView)
+                        print("tap")
                     }, label: {
                         Text("К оплате")
                             .frame(width: 240, height: 44)
@@ -69,11 +70,11 @@ struct CartView: View {
                 .padding(.horizontal, 16)
             }
         }
-        .environmentObject(mockData)
     }
 }
 
 #Preview {
     CartView()
         .environmentObject(NavigationModel())
+        .environmentObject(MockData())
 }
