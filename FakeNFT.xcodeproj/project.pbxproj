@@ -33,6 +33,8 @@
 		C942F5382DE7AF8800966062 /* UserCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5372DE7AF8800966062 /* UserCollectionView.swift */; };
 		C942F53A2DE7AFD700966062 /* PaymentMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5392DE7AFD700966062 /* PaymentMethodView.swift */; };
 		C942F53C2DE7AFF700966062 /* PaymentDoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F53B2DE7AFF700966062 /* PaymentDoneView.swift */; };
+		C942F5792DEA4FE600966062 /* SortingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5772DEA4FE600966062 /* SortingManager.swift */; };
+		C942F57A2DEA4FE600966062 /* CartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5762DEA4FE600966062 /* CartManager.swift */; };
 		C99679BA2DE66C470096BF5A /* TrofimovaDecompositionProfile.md in Resources */ = {isa = PBXBuildFile; fileRef = C99679B62DE66C470096BF5A /* TrofimovaDecompositionProfile.md */; };
 		C99679BB2DE66C470096BF5A /* ZakharovMaksCatalog.md in Resources */ = {isa = PBXBuildFile; fileRef = C99679B82DE66C470096BF5A /* ZakharovMaksCatalog.md */; };
 		C99679BC2DE66C470096BF5A /* KhutorenkoAnnaStatisticsTasks.md in Resources */ = {isa = PBXBuildFile; fileRef = C99679B52DE66C470096BF5A /* KhutorenkoAnnaStatisticsTasks.md */; };
@@ -97,6 +99,8 @@
 		C942F5372DE7AF8800966062 /* UserCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCollectionView.swift; sourceTree = "<group>"; };
 		C942F5392DE7AFD700966062 /* PaymentMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentMethodView.swift; sourceTree = "<group>"; };
 		C942F53B2DE7AFF700966062 /* PaymentDoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentDoneView.swift; sourceTree = "<group>"; };
+		C942F5762DEA4FE600966062 /* CartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartManager.swift; sourceTree = "<group>"; };
+		C942F5772DEA4FE600966062 /* SortingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortingManager.swift; sourceTree = "<group>"; };
 		C99679B52DE66C470096BF5A /* KhutorenkoAnnaStatisticsTasks.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = KhutorenkoAnnaStatisticsTasks.md; sourceTree = "<group>"; };
 		C99679B62DE66C470096BF5A /* TrofimovaDecompositionProfile.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TrofimovaDecompositionProfile.md; sourceTree = "<group>"; };
 		C99679B72DE66C470096BF5A /* YaroslavRubanCartTask.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = YaroslavRubanCartTask.md; sourceTree = "<group>"; };
@@ -217,6 +221,7 @@
 		3F68069529CBBAF100B4F915 /* FakeNFT */ = {
 			isa = PBXGroup;
 			children = (
+				C942F5782DEA4FE600966062 /* Managers */,
 				C99679B92DE66C470096BF5A /* Docs */,
 				C935A9122DE386A000C6B7A3 /* UIElements */,
 				E1CD40DA2A96BE9B00BE7FE8 /* Resources */,
@@ -326,6 +331,15 @@
 				C935A9132DE386BC00C6B7A3 /* ProgressHUD.swift */,
 			);
 			path = UIElements;
+			sourceTree = "<group>";
+		};
+		C942F5782DEA4FE600966062 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				C942F5762DEA4FE600966062 /* CartManager.swift */,
+				C942F5772DEA4FE600966062 /* SortingManager.swift */,
+			);
+			path = Managers;
 			sourceTree = "<group>";
 		};
 		C99679B92DE66C470096BF5A /* Docs */ = {
@@ -556,6 +570,8 @@
 				C935A9142DE386BC00C6B7A3 /* ProgressHUD.swift in Sources */,
 				C942F53C2DE7AFF700966062 /* PaymentDoneView.swift in Sources */,
 				D04790C12DE3A59E000585F0 /* CatalogView.swift in Sources */,
+				C942F5792DEA4FE600966062 /* SortingManager.swift in Sources */,
+				C942F57A2DEA4FE600966062 /* CartManager.swift in Sources */,
 				3FC8C39329D246BA0081F015 /* DateFormatters+Presets.swift in Sources */,
 				D04790BD2DE393EC000585F0 /* AppTabView.swift in Sources */,
 				C942F5382DE7AF8800966062 /* UserCollectionView.swift in Sources */,
