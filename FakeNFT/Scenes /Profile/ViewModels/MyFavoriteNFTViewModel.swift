@@ -9,9 +9,12 @@ import Foundation
 
 final class MyFavoriteNFTViewModel: ObservableObject {
     @Published var favoriteNfts: [Nft] = []
-    private let imageURL = URL(string: "https://sun9-71.userapi.com/impf/HXh-XOzRZNjBZN3-s3KY8-A1vvUZcCzEIVCO7A/NiLsvqlmqpI.jpg?size=320x256&quality=96&sign=cae1cfe812481cab04191c25a4dda9c4&type=album")
+    // моковая ссылка
+    private let imageURL = URL(string: "https://sun9-71.userapi.com/"
+                               + "impf/HXh-XOzRZNjBZN3-s3KY8-A1vvUZcCzEIVCO7A/NiLsvqlmqpI.jpg"
+                               + "?size=320x256&quality=96&sign=cae1cfe812481cab04191c25a4dda9c4&type=album")
     
-    init() {        
+    init() {
         setMockNFTs(with: imageURL)
     }
     
