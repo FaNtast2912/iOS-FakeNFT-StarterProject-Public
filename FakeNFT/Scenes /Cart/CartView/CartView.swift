@@ -26,14 +26,23 @@ struct CartView: View {
                 })
             }
 
-            ScrollView {
-                VStack(spacing: 16) {
-                    ForEach(mockData.cartNFTs) { nft in
-                        NFTItemView(nft: nft)
+            if mockData.cartNFTs.isEmpty {
+                Spacer()
+                Text("Корзина пуста")
+                    .font(.system(size: 17, weight: .bold))
+                    .foregroundColor(.ypBlackUniversal)
+                    .multilineTextAlignment(.center)
+                Spacer()
+            } else {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        ForEach(mockData.cartNFTs) { nft in
+                            NFTItemView(nft: nft)
+                        }
                     }
+                    .padding(.top, 36)
+                    .padding(.horizontal, 16)
                 }
-                .padding(.top, 36)
-                .padding(.horizontal, 16)
             }
 
             ZStack {
