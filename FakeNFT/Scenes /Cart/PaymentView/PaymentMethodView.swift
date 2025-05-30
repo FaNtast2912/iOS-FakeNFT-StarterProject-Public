@@ -24,11 +24,12 @@ struct PaymentMethodView: View {
             HStack {
                 Button(action: {
                     navigationModel.navigateBack()
-                }) {
+                }, label: {
                     Image(systemName: "chevron.backward")
                         .foregroundColor(.black)
                         .padding(.leading)
-                }
+                })
+
                 Spacer()
                 Text("Выберите способ оплаты")
                     .font(.system(size: 17, weight: .semibold))
@@ -70,21 +71,20 @@ struct PaymentMethodView: View {
 
                 Button(action: {
                     navigationModel.navigate(to: .paymentDoneView)
-                }) {
+                }, label: {
                     Text("Оплатить")
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity, minHeight: 54)
                         .background(Color.black)
                         .cornerRadius(12)
-                }
+                })
             }
             .padding(16)
             .background(Color(.systemGray6))
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .padding(.bottom, 0)
         }
-        .background(Color(.systemGroupedBackground))
         .ignoresSafeArea(.keyboard)
         .navigationBarBackButtonHidden(true)
     }

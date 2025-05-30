@@ -10,7 +10,7 @@ import SwiftUI
 struct CurrencyCellView: View {
     let currency: PaymentCrypto
     let isSelected: Bool
-
+    
     var body: some View {
         HStack(spacing: 12) {
             Image(currency.icon)
@@ -25,14 +25,14 @@ struct CurrencyCellView: View {
                     .foregroundColor(.init(red: 0.25, green: 0.87, blue: 0.63))
             }
             Spacer()
-            if isSelected {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-            }
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 12)
-        .background(Color.white)
+        .background(Color(.systemGray6))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(isSelected ? Color.black : Color.clear, lineWidth: 1)
+        )
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: Color(.black).opacity(0.03), radius: 1)
     }
