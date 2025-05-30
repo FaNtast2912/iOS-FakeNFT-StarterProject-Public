@@ -1,0 +1,21 @@
+//
+//  Users.swift
+//  FakeNFT
+//
+//  Created by Анна Браун on 29.05.2025.
+//
+import Foundation
+
+struct User: Identifiable, Hashable {
+    let id: String
+    let name: String
+    let avatar: String
+    let description: String
+    let website: String
+    let nfts: [String]
+
+    var rating: Int {
+        nfts.count
+    }
+}
+

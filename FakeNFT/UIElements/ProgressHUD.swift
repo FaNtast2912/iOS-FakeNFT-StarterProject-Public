@@ -1,4 +1,3 @@
-
 //
 //  ProgressHUD.swift
 //  FakeNFT
