@@ -13,6 +13,7 @@ struct MyFavoriteNFTCardView: View {
     let rating: Int
     let price: String
     let isFavorite: Bool
+    let completion: () -> Void
     
     var body: some View {
         HStack(spacing: 0) {
@@ -22,7 +23,7 @@ struct MyFavoriteNFTCardView: View {
                     .clipShape(.rect(cornerRadius: 12))
                     .aspectRatio(contentMode: .fit)
                 Button {
-                    print("like tapped")
+                    completion()
                 } label: {
                     Image(isFavorite ? "yp.favorites.active" : "yp.favorites.noActive")
                         .padding(4)
@@ -57,6 +58,7 @@ struct MyFavoriteNFTCardView: View {
         name: "Archie",
         rating: 3,
         price: "12",
-        isFavorite: true
+        isFavorite: true,
+        completion: { print("tap")}
     )
 }

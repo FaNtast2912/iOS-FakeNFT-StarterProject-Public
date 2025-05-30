@@ -17,7 +17,7 @@ class ProfileViewModel: ObservableObject {
             description: "Дизайнер из Казани, люблю цифровое искусство и бейглы. В моей коллекции уже 100+ NFT, и еще больше — на моём сайте. Открыт к коллаборациям.",
             website: "Joaquin Phoenix.com",
             nfts: ["1", "2", "3", "4"],
-            likes: ["1", "2"],
+            likes: ["1", "2", "3"],
             id: "1234fdgsd"
         )
     }

@@ -26,7 +26,8 @@ struct MyFavoriteNFTView: View {
                                 name: nft.name,
                                 rating: nft.rating,
                                 price: String(nft.price) + " ETH",
-                                isFavorite: true
+                                isFavorite: true,
+                                completion: { print("like tapped") }
                             )
                         }
                     }
