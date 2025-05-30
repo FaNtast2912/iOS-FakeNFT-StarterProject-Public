@@ -8,74 +8,85 @@
 import SwiftUI
 
 struct UserCardView: View {
-    let user: Users
+    let user: User
     @StateObject private var viewModel = UserCardViewModel()
     @EnvironmentObject var navigationModel: NavigationModel
-    
+
     var body: some View {
-        VStack(alignment: .leading) {
-            if let user = viewModel.user {
-                HStack(spacing: 16) {
-                    Image("yp.userPickMock")
-                        .resizable()
-                        .frame(width: 70, height: 70)
-                        .clipShape(Circle())
-                    
-                    Text(user.name)
-                        .font(.system(size: 22, weight: .bold))
-                }
-                .padding(.bottom, 20)
-                
-                Text(user.description)
-                    .padding(.bottom, 28)
-                    .padding(.trailing, 2)
-                    .font(.system(size: 15))
-                
-                Button("Перейти на сайт пользователя") {
-                }
-                .padding(10)
-                .frame(maxWidth: .infinity)
-                .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.ypBlack))
-                .cornerRadius(16)
-                .padding(.bottom, 40)
-                .font(.system(size: 15))
-                
-                HStack {
-                    Text("Коллекция NFT (\(user.nfts.count))")
-                        .font(.system(size: 22, weight: .bold))
-                    Spacer()
-                    Image("yp.chevron.backward")
-                        .rotationEffect(.degrees(180))
-                }
+        contentView
+            .foregroundStyle(Color.ypBlack)
+            .padding(16)
+            .onAppear {
+                viewModel.loadMockUser(user: user)
+            }
+    }
+
+    // MARK: - Content View
+
+    @ViewBuilder
+    private var contentView: some View {
+        if let user = viewModel.user {
+            VStack(alignment: .leading) {
+                userHeaderView(user: user)
+                userDescriptionView(user: user)
+                websiteButtonView(user: user)
+                nftCollectionHeaderView(user: user)
                 Spacer()
-            } else {
-                Text("Загрузка...") //временно, потом будет сетевой запрос и обработка с прогрессхад
             }
+        } else {
+            Text("Загрузка...")
         }
-        .foregroundStyle(Color.ypBlack)
-        .padding()
-        .onAppear {
-            viewModel.loadMockUser(user: user)
+    }
+
+    // MARK: - Components
+
+    private func userHeaderView(user: User) -> some View {
+        HStack(spacing: 16) {
+            Image("yp.userPickMock")
+                .resizable()
+                .frame(width: 70, height: 70)
+                .clipShape(Circle())
+
+            Text(user.name)
+                .font(.system(size: 22, weight: .bold))
         }
-        // тоже временно потом вынесем в общие стили
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    navigationModel.navigateBack()
-                }) {
-                    HStack(spacing: 4) {
-                        Image("yp.chevron.backward")
-                    }
-                }
-            }
+        .padding(.bottom, 20)
+    }
+
+    private func userDescriptionView(user: User) -> some View {
+        Text(user.description)
+            .font(.system(size: 15))
+            .padding(.trailing, 2)
+            .padding(.bottom, 28)
+        
+    }
+
+    private func websiteButtonView(user: User) -> some View {
+        Button("Перейти на сайт пользователя") {
+            // будет обработка позже
         }
-        .navigationBarBackButtonHidden(true)
+        .padding(10)
+        .frame(maxWidth: .infinity)
+        .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.ypBlack))
+        .cornerRadius(16)
+        .font(.system(size: 15))
+        .padding(.bottom, 40)
+    }
+
+    private func nftCollectionHeaderView(user: User) -> some View {
+        HStack {
+            Text("Коллекция NFT (\(user.nfts.count))")
+                .font(.system(size: 22, weight: .bold))
+            Spacer()
+            Image("yp.chevron.backward")
+                .rotationEffect(.degrees(180))
+        }
     }
 }
 
 #Preview {
     UserCardView(
-        user: Users(
+        user: User(
             id: "1",
             name: "Mock User",
             avatar: "",

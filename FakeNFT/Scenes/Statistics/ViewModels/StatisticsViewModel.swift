@@ -7,15 +7,15 @@
 import Foundation
 
 final class StatisticsViewModel: ObservableObject {
-    @Published var users: [Users] = []
+    @Published var users: [User] = []
 
     init() {
         loadMockUsers()
     }
 
     private func loadMockUsers() {
-        let mock: [Users] = [
-            Users(
+        let mock: [User] = [
+            User(
                 id: "1",
                 name: "Mitchell Acevedo",
                 avatar: "",
@@ -23,7 +23,7 @@ final class StatisticsViewModel: ObservableObject {
                 website: "https://student15.students.practicum.org",
                 nfts: []
             ),
-            Users(
+            User(
                 id: "2",
                 name: "Fred Hensley",
                 avatar: "",
@@ -31,7 +31,7 @@ final class StatisticsViewModel: ObservableObject {
                 website: "https://student4.students.practicum.org",
                 nfts: []
             ),
-            Users(
+            User(
                 id: "3",
                 name: "Evangelina Mullen",
                 avatar: "",

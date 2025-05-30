@@ -7,9 +7,9 @@
 import Foundation
 
 final class UserCardViewModel: ObservableObject {
-    @Published var user: Users?
+    @Published var user: User?
 
-    func loadMockUser(user: Users) {
+    func loadMockUser(user: User) {
         self.user = user
     }
 }

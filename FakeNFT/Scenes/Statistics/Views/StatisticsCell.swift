@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct StatisticsCell: View {
-    let user: Users
+    let user: User
     let rank: Int
     
     var body: some View {
@@ -37,7 +37,7 @@ struct StatisticsCell: View {
 
 #Preview {
     StatisticsCell(
-        user: Users(
+        user: User(
             id: "1",
             name: "Mock User",
             avatar: "",

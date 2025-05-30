@@ -19,7 +19,7 @@ enum Screens: Hashable {
     
     // Statistics
     case statisticsView
-    case userCard(user: Users)
+    case userCard(user: User)
     case userCollection
     
     // Cart
