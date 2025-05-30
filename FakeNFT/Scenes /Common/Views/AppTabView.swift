@@ -75,4 +75,5 @@ struct AppTabView: View {
     AppTabView()
         .environmentObject(NavigationModel())
         .environmentObject(MockData())
+        .environmentObject(PaymentMethodViewModel())
 }

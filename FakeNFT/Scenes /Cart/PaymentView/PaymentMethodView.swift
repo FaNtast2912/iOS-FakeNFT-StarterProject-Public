@@ -10,8 +10,7 @@ import SwiftUI
 struct PaymentMethodView: View {
     @EnvironmentObject var navigationModel: NavigationModel
     @EnvironmentObject var mockData: MockData
-
-    @State private var selected: PaymentCrypto?
+    @EnvironmentObject var viewModel: PaymentMethodViewModel
 
     private let columns = [
         GridItem(.flexible()),
@@ -20,7 +19,6 @@ struct PaymentMethodView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Заголовок
             HStack {
                 Button(action: {
                     navigationModel.navigateBack()
@@ -40,12 +38,11 @@ struct PaymentMethodView: View {
 
             // Сетка криптовалют
             LazyVGrid(columns: columns, spacing: 12) {
-                ForEach(mockData.paymentCryptos) { crypto in
+                ForEach(viewModel.currencies) { crypto in
                     CurrencyCellView(
                         currency: crypto,
-                        isSelected: selected?.id == crypto.id
+                        isSelected: viewModel.selectedCurrency?.id == crypto.id
                     )
-                    .onTapGesture { selected = crypto }
                 }
             }
             .padding(.horizontal, 12)
@@ -94,4 +91,5 @@ struct PaymentMethodView: View {
     PaymentMethodView()
         .environmentObject(NavigationModel())
         .environmentObject(MockData())
+        .environmentObject(PaymentMethodViewModel())
 }
