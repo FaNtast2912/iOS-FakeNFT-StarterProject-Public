@@ -19,7 +19,7 @@ struct MyFavoriteNFTCardView: View {
         HStack(spacing: 0) {
             ZStack(alignment: .topTrailing) {
                 AsyncImage(url: URL(string: imageUrl))
-                    .frame(width: 80, height: 80, alignment: .center)
+                    .frame(width: 80, height: 80)
                     .clipShape(.rect(cornerRadius: 12))
                     .aspectRatio(contentMode: .fit)
                 Button {

@@ -7,7 +7,7 @@
 import Foundation
 
 @MainActor
-class ProfileViewModel: ObservableObject {
+final class ProfileViewModel: ObservableObject {
     @Published var profile: Profile
     
     init() {

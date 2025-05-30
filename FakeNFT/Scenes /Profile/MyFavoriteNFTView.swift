@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct MyFavoriteNFTView: View {
-    @StateObject var myFavoriteNFTVM = MyFavoriteNFTViewModel()
-    @EnvironmentObject var navigationModel: NavigationModel
+    @StateObject private var myFavoriteNFTVM = MyFavoriteNFTViewModel()
+    @EnvironmentObject private var navigationModel: NavigationModel
     
     private let columns = [GridItem(.flexible(), spacing: 7), GridItem(.flexible(), spacing: 7)]
     
@@ -32,6 +32,7 @@ struct MyFavoriteNFTView: View {
                         }
                     }
                 }
+                .navigationTitle("Избранные NFT")
             }
             
         }
@@ -44,7 +45,6 @@ struct MyFavoriteNFTView: View {
                         Image("yp.chevron.backward")
                     }
                 }
-                .navigationTitle("Избранные NFT")
             }
         }
         .navigationBarBackButtonHidden(true)

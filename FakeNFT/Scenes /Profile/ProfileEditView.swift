@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ProfileEditView: View {
     @StateObject private var profileEditVM: EditingProfileViewModel
-    @ObservedObject var profileVM: ProfileViewModel
-    @Environment(\.dismiss) var dismiss
+    @ObservedObject private var profileVM: ProfileViewModel
+    @Environment(\.dismiss) private var dismiss
     
     init(profileVM: ProfileViewModel) {
         self.profileVM = profileVM
@@ -48,7 +48,7 @@ struct ProfileEditView: View {
                 .padding(.bottom, 22)
                 
                 VStack {
-                    ZStack(alignment: .center) {
+                    ZStack {
                         AsyncImage(url: URL(string: profileEditVM.avatar))
                             .profileImageViewStyle()
                         

@@ -15,7 +15,7 @@ struct TextAreaEditViewModifier: ViewModifier {
             .foregroundStyle(.black)
             .padding()
             .background(.gray.opacity(0.2))
-            .cornerRadius(12)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
             .onAppear {
                 UITextField.appearance().clearButtonMode = .whileEditing
             }

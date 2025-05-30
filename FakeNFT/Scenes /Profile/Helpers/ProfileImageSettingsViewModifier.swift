@@ -11,7 +11,7 @@ struct ProfileImageSettingsViewModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .aspectRatio(contentMode: .fit)
-            .frame(width: 70, height: 70, alignment: .center)
+            .frame(width: 70, height: 70)
             .clipShape(Circle())
         
     }

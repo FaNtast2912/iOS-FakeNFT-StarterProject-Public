@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct ProfileView: View {
-    @EnvironmentObject var navigationModel: NavigationModel
-    @StateObject var profileVM = ProfileViewModel()
+    @EnvironmentObject private var navigationModel: NavigationModel
+    @StateObject private var profileVM = ProfileViewModel()
     @State private var editProfileIsPresented: Bool = false
     
     var body: some View {
