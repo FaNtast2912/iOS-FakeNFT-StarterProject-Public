@@ -28,8 +28,8 @@ struct CartView: View {
 
             ScrollView {
                 VStack(spacing: 16) {
-                    ForEach(0..<mockData.nftCount, id: \.self) { index in
-                        NFTItemView(index: index)
+                    ForEach(mockData.cartNFTs) { nft in
+                        NFTItemView(nft: nft)
                     }
                 }
                 .padding(.top, 36)

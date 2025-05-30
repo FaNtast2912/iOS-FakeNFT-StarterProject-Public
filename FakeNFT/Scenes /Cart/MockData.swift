@@ -15,10 +15,31 @@ struct PaymentCrypto: Identifiable, Equatable {
     let subtitle: String
 }
 
+struct CartNFT: Identifiable, Equatable {
+    let id = UUID()
+    let name: String
+    let price: Double
+    let imageUrl: String?
+}
+
 final class MockData: ObservableObject {
-    @Published var nftCount: Int = 3
-    @Published var totalCostNft: Double = 5.34
-    @Published var nftName = ["April", "Greena", "Spring"]
+    @Published var cartNFTs: [CartNFT] = [
+        CartNFT(name: "April", price: 9.68, imageUrl: nil),
+        CartNFT(name: "Greena", price: 2.05, imageUrl: nil),
+        CartNFT(name: "Spring", price: 1.51, imageUrl: nil)
+    ]
+    
+    var nftCount: Int {
+        cartNFTs.count
+    }
+    
+    var totalCostNft: Double {
+        cartNFTs.reduce(0) { $0 + $1.price }
+    }
+    
+    var nftNames: [String] {
+        cartNFTs.map { $0.name }
+    }
     
     let paymentCryptos: [CurrencyModel] = [
         CurrencyModel(name: "Bitcoin", code: "BTC", iconName: "yp.cripto.bitcoin"),
