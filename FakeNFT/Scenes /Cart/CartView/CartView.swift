@@ -10,6 +10,7 @@ import SwiftUI
 struct CartView: View {
     @EnvironmentObject var mockData: MockData
     @EnvironmentObject var navigation: NavigationModel
+
     @State private var showDeleteConfirmation = false
     @State private var showSortOptions = false
     @State private var currentSortOption: SortOption = .price
@@ -78,6 +79,7 @@ struct CartView: View {
                 Text("Корзина пуста")
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.ypBlackUniversal)
+
                 Spacer()
             } else {
                 ScrollView {
@@ -96,13 +98,13 @@ struct CartView: View {
                     .fill(Color(UIColor.systemGray6))
                     .frame(height: 76)
                     .cornerRadius(12)
-                
+
                 HStack {
                     VStack(alignment: .leading) {
                         Text("\(mockData.nfts.count) NFT")
                             .font(.system(size: 15, weight: .regular))
                             .padding(.bottom, 2)
-                        
+
                         Text(String(format: "%.2f ETH", mockData.nfts.reduce(0) { $0 + $1.price }))
                             .font(.system(size: 17, weight: .bold))
                             .foregroundColor(.ypGreenUniversal)
