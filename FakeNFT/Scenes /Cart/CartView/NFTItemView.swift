@@ -12,6 +12,7 @@ struct NFTItemView: View {
     @EnvironmentObject var cartManager: CartManager
     
     let nft: Nft
+    @Binding var showDeleteConfirmation: Bool
     
     var body: some View {
         HStack(spacing: 16) {
@@ -45,13 +46,11 @@ struct NFTItemView: View {
             Spacer()
             
             Button {
-//                cartManager.removeFromCart(nft)
-                print("Удален NFT: \(nft.name)")
+                showDeleteConfirmation = true
             } label: {
                 Image("yp.cart.delete")
                     .frame(width: 40, height: 40)
                     .foregroundColor(.black)
-              .foregroundColor(.black)
             }
         }
     }
@@ -68,6 +67,6 @@ struct NFTItemView: View {
         price: 1.78,
         author: "Автор"
     )
-    NFTItemView(nft: mockNFT)
+    NFTItemView(nft: mockNFT, showDeleteConfirmation: .constant(false))
         .environmentObject(MockData())
 }

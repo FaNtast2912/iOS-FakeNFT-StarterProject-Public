@@ -10,6 +10,7 @@ import SwiftUI
 struct CartView: View {
     @EnvironmentObject var mockData: MockData
     @EnvironmentObject var navigation: NavigationModel
+    @State private var showDeleteConfirmation = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -37,7 +38,7 @@ struct CartView: View {
                 ScrollView {
                     VStack(spacing: 16) {
                         ForEach(Array(mockData.nfts), id: \.id) { nft in
-                            NFTItemView(nft: nft)
+                            NFTItemView(nft: nft, showDeleteConfirmation: $showDeleteConfirmation)
                         }
                     }
                     .padding(.top, 36)
@@ -79,6 +80,18 @@ struct CartView: View {
                 .padding(.horizontal, 16)
             }
         }
+        .overlay(
+            showDeleteConfirmation ?
+            DeleteNFTConfirmationView(
+                nftImage: Image("mockImageNFT"),
+                onDelete: {
+                    showDeleteConfirmation = false
+                },
+                onCancel: {
+                    showDeleteConfirmation = false
+                }
+            ) : nil
+        )
     }
 }
 
