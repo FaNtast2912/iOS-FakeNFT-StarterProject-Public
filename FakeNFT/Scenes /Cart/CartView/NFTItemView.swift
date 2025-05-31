@@ -46,7 +46,7 @@ struct NFTItemView: View {
             
             Spacer()
             
-   Button {
+            Button {
                 showDeleteConfirmation = true
             } label: {
                 Image("yp.cart.delete")

@@ -11,8 +11,6 @@ struct CartView: View {
     @EnvironmentObject var mockData: MockData
     @EnvironmentObject var navigation: NavigationModel
 
-<<<<<<< HEAD
-=======
     @State private var showDeleteConfirmation = false
     @State private var showSortOptions = false
     @State private var currentSortOption: SortOption = .price
