@@ -14,9 +14,16 @@ struct NFTItemView: View {
     let nft: Nft
     @Binding var showDeleteConfirmation: Bool
     
+    private var nftImage: String {
+        let images = ["mockImageNFT", "mockImageNFT2", "mockImageNFT3"]
+        guard !images.isEmpty else { return "mockImageNFT" }
+        let index = abs(Int(nft.id) ?? 0) % images.count
+        return images[index]
+    }
+    
     var body: some View {
         HStack(spacing: 16) {
-            Image("mockImageNFT")
+            Image(nftImage)
                 .resizable()
                 .frame(width: 108, height: 108)
                 .cornerRadius(12)
@@ -26,14 +33,7 @@ struct NFTItemView: View {
                     .font(.system(size: 13, weight: .medium))
                     .lineLimit(2)
                 
-                HStack(spacing: 4) {
-                    ForEach(0..<5) { index in
-                        Image(systemName: index < 4 ? "star.fill" : "star")
-                            .resizable()
-                            .frame(width: 12, height: 12)
-                            .foregroundColor(.yellow)
-                    }
-                }
+                RatingView(rating: nft.rating)
                 
                 Text("Цена")
                     .font(.system(size: 13, weight: .regular))
@@ -51,6 +51,21 @@ struct NFTItemView: View {
                 Image("yp.cart.delete")
                     .frame(width: 40, height: 40)
                     .foregroundColor(.black)
+            }
+        }
+    }
+}
+
+struct RatingView: View {
+    let rating: Int
+    
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(0..<5) { index in
+                Image(systemName: index < rating ? "star.fill" : "star")
+                    .resizable()
+                    .frame(width: 12, height: 12)
+                    .foregroundColor(.yellow)
             }
         }
     }

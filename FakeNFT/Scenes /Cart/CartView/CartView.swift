@@ -140,7 +140,41 @@ struct CartView: View {
 }
 
 #Preview {
-    CartView()
+    let mockData = MockData()
+    mockData.nfts = [
+        Nft(
+            id: "0",
+            name: "NFT 1",
+            createdAt: "",
+            images: [],
+            rating: 3,
+            description: "",
+            price: 1.5,
+            author: ""
+        ),
+        Nft(
+            id: "1",
+            name: "NFT 2",
+            createdAt: "",
+            images: [],
+            rating: 4,
+            description: "",
+            price: 2.3,
+            author: ""
+        ),
+        Nft(
+            id: "2",
+            name: "NFT 3",
+            createdAt: "",
+            images: [],
+            rating: 5,
+            description: "",
+            price: 3.1,
+            author: ""
+        )
+    ]
+    
+    return CartView()
         .environmentObject(NavigationModel())
-        .environmentObject(MockData())
+        .environmentObject(mockData)
 }
