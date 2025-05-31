@@ -26,7 +26,7 @@ struct CartView: View {
                 })
             }
 
-            if mockData.cartNFTs.isEmpty {
+            if mockData.nfts.isEmpty {
                 Spacer()
                 Text("Корзина пуста")
                     .font(.system(size: 17, weight: .bold))
@@ -36,7 +36,7 @@ struct CartView: View {
             } else {
                 ScrollView {
                     VStack(spacing: 16) {
-                        ForEach(mockData.cartNFTs) { nft in
+                        ForEach(Array(mockData.nfts), id: \.id) { nft in
                             NFTItemView(nft: nft)
                         }
                     }
@@ -53,11 +53,11 @@ struct CartView: View {
 
                 HStack {
                     VStack(alignment: .leading) {
-                        Text("\(mockData.nftCount) NFT")
+                        Text("\(mockData.nfts.count) NFT")
                             .font(.system(size: 15, weight: .regular))
                             .padding(.bottom, 2)
 
-                        Text(String(format: "%.2f ETH", mockData.totalCostNft))
+                        Text(String(format: "%.2f ETH", mockData.nfts.reduce(0) { $0 + $1.price }))
                             .font(.system(size: 17, weight: .bold))
                             .foregroundColor(.ypGreenUniversal)
                     }

@@ -9,8 +9,9 @@ import SwiftUI
 
 struct NFTItemView: View {
     @EnvironmentObject var mockData: MockData
+    @EnvironmentObject var cartManager: CartManager
     
-    let nft: CartNFT
+    let nft: Nft
     
     var body: some View {
         HStack(spacing: 16) {
@@ -37,26 +38,36 @@ struct NFTItemView: View {
                     .font(.system(size: 13, weight: .regular))
                     .padding(.top, 12)
                 
-                Text(String(format: "%.2f ETH", nft.price))
+                Text(String(format: "%.2f ETH", Double(nft.price)))
                     .font(.system(size: 17, weight: .bold))
             }
             
             Spacer()
             
-            Button(action: {
-                // TODO: Добавить логику удаления NFT из корзины
+            Button {
+//                cartManager.removeFromCart(nft)
                 print("Удален NFT: \(nft.name)")
-            }, label: {
+            } label: {
                 Image("yp.cart.delete")
                     .frame(width: 40, height: 40)
                     .foregroundColor(.black)
-            })
+              .foregroundColor(.black)
+            }
         }
     }
 }
 
 #Preview {
-    let mockNFT = CartNFT(name: "April", price: 1.78, imageUrl: nil)
+    let mockNFT = Nft(
+        id: "1",
+        name: "April",
+        createdAt: "2025-05-31",
+        images: [],
+        rating: 4,
+        description: "Описание тестового NFT",
+        price: 1.78,
+        author: "Автор"
+    )
     NFTItemView(nft: mockNFT)
         .environmentObject(MockData())
 }
