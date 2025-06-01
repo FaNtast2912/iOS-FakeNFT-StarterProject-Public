@@ -23,7 +23,7 @@ struct StatisticsCell: View {
                     .clipShape(Circle())
                 Text(user.name)
                 Spacer()
-                Text("\(user.rating)")
+                Text("\(user.nfts.count)")
             }
             .padding(.horizontal, 16)
             .frame(height: 80)
@@ -43,7 +43,8 @@ struct StatisticsCell: View {
             avatar: "",
             description: "Bio",
             website: "https://example.com",
-            nfts: ["nft1", "nft2"]
+            nfts: ["nft1", "nft2"],
+            rating: "2"
         ),
         rank: 1
     )

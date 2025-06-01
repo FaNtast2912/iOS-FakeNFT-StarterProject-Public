@@ -16,6 +16,9 @@ struct UserCardView: View {
         contentView
             .foregroundStyle(Color.ypBlack)
             .padding(16)
+            .navigationBarStyle(dismissAction: {
+                navigationModel.navigateBack()
+            })
             .onAppear {
                 viewModel.loadMockUser(user: user)
             }
@@ -37,8 +40,6 @@ struct UserCardView: View {
             Text("Загрузка...")
         }
     }
-
-    // MARK: - Components
 
     private func userHeaderView(user: User) -> some View {
         HStack(spacing: 16) {
@@ -81,6 +82,9 @@ struct UserCardView: View {
             Image("yp.chevron.backward")
                 .rotationEffect(.degrees(180))
         }
+        .onTapGesture {
+            navigationModel.navigate(to: .userCollection(user: user))
+        }
     }
 }
 
@@ -92,7 +96,9 @@ struct UserCardView: View {
             avatar: "",
             description: "Дизайнер из Казани, люблю цифровое искусство и бейглы. В моей коллекции уже 100+ NFT, и еще больше — на моём сайте. Открыт к коллаборациям.",
             website: "https://example.com",
-            nfts: ["nft1", "nft2"]
+            nfts: ["nft1", "nft2"],
+            rating: "3"
+            
         )
     )
 }

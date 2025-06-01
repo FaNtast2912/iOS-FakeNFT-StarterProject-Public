@@ -13,9 +13,5 @@ struct User: Identifiable, Hashable {
     let description: String
     let website: String
     let nfts: [String]
-
-    var rating: Int {
-        nfts.count
-    }
+    let rating: String
 }
-
