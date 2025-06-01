@@ -20,7 +20,7 @@ enum Screens: Hashable {
     // Statistics
     case statisticsView
     case userCard(user: User)
-    case userCollection
+    case userCollection(user: User)
     
     // Cart
     case cartView
@@ -111,8 +111,8 @@ extension NavigationModel {
             StatisticsView()
         case .userCard(let user):
             UserCardView(user: user)
-        case .userCollection:
-            UserCollectionView()
+        case .userCollection(let user):
+            UserCollectionView(user: user)
             
             // Cart
         case .cartView:
