@@ -33,7 +33,7 @@ final class SortingManager {
 
         case .rating(let ascending):
             return products.sorted {
-                ascending ? ($0.raiting < $1.raiting) : ($0.raiting > $1.raiting)
+                ascending ? ($0.rating < $1.rating) : ($0.rating > $1.rating)
             }
 
         case .nftCount(let ascending):
