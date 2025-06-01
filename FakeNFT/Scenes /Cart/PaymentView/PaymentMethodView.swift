@@ -61,7 +61,7 @@ struct PaymentMethodView: View {
                         .foregroundColor(.blue)
                         .underline()
                         .onTapGesture {
-                            navigationModel.IOScource()
+                            navigationModel.openPracticumTerms()
                         }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
