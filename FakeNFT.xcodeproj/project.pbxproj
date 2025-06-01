@@ -33,37 +33,18 @@
 		C942F5382DE7AF8800966062 /* UserCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5372DE7AF8800966062 /* UserCollectionView.swift */; };
 		C942F53A2DE7AFD700966062 /* PaymentMethodView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5392DE7AFD700966062 /* PaymentMethodView.swift */; };
 		C942F53C2DE7AFF700966062 /* PaymentDoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F53B2DE7AFF700966062 /* PaymentDoneView.swift */; };
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
 		C942F5792DEA4FE600966062 /* SortingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5772DEA4FE600966062 /* SortingManager.swift */; };
-		C942F57A2DEA4FE600966062 /* CartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5762DEA4FE600966062 /* CartManager.swift */; };
-=======
->>>>>>> feature/YaroslavRuban/CartPart1
-=======
->>>>>>> feature/YaroslavRuban/CartPart1
->>>>>>> feature/YaroslavRuban/Cart
 		C942F5622DE7B51700966062 /* NFTItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5612DE7B51700966062 /* NFTItemView.swift */; };
 		C942F5642DE7B54C00966062 /* CurrencyCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5632DE7B54C00966062 /* CurrencyCellView.swift */; };
 		C942F5662DE7B57400966062 /* CurrencyModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5652DE7B57400966062 /* CurrencyModel.swift */; };
 		C942F5682DE7B59D00966062 /* PaymentMethodViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5672DE7B59D00966062 /* PaymentMethodViewModel.swift */; };
 		C942F56A2DE7B5C000966062 /* MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5692DE7B5C000966062 /* MockData.swift */; };
-<<<<<<< HEAD
 		C942F5792DEA4FE600966062 /* SortingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5772DEA4FE600966062 /* SortingManager.swift */; };
 		C942F57A2DEA4FE600966062 /* CartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5762DEA4FE600966062 /* CartManager.swift */; };
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 		C942F5792DEA4FE600966062 /* SortingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5772DEA4FE600966062 /* SortingManager.swift */; };
 		C942F57A2DEA4FE600966062 /* CartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5762DEA4FE600966062 /* CartManager.swift */; };
->>>>>>> feature/YaroslavRuban/CartPart1
-=======
 		C942F5792DEA4FE600966062 /* SortingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5772DEA4FE600966062 /* SortingManager.swift */; };
 		C942F57A2DEA4FE600966062 /* CartManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C942F5762DEA4FE600966062 /* CartManager.swift */; };
->>>>>>> feature/YaroslavRuban/CartPart1
->>>>>>> feature/YaroslavRuban/Cart
 		C99679BA2DE66C470096BF5A /* TrofimovaDecompositionProfile.md in Resources */ = {isa = PBXBuildFile; fileRef = C99679B62DE66C470096BF5A /* TrofimovaDecompositionProfile.md */; };
 		C99679BB2DE66C470096BF5A /* ZakharovMaksCatalog.md in Resources */ = {isa = PBXBuildFile; fileRef = C99679B82DE66C470096BF5A /* ZakharovMaksCatalog.md */; };
 		C99679BC2DE66C470096BF5A /* KhutorenkoAnnaStatisticsTasks.md in Resources */ = {isa = PBXBuildFile; fileRef = C99679B52DE66C470096BF5A /* KhutorenkoAnnaStatisticsTasks.md */; };
@@ -129,37 +110,19 @@
 		C942F5372DE7AF8800966062 /* UserCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCollectionView.swift; sourceTree = "<group>"; };
 		C942F5392DE7AFD700966062 /* PaymentMethodView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentMethodView.swift; sourceTree = "<group>"; };
 		C942F53B2DE7AFF700966062 /* PaymentDoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentDoneView.swift; sourceTree = "<group>"; };
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
 		C942F5762DEA4FE600966062 /* CartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartManager.swift; sourceTree = "<group>"; };
 		C942F5772DEA4FE600966062 /* SortingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortingManager.swift; sourceTree = "<group>"; };
-=======
->>>>>>> feature/YaroslavRuban/CartPart1
-=======
->>>>>>> feature/YaroslavRuban/CartPart1
->>>>>>> feature/YaroslavRuban/Cart
 		C942F5612DE7B51700966062 /* NFTItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NFTItemView.swift; sourceTree = "<group>"; };
 		C942F5632DE7B54C00966062 /* CurrencyCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyCellView.swift; sourceTree = "<group>"; };
 		C942F5652DE7B57400966062 /* CurrencyModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyModel.swift; sourceTree = "<group>"; };
 		C942F5672DE7B59D00966062 /* PaymentMethodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentMethodViewModel.swift; sourceTree = "<group>"; };
 		C942F5692DE7B5C000966062 /* MockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockData.swift; sourceTree = "<group>"; };
-<<<<<<< HEAD
 		C942F5762DEA4FE600966062 /* CartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartManager.swift; sourceTree = "<group>"; };
 		C942F5772DEA4FE600966062 /* SortingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortingManager.swift; sourceTree = "<group>"; };
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 		C942F5762DEA4FE600966062 /* CartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartManager.swift; sourceTree = "<group>"; };
 		C942F5772DEA4FE600966062 /* SortingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortingManager.swift; sourceTree = "<group>"; };
->>>>>>> feature/YaroslavRuban/CartPart1
-=======
 		C942F5762DEA4FE600966062 /* CartManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartManager.swift; sourceTree = "<group>"; };
 		C942F5772DEA4FE600966062 /* SortingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortingManager.swift; sourceTree = "<group>"; };
->>>>>>> feature/YaroslavRuban/CartPart1
->>>>>>> feature/YaroslavRuban/Cart
 		C99679B52DE66C470096BF5A /* KhutorenkoAnnaStatisticsTasks.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = KhutorenkoAnnaStatisticsTasks.md; sourceTree = "<group>"; };
 		C99679B62DE66C470096BF5A /* TrofimovaDecompositionProfile.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = TrofimovaDecompositionProfile.md; sourceTree = "<group>"; };
 		C99679B72DE66C470096BF5A /* YaroslavRubanCartTask.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = YaroslavRubanCartTask.md; sourceTree = "<group>"; };
@@ -393,10 +356,6 @@
 			path = UIElements;
 			sourceTree = "<group>";
 		};
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
 		C942F5782DEA4FE600966062 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
@@ -406,28 +365,12 @@
 			path = Managers;
                sourceTree = "<group>";
         };
-=======
->>>>>>> feature/YaroslavRuban/CartPart1
-=======
->>>>>>> feature/YaroslavRuban/CartPart1
->>>>>>> feature/YaroslavRuban/Cart
 		C942F56B2DE7B74F00966062 /* CartView */ = {
 			isa = PBXGroup;
 			children = (
 				D04790C52DE3A628000585F0 /* CartView.swift */,
 				C942F5612DE7B51700966062 /* NFTItemView.swift */,
-<<<<<<< HEAD
 				C9A25CF52DEB618200634D88 /* DeleteNFTConfirmationView.swift */,
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-				C9A25CF52DEB618200634D88 /* DeleteNFTConfirmationView.swift */,
->>>>>>> feature/YaroslavRuban/CartPart1
-=======
-				C9A25CF52DEB618200634D88 /* DeleteNFTConfirmationView.swift */,
->>>>>>> feature/YaroslavRuban/CartPart1
->>>>>>> feature/YaroslavRuban/Cart
 			);
 			path = CartView;
 			sourceTree = "<group>";
@@ -451,14 +394,6 @@
 			path = PaymentDoneView;
 			sourceTree = "<group>";
 		};
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> feature/YaroslavRuban/CartPart1
->>>>>>> feature/YaroslavRuban/Cart
 		C942F5782DEA4FE600966062 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
@@ -468,13 +403,6 @@
 			path = Managers;
 			sourceTree = "<group>";
 		};
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> feature/YaroslavRuban/CartPart1
-=======
->>>>>>> feature/YaroslavRuban/CartPart1
->>>>>>> feature/YaroslavRuban/Cart
 		C99679B92DE66C470096BF5A /* Docs */ = {
 			isa = PBXGroup;
 			children = (
