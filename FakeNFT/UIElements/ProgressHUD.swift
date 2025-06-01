@@ -18,17 +18,11 @@ struct ProgressHUD: View {
     var body: some View {
         if isLoading {
             ZStack {
-
-                Color(uiColor: .systemBackground)
-                    .opacity(0.7)
-                    .edgesIgnoringSafeArea(.all)
-                    .onTapGesture {}
-
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle())
                     .scaleEffect(1.5)
                     .frame(width: 82, height: 82)
-                    .background(Color(uiColor: .secondarySystemBackground))
+                    .background(Color.ypLightGrey)
                     .cornerRadius(16)
             }
             .transition(.opacity)
