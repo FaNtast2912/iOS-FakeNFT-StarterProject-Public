@@ -4,7 +4,10 @@ import SwiftUI
 struct FakeNFTApp: App {
     @StateObject private var navigation = NavigationModel()
     @StateObject private var mockData = MockData()
-    @StateObject private var paymentViewModel = PaymentMethodViewModel()
+    @StateObject private var paymentViewModel: PaymentMethodViewModel = {
+        let mockCurrencies = MockData().paymentCryptos
+        return PaymentMethodViewModel(currencies: mockCurrencies)
+    }()
 
     var body: some Scene {
         WindowGroup {
@@ -12,9 +15,6 @@ struct FakeNFTApp: App {
                 .environmentObject(navigation)
                 .environmentObject(mockData)
                 .environmentObject(paymentViewModel)
-                .onAppear {
-                    paymentViewModel.loadCurrencies(from: mockData)
-                }
         }
     }
 }

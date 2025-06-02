@@ -15,7 +15,7 @@ struct CurrencyCellView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(currency.iconName)
+            Image(currency.iconName) // Используем computed property iconName
                 .resizable()
                 .frame(width: 36, height: 36)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -23,7 +23,7 @@ struct CurrencyCellView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(currency.name)
                     .font(.system(size: 15, weight: .semibold))
-                Text(currency.code)
+                Text(currency.code) // Используем computed property code
                     .font(.system(size: 13))
                     .foregroundColor(.init(red: 0.25, green: 0.87, blue: 0.63))
             }
@@ -48,7 +48,13 @@ struct CurrencyCellView: View {
 
 #Preview {
     CurrencyCellView(
-        currency: CurrencyModel(name: "Bitcoin", code: "BTC", iconName: "yp.cripto.bitcoin"),
+        currency: CurrencyModel(
+            id: "1",
+            name: "Bitcoin",
+            title: "BTC",
+            image: "yp.cripto.bitcoin" // Теперь используем новые параметры
+        ),
         isSelected: true
     )
+    .environmentObject(PaymentMethodViewModel())
 }
