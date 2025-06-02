@@ -11,12 +11,12 @@ struct PaymentMethodView: View {
     @EnvironmentObject var navigationModel: NavigationModel
     @EnvironmentObject var mockData: MockData
     @EnvironmentObject var viewModel: PaymentMethodViewModel
-
+    
     private let columns = [
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
-
+    
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -27,7 +27,7 @@ struct PaymentMethodView: View {
                         .foregroundColor(.black)
                         .padding(.leading)
                 })
-
+                
                 Spacer()
                 Text("Выберите способ оплаты")
                     .font(.system(size: 17, weight: .semibold))
@@ -35,7 +35,7 @@ struct PaymentMethodView: View {
                 Spacer()
             }
             .background(Color.white)
-
+            
             // Сетка криптовалют
             LazyVGrid(columns: columns, spacing: 12) {
                 ForEach(viewModel.currencies) { crypto in
@@ -47,9 +47,9 @@ struct PaymentMethodView: View {
             }
             .padding(.horizontal, 12)
             .padding(.top, 4)
-
+            
             Spacer()
-
+            
             // Соглашение + кнопка
             VStack(spacing: 16) {
                 VStack(alignment: .leading) {
@@ -65,7 +65,7 @@ struct PaymentMethodView: View {
                         }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+                
                 Button(action: {
                     navigationModel.navigate(to: .paymentDoneView)
                 }, label: {
@@ -78,9 +78,11 @@ struct PaymentMethodView: View {
                 })
             }
             .padding(16)
-            .background(Color(.systemGray6))
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .padding(.bottom, 0)
+            .frame(maxWidth: .infinity)
+            .background(
+                Color(.systemGray6)
+                    .edgesIgnoringSafeArea(.bottom)
+            )
         }
         .ignoresSafeArea(.keyboard)
         .navigationBarBackButtonHidden(true)
