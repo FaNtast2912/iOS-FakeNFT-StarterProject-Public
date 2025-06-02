@@ -4,6 +4,7 @@ import SwiftUI
 struct CatalogListView: View {
     @StateObject private var viewModel = CatalogViewModel()
     @EnvironmentObject private var navigationModel: NavigationModel
+    @State private var showingSortOptions = false
     
     var body: some View {
         NavigationView {
@@ -27,6 +28,15 @@ struct CatalogListView: View {
                     sortButton
                 }
             }
+            .confirmationDialog("Сортировка", isPresented: $showingSortOptions, titleVisibility: .visible) {
+                Button("По названию") {
+                    viewModel.sortCollections(by: .name(ascending: true))
+                }
+                Button("По количеству") {
+                    viewModel.sortCollections(by: .nftCount(ascending: false))
+                }
+                Button("Закрыть", role: .cancel) {}
+            }
         }
         .task {
             if case .idle = viewModel.loadingState {
@@ -43,9 +53,7 @@ struct CatalogListView: View {
     private var loadingView: some View {
         VStack {
             Spacer()
-            ProgressView()
-                .scaleEffect(1.5)
-                .tint(.ypBlueUniversal)
+            ProgressHUD(isLoading: true)
             Spacer()
         }
     }
@@ -104,7 +112,7 @@ struct CatalogListView: View {
     
     private var sortButton: some View {
         Button {
-            // TODO: Implement sorting functionality
+            showingSortOptions = true
         } label: {
             Image("yp.sort")
                 .foregroundColor(.ypBlack)

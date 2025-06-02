@@ -70,8 +70,7 @@ struct CollectionDetailView: View {
             Rectangle()
                 .fill(Color.ypLightGrey)
                 .overlay {
-                    ProgressView()
-                        .tint(.ypBlueUniversal)
+                    ProgressHUD(isLoading: true)
                 }
         }
         .frame(height: 310)
@@ -137,9 +136,7 @@ struct CollectionDetailView: View {
     
     private var loadingView: some View {
         VStack {
-            ProgressView()
-                .scaleEffect(1.5)
-                .tint(.ypBlueUniversal)
+            ProgressHUD(isLoading: true)
             
             Text("Загрузка NFT...")
                 .font(.system(size: 15))
