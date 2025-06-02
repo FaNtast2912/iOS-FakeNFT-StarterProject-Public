@@ -32,7 +32,12 @@ struct CollectionDetailView: View {
             }
         }
         .ignoresSafeArea()
-        .navigationBarBackButtonHidden(false)
+        .navigationBarBackButtonHidden()
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                backButton
+            }
+        }
         .task {
             if case .idle = viewModel.loadingState {
                 await viewModel.loadNFTs()
@@ -40,6 +45,17 @@ struct CollectionDetailView: View {
         }
         .refreshable {
             await viewModel.refresh()
+        }
+    }
+    
+    // MARK: - BackButton
+    
+    private var backButton: some View {
+        Button {
+            navigationModel.navigateBack()
+        } label: {
+            Image("yp.chevron.backward")
+                .foregroundColor(.ypBlack)
         }
     }
     
@@ -86,7 +102,6 @@ struct CollectionDetailView: View {
                 }
             }
 
-            
             // Описание
             Text(collection.description)
                 .font(.system(size: 13, weight: .regular))

@@ -58,6 +58,8 @@ struct CatalogListView: View {
                 ForEach(collections) { collection in
                     CatalogRowView(collection: collection)
                         .onTapGesture {
+                            // Устанавливаем выбранную коллекцию перед навигацией
+                            navigationModel.selectedCollection = collection
                             navigationModel.navigate(to: .collectionDetailView)
                         }
                 }

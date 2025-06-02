@@ -46,6 +46,12 @@ final class NavigationModel: ObservableObject {
         path.append(screen)
     }
     
+    /// Переход к экрану деталей коллекции
+    func navigateToCollectionDetail(collection: Collection) {
+        selectedCollection = collection
+        navigate(to: .collectionDetailView)
+    }
+    
     /// Возврат на предыдущий экран
     func navigateBack() {
         guard !path.isEmpty else { return }
