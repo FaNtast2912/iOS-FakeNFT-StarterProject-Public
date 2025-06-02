@@ -8,8 +8,16 @@
 import SwiftUI
 
 struct PaymentDoneView: View {
+    @EnvironmentObject var navigationModel: NavigationModel
+    
     var body: some View {
-        Text("Hello, World!")
+        VStack {
+            Text("Экран будет реализован во второй части эпика")
+        }
+        .navigationBarStyle {
+            navigationModel.navigateBack()
+        }
+        .navigationTitle("Оплата")
     }
 }
 
