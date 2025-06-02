@@ -8,12 +8,11 @@
 import SwiftUI
 
 struct CartView: View {
-    @EnvironmentObject var mockData: MockData
     @EnvironmentObject var navigation: NavigationModel
+    @StateObject var viewModel = CartViewModel()
     
     @State private var showDeleteConfirmation = false
     @State private var showSortOptions = false
-    @State private var currentSortOption: SortOption = .price
     
     private enum Constants {
         static let sortButtonImageSize: CGFloat = 21
@@ -32,31 +31,12 @@ struct CartView: View {
         static let payButtonHeight: CGFloat = 44
         static let payButtonCornerRadius: CGFloat = 16
     }
-    
-    private enum SortOption: String {
-        case price = "По цене"
-        case rating = "По рейтингу"
-        case name = "По названию"
-        
-        func toProductSortOption() -> ProductSortOption {
-            switch self {
-            case .price: return .price(ascending: true)
-            case .rating: return .rating(ascending: true)
-            case .name: return .name(ascending: true)
-            }
-        }
-    }
-    
-    private var sortedNFTs: [Nft] {
-        let option = currentSortOption.toProductSortOption()
-        return SortingManager.shared.sort(products: mockData.nfts, by: option)
-    }
 
     var body: some View {
         VStack(spacing: 0) {
             sortButton
             
-            if mockData.nfts.isEmpty {
+            if viewModel.nfts.isEmpty {
                 emptyCartView
             } else {
                 nftListView
@@ -72,26 +52,25 @@ struct CartView: View {
     private var sortButton: some View {
         HStack {
             Spacer()
-            Button(
-                action: { showSortOptions.toggle() },
-                label: {
-                    Image("yp.sort")
-                        .resizable()
-                        .frame(width: Constants.sortButtonImageSize, height: Constants.sortButtonImageHeight)
-                        .foregroundColor(.black)
-                        .padding(.trailing, Constants.sortButtonTrailingPadding)
-                }
-            )
+            Button(action: { showSortOptions.toggle() }) {
+                Image("yp.sort")
+                    .resizable()
+                    .frame(width: Constants.sortButtonImageSize,
+                           height: Constants.sortButtonImageHeight)
+                    .foregroundColor(.black)
+                    .padding(.trailing, Constants.sortButtonTrailingPadding)
+            }
             .confirmationDialog(
                 "Сортировка",
-                isPresented: $showSortOptions,
-                actions: {
-                    ForEach([SortOption.price, .rating, .name], id: \.self) { option in
-                        Button(option.rawValue) { currentSortOption = option }
+                isPresented: $showSortOptions
+            ) {
+                ForEach(CartViewModel.SortOption.allCases, id: \.self) { option in
+                    Button(option.rawValue) {
+                        viewModel.currentSortOption = option
                     }
-                    Button("Закрыть", role: .cancel) {}
                 }
-            )
+                Button("Закрыть", role: .cancel) {}
+            }
         }
         .padding(.top, 16)
     }
@@ -109,8 +88,9 @@ struct CartView: View {
     private var nftListView: some View {
         ScrollView {
             LazyVStack(spacing: Constants.nftListSpacing) {
-                ForEach(sortedNFTs, id: \.id) { nft in
+                ForEach(viewModel.getSortedNFTs(), id: \.id) { nft in
                     NFTItemView(nft: nft, showDeleteConfirmation: $showDeleteConfirmation)
+                        .environmentObject(viewModel)
                 }
             }
             .padding(.top, Constants.nftListTopPadding)
@@ -127,35 +107,29 @@ struct CartView: View {
             
             HStack {
                 VStack(alignment: .leading) {
-                    Text("\(mockData.nfts.count) NFT")
+                    Text("\(viewModel.nfts.count) NFT")
                         .font(.system(size: Constants.nftCountFontSize, weight: .regular))
                         .padding(.bottom, 2)
                     
-                    Text(String(format: "%.2f ETH", mockData.nfts.reduce(0) { $0 + $1.price }))
+                    Text(String(format: "%.2f ETH", viewModel.nfts.reduce(0) { $0 + $1.price }))
                         .font(.system(size: Constants.priceFontSize, weight: .bold))
                         .foregroundColor(.ypGreenUniversal)
                 }
                 
                 Spacer()
                 
-                payButton
+                Button(action: { navigation.navigate(to: .paymentMethodView) }) {
+                    Text("К оплате")
+                        .frame(width: Constants.payButtonWidth,
+                               height: Constants.payButtonHeight)
+                        .font(.system(size: Constants.priceFontSize, weight: .bold))
+                        .background(Color.black)
+                        .foregroundColor(.white)
+                        .cornerRadius(Constants.payButtonCornerRadius)
+                }
             }
             .padding(.horizontal, Constants.paymentSummaryHorizontalPadding)
         }
-    }
-    
-    private var payButton: some View {
-        Button(
-            action: { navigation.navigate(to: .paymentMethodView) },
-            label: {
-                Text("К оплате")
-                    .frame(width: Constants.payButtonWidth, height: Constants.payButtonHeight)
-                    .font(.system(size: Constants.priceFontSize, weight: .bold))
-                    .background(Color.black)
-                    .foregroundColor(.white)
-                    .cornerRadius(Constants.payButtonCornerRadius)
-            }
-        )
     }
     
     private var deleteConfirmationOverlay: some View {
@@ -171,44 +145,19 @@ struct CartView: View {
     }
 }
 
-// MARK: - Preview
-
-#Preview {
+#Preview("With NFTs") {
     let mockData = MockData()
-    mockData.nfts = [
-        Nft(
-            id: "0",
-            name: "NFT 1",
-            createdAt: "",
-            images: [],
-            rating: 3,
-            description: "",
-            price: 1.5,
-            author: ""
-        ),
-        Nft(
-            id: "1",
-            name: "NFT 2",
-            createdAt: "",
-            images: [],
-            rating: 4,
-            description: "",
-            price: 2.3,
-            author: ""
-        ),
-        Nft(
-            id: "2",
-            name: "NFT 3",
-            createdAt: "",
-            images: [],
-            rating: 5,
-            description: "",
-            price: 3.1,
-            author: ""
-        )
-    ]
+    let viewModel = CartViewModel(mockData: mockData)
     
     return CartView()
         .environmentObject(NavigationModel())
-        .environmentObject(mockData)
+}
+
+#Preview("Empty Cart") {
+    let mockData = MockData()
+    mockData.nfts = []
+    let viewModel = CartViewModel(mockData: mockData)
+    
+    return CartView()
+        .environmentObject(NavigationModel())
 }
