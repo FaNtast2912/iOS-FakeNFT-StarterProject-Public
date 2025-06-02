@@ -12,13 +12,14 @@ struct ProfileEditView: View {
     @ObservedObject private var profileVM: ProfileViewModel
     @Environment(\.dismiss) private var dismiss
     
-    init(profileVM: ProfileViewModel) {
+    init(profileVM: ProfileViewModel, service: ServicesAssembly) {
         self.profileVM = profileVM
         _profileEditVM = StateObject(wrappedValue: EditingProfileViewModel(
             name: profileVM.profile.name,
-            description: profileVM.profile.description,
+            description: profileVM.profile.description ?? "",
             avatar: profileVM.profile.avatar,
-            website: profileVM.profile.website
+            website: profileVM.profile.website,
+            service: service
         ))
     }
     
@@ -30,12 +31,7 @@ struct ProfileEditView: View {
                     Button {
                         Task {
                             await profileEditVM.updateProfileInfo()
-                            profileVM.updateMockProfile(
-                                name: profileEditVM.name,
-                                avatar: profileEditVM.avatar,
-                                description: profileEditVM.description,
-                                website: profileEditVM.website
-                            )
+                            await profileVM.fetchProfile()
                             dismiss()
                         }
                     } label: {
@@ -49,9 +45,16 @@ struct ProfileEditView: View {
                 
                 VStack {
                     ZStack {
-                        AsyncImage(url: URL(string: profileEditVM.avatar))
-                            .profileImageViewStyle()
-                        
+                        AsyncImage(url: URL(string: profileEditVM.avatar)) { image in
+                            image
+                                .profileImageViewStyle()
+                        } placeholder: {
+                            ZStack {
+                                Circle()
+                                    .foregroundStyle(.gray)
+                                    .frame(width: 70, height: 70)
+                            }
+                        }
                         Text("Сменить фото")
                             .multilineTextAlignment(.center)
                             .font(.system(size: 10, weight: .medium))
@@ -121,5 +124,6 @@ struct ProfileEditView: View {
 }
 
 #Preview {
-    ProfileEditView(profileVM: ProfileViewModel())
+    let service = ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl())
+    ProfileEditView(profileVM: ProfileViewModel(service: service), service: service)
 }

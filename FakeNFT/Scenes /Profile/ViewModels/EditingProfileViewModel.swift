@@ -15,6 +15,7 @@ final class EditingProfileViewModel: ObservableObject {
     @Published var website: String
     @Published var loadingState: LoadingState = .loaded
     @Published var alertErrorPresented: Bool = false
+    private let profileService: ProfileService
     
     enum LoadingState {
         case loading
@@ -26,29 +27,30 @@ final class EditingProfileViewModel: ObservableObject {
         name: String,
         description: String,
         avatar: String,
-        website: String
+        website: String,
+        service: ServicesAssembly
     ) {
         self.name = name
         self.description = description
         self.avatar = avatar
         self.website = website
+        profileService = service.profileService
     }
     
     func updateAvatar() async {
-        avatar = "https://sun9-71.userapi.com/impf/HXh-XOzRZNjBZN3-s3KY8-A1vvUZcCzEIVCO7A/NiLsvqlmqpI.jpg" + "?size=320x256&quality=96&sign=cae1cfe812481cab04191c25a4dda9c4&type=album"
+        avatar = "https://lh6.ggpht.com/WeTiwh_IjTAP6F3Q3ECOh3OuXqdr28RVqB_K2o7dp51FRQsSqsODym2LJJ4IDyWugQ=w300"
     }
     
     func updateProfileInfo() async {
+        let dto = UpdateProfileDto(avatar: avatar, name: name, description: description, website: website)
+        loadingState = .loading
         do {
-            loadingState = .loading
-            try await Task.sleep(for: .seconds(3))
-            print("данные отправились на сервер")
+            _ = try await profileService.updateProfile(dto: dto)
             loadingState = .loaded
         } catch {
             loadingState = .error
-            alertErrorPresented = true
-            print(error.localizedDescription)
+            print(String(describing: error.localizedDescription))
         }
     }
-    
 }
+
