@@ -15,6 +15,24 @@ struct CartView: View {
     @State private var showSortOptions = false
     @State private var currentSortOption: SortOption = .price
     
+    private enum Constants {
+        static let sortButtonImageSize: CGFloat = 21
+        static let sortButtonImageHeight: CGFloat = 12.6
+        static let sortButtonTrailingPadding: CGFloat = 19.5
+        static let emptyCartFontSize: CGFloat = 17
+        static let nftListTopPadding: CGFloat = 36
+        static let nftListHorizontalPadding: CGFloat = 16
+        static let nftListSpacing: CGFloat = 16
+        static let paymentSummaryHeight: CGFloat = 76
+        static let paymentSummaryCornerRadius: CGFloat = 12
+        static let paymentSummaryHorizontalPadding: CGFloat = 16
+        static let nftCountFontSize: CGFloat = 15
+        static let priceFontSize: CGFloat = 17
+        static let payButtonWidth: CGFloat = 240
+        static let payButtonHeight: CGFloat = 44
+        static let payButtonCornerRadius: CGFloat = 16
+    }
+    
     private enum SortOption: String {
         case price = "По цене"
         case rating = "По рейтингу"
@@ -59,9 +77,9 @@ struct CartView: View {
                 label: {
                     Image("yp.sort")
                         .resizable()
-                        .frame(width: 21, height: 12.6)
+                        .frame(width: Constants.sortButtonImageSize, height: Constants.sortButtonImageHeight)
                         .foregroundColor(.black)
-                        .padding(.trailing, 19.5)
+                        .padding(.trailing, Constants.sortButtonTrailingPadding)
                 }
             )
             .confirmationDialog(
@@ -82,7 +100,7 @@ struct CartView: View {
         VStack {
             Spacer()
             Text("Корзина пуста")
-                .font(.system(size: 17, weight: .bold))
+                .font(.system(size: Constants.emptyCartFontSize, weight: .bold))
                 .foregroundColor(.ypBlackUniversal)
             Spacer()
         }
@@ -90,13 +108,13 @@ struct CartView: View {
     
     private var nftListView: some View {
         ScrollView {
-            LazyVStack(spacing: 16) {
+            LazyVStack(spacing: Constants.nftListSpacing) {
                 ForEach(sortedNFTs, id: \.id) { nft in
                     NFTItemView(nft: nft, showDeleteConfirmation: $showDeleteConfirmation)
                 }
             }
-            .padding(.top, 36)
-            .padding(.horizontal, 16)
+            .padding(.top, Constants.nftListTopPadding)
+            .padding(.horizontal, Constants.nftListHorizontalPadding)
         }
     }
     
@@ -104,17 +122,17 @@ struct CartView: View {
         ZStack {
             Rectangle()
                 .fill(Color(UIColor.systemGray6))
-                .frame(height: 76)
-                .cornerRadius(12)
+                .frame(height: Constants.paymentSummaryHeight)
+                .cornerRadius(Constants.paymentSummaryCornerRadius)
             
             HStack {
                 VStack(alignment: .leading) {
                     Text("\(mockData.nfts.count) NFT")
-                        .font(.system(size: 15, weight: .regular))
+                        .font(.system(size: Constants.nftCountFontSize, weight: .regular))
                         .padding(.bottom, 2)
                     
                     Text(String(format: "%.2f ETH", mockData.nfts.reduce(0) { $0 + $1.price }))
-                        .font(.system(size: 17, weight: .bold))
+                        .font(.system(size: Constants.priceFontSize, weight: .bold))
                         .foregroundColor(.ypGreenUniversal)
                 }
                 
@@ -122,7 +140,7 @@ struct CartView: View {
                 
                 payButton
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, Constants.paymentSummaryHorizontalPadding)
         }
     }
     
@@ -131,11 +149,11 @@ struct CartView: View {
             action: { navigation.navigate(to: .paymentMethodView) },
             label: {
                 Text("К оплате")
-                    .frame(width: 240, height: 44)
-                    .font(.system(size: 17, weight: .bold))
+                    .frame(width: Constants.payButtonWidth, height: Constants.payButtonHeight)
+                    .font(.system(size: Constants.priceFontSize, weight: .bold))
                     .background(Color.black)
                     .foregroundColor(.white)
-                    .cornerRadius(16)
+                    .cornerRadius(Constants.payButtonCornerRadius)
             }
         )
     }
