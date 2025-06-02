@@ -10,7 +10,7 @@ import SwiftUI
 struct CartView: View {
     @EnvironmentObject var mockData: MockData
     @EnvironmentObject var navigation: NavigationModel
-
+    
     @State private var showDeleteConfirmation = false
     @State private var showSortOptions = false
     @State private var currentSortOption: SortOption = .price
@@ -36,110 +36,124 @@ struct CartView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack {
-                Spacer()
-                Button(
-                    action: { showSortOptions.toggle() },
-                    label: {
-                        Image("yp.sort")
-                            .resizable()
-                            .frame(width: 21, height: 12.6)
-                            .foregroundColor(.black)
-                            .padding(.trailing, 19.5)
-                    }
-                )
-                .confirmationDialog(
-                    "Сортировка",
-                    isPresented: $showSortOptions,
-                    actions: {
-                        Button(
-                            action: { currentSortOption = .price },
-                            label: { Text("По цене") }
-                        )
-                        Button(
-                            action: { currentSortOption = .rating },
-                            label: { Text("По рейтингу") }
-                        )
-                        Button(
-                            action: { currentSortOption = .name },
-                            label: { Text("По названию") }
-                        )
-                        Button(
-                            role: .cancel,
-                            action: {},
-                            label: { Text("Закрыть") }
-                        )
-                    }
-                )
-            }
-            .padding(.top, 16)
-
+            sortButton
+            
             if mockData.nfts.isEmpty {
-                Spacer()
-                Text("Корзина пуста")
-                    .font(.system(size: 17, weight: .bold))
-                    .foregroundColor(.ypBlackUniversal)
-
-                Spacer()
+                emptyCartView
             } else {
-                ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(sortedNFTs, id: \.id) { nft in
-                            NFTItemView(nft: nft, showDeleteConfirmation: $showDeleteConfirmation)
-                        }
-                    }
-                    .padding(.top, 36)
-                    .padding(.horizontal, 16)
-                }
+                nftListView
             }
-
-            ZStack {
-                Rectangle()
-                    .fill(Color(UIColor.systemGray6))
-                    .frame(height: 76)
-                    .cornerRadius(12)
-
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("\(mockData.nfts.count) NFT")
-                            .font(.system(size: 15, weight: .regular))
-                            .padding(.bottom, 2)
-
-                        Text(String(format: "%.2f ETH", mockData.nfts.reduce(0) { $0 + $1.price }))
-                            .font(.system(size: 17, weight: .bold))
-                            .foregroundColor(.ypGreenUniversal)
-                    }
-                    
-                    Spacer()
-                    
-                    Button(
-                        action: { navigation.navigate(to: .paymentMethodView) },
-                        label: {
-                            Text("К оплате")
-                                .frame(width: 240, height: 44)
-                                .font(.system(size: 17, weight: .bold))
-                                .background(Color.black)
-                                .foregroundColor(.white)
-                                .cornerRadius(16)
-                        }
-                    )
-                }
-                .padding(.horizontal, 16)
-            }
+            
+            paymentSummaryView
         }
-        .overlay(
-            Group {
-                if showDeleteConfirmation {
-                    DeleteNFTConfirmationView(
-                        nftImage: Image("mockImageNFT"),
-                        onDelete: { showDeleteConfirmation = false },
-                        onCancel: { showDeleteConfirmation = false }
-                    )
+        .overlay(deleteConfirmationOverlay)
+    }
+    
+    // MARK: - Private Subviews
+    
+    private var sortButton: some View {
+        HStack {
+            Spacer()
+            Button(
+                action: { showSortOptions.toggle() },
+                label: {
+                    Image("yp.sort")
+                        .resizable()
+                        .frame(width: 21, height: 12.6)
+                        .foregroundColor(.black)
+                        .padding(.trailing, 19.5)
                 }
+            )
+            .confirmationDialog(
+                "Сортировка",
+                isPresented: $showSortOptions,
+                actions: {
+                    ForEach([SortOption.price, .rating, .name], id: \.self) { option in
+                        Button(option.rawValue) { currentSortOption = option }
+                    }
+                    Button("Закрыть", role: .cancel) {}
+                }
+            )
+        }
+        .padding(.top, 16)
+    }
+    
+    private var emptyCartView: some View {
+        VStack {
+            Spacer()
+            Text("Корзина пуста")
+                .font(.system(size: 17, weight: .bold))
+                .foregroundColor(.ypBlackUniversal)
+            Spacer()
+        }
+    }
+    
+    private var nftListView: some View {
+        ScrollView {
+            LazyVStack(spacing: 16) {
+                ForEach(sortedNFTs, id: \.id) { nft in
+                    NFTItemView(nft: nft, showDeleteConfirmation: $showDeleteConfirmation)
+                }
+            }
+            .padding(.top, 36)
+            .padding(.horizontal, 16)
+        }
+    }
+    
+    private var paymentSummaryView: some View {
+        ZStack {
+            Rectangle()
+                .fill(Color(UIColor.systemGray6))
+                .frame(height: 76)
+                .cornerRadius(12)
+            
+            HStack {
+                VStack(alignment: .leading) {
+                    Text("\(mockData.nfts.count) NFT")
+                        .font(.system(size: 15, weight: .regular))
+                        .padding(.bottom, 2)
+                    
+                    Text(String(format: "%.2f ETH", mockData.nfts.reduce(0) { $0 + $1.price }))
+                        .font(.system(size: 17, weight: .bold))
+                        .foregroundColor(.ypGreenUniversal)
+                }
+                
+                Spacer()
+                
+                payButton
+            }
+            .padding(.horizontal, 16)
+        }
+    }
+    
+    private var payButton: some View {
+        Button(
+            action: { navigation.navigate(to: .paymentMethodView) },
+            label: {
+                Text("К оплате")
+                    .frame(width: 240, height: 44)
+                    .font(.system(size: 17, weight: .bold))
+                    .background(Color.black)
+                    .foregroundColor(.white)
+                    .cornerRadius(16)
             }
         )
     }
+    
+    private var deleteConfirmationOverlay: some View {
+        Group {
+            if showDeleteConfirmation {
+                DeleteNFTConfirmationView(
+                    nftImage: Image("mockImageNFT"),
+                    onDelete: { showDeleteConfirmation = false },
+                    onCancel: { showDeleteConfirmation = false }
+                )
+            }
+        }
+    }
 }
+
+// MARK: - Preview
 
 #Preview {
     let mockData = MockData()
