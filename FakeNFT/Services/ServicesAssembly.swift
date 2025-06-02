@@ -21,4 +21,8 @@ final class ServicesAssembly {
     var profileService: ProfileService {
         ProfileServiceImpl(networkClient: networkClient)
     }
+    
+    var userLikesService: UserLikesService {
+        UserLikesServiceImpl(networkClient: networkClient)
+    }
 }

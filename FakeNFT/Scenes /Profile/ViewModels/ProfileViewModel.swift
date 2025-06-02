@@ -23,9 +23,6 @@ final class ProfileViewModel: ObservableObject {
         self.service = service
         profile = Profile(name: "Имя", avatar: "", description: "Описание", website: "Сайт", nfts: [], likes: [], id: "")
         
-        Task {
-            await fetchProfile()
-        }
     }
     
     func updateMockProfile(name: String, avatar: String, description: String, website: String) {

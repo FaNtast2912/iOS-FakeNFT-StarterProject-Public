@@ -18,10 +18,13 @@ struct MyFavoriteNFTCardView: View {
     var body: some View {
         HStack(spacing: 0) {
             ZStack(alignment: .topTrailing) {
-                AsyncImage(url: URL(string: imageUrl))
-                    .frame(width: 80, height: 80)
-                    .clipShape(.rect(cornerRadius: 12))
-                    .aspectRatio(contentMode: .fit)
+                AsyncImage(url: URL(string: imageUrl)) { image in
+                    image
+                        .image?.resizable()
+                        .frame(width: 80, height: 80)
+                        .clipShape(.rect(cornerRadius: 12))
+                        .aspectRatio(contentMode: .fit)
+                }
                 Button {
                     completion()
                 } label: {
@@ -36,6 +39,7 @@ struct MyFavoriteNFTCardView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(name)
                         .font(.system(size: 17, weight: .bold))
+                        .lineLimit(2)
                     HStack(spacing: 0) {
                         ForEach(0..<5) { value in
                             Image(rating > value ? "yp.star.active" : "yp.star.noActive")

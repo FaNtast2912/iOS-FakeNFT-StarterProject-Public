@@ -76,6 +76,11 @@ struct ProfileView: View {
             .sheet(isPresented: $editProfileIsPresented) {
                 ProfileEditView(profileVM: profileVM, service: profileVM.getService())
             }
+            .onAppear {
+                Task {
+                    await profileVM.fetchProfile()
+                }
+            }
             
             if profileVM.loadingState == .loading {
                 ProgressHUD(isLoading: profileVM.loadingState == .loading)
