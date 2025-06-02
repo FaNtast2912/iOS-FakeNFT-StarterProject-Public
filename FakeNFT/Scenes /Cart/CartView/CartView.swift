@@ -43,9 +43,9 @@ struct CartView: View {
                     label: {
                         Image("yp.sort")
                             .resizable()
-                            .frame(width: 32, height: 24)
+                            .frame(width: 21, height: 12.6)
                             .foregroundColor(.black)
-                            .padding(.trailing, 9)
+                            .padding(.trailing, 19.5)
                     }
                 )
                 .confirmationDialog(
