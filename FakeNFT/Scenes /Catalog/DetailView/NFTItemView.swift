@@ -11,7 +11,7 @@ import SwiftUI
 struct NFTItemView: View {
     let nft: Nft
     @State private var isLiked = false
-    @State private var isInCart = false
+    @EnvironmentObject private var cartManager: CartManager
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -68,9 +68,13 @@ struct NFTItemView: View {
                     Spacer()
                     
                     Button {
-                        isInCart.toggle()
+                        if cartManager.isInCart(nft) {
+                            cartManager.removeFromCart(nft)
+                        } else {
+                            cartManager.addToCart(nft)
+                        }
                     } label: {
-                        Image(isInCart ? "yp.cart.delete" : "yp.cart")
+                        Image(cartManager.isInCart(nft) ? "yp.cart.delete" : "yp.cart")
                             .foregroundColor(.ypBlackUniversal)
                             .font(.system(size: 12))
                     }
@@ -96,6 +100,7 @@ struct NFTItemView: View {
     )
     
     NFTItemView(nft: sampleNFT)
+        .environmentObject(CartManager())
         .padding()
         .previewLayout(.sizeThatFits)
 }

@@ -12,6 +12,7 @@ struct CollectionDetailView: View {
     let collection: Collection
     @StateObject private var viewModel: CollectionDetailViewModel
     @EnvironmentObject private var navigationModel: NavigationModel
+    @StateObject private var cartManager = CartManager()
     
     init(collection: Collection) {
         self.collection = collection
@@ -46,6 +47,7 @@ struct CollectionDetailView: View {
         .refreshable {
             await viewModel.refresh()
         }
+        .environmentObject(cartManager)
     }
     
     // MARK: - BackButton
