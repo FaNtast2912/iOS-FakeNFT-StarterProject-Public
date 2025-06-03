@@ -83,6 +83,17 @@ struct ProfileView: View {
                     await profileVM.fetchProfile()
                 }
             }
+            .alert( isPresented: $profileVM.alertErrorPresented) {
+                Alert(
+                    title: Text("Не удалось получить данные"),
+                    primaryButton: .default(Text("Отмена")),
+                    secondaryButton: .cancel(Text("Повторить"), action: {
+                        Task {
+                            await profileVM.fetchProfile()
+                        }
+                    })
+                )
+            }
             
             if profileVM.loadingState == .loading {
                 ProgressHUD(isLoading: profileVM.loadingState == .loading)

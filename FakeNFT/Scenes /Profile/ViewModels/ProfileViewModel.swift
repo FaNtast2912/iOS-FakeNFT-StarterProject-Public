@@ -11,6 +11,7 @@ final class ProfileViewModel: ObservableObject {
     @Published var profile: Profile
     @Published var loadingState: LoadingState = .loaded
     @Published var avatarPlaceholderName = "yp.emptyUserPick"
+    @Published var alertErrorPresented: Bool = false
     private let service: ServicesAssembly
     
     enum LoadingState {
@@ -45,6 +46,7 @@ final class ProfileViewModel: ObservableObject {
             loadingState = .loaded
         } catch {
             loadingState = .error
+            alertErrorPresented = loadingState == .error ? true : false
             print(String(describing: error.localizedDescription))
         }
     }
