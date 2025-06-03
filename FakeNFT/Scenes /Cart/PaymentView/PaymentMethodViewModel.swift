@@ -35,6 +35,9 @@ final class PaymentMethodViewModel: ObservableObject {
         ]
     }
     
+    /// Эмуляция функции успешной и неуспешной оплаты через выбор валюты.
+    /// Пока валюта не выбрана - оплата не будет прозведена
+    /// Comment for commit =)
     @MainActor
     func processPayment() async -> Bool {
         showPaymentError = false
