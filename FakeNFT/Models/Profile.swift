@@ -2,8 +2,9 @@
 //  Profile.swift
 //  FakeNFT
 //
-//  Created by Maksim Zakharov on 03.06.2025.
+//  Created by Olga Trofimova on 03.06.2025.
 //
+import Foundation
 
 struct Profile: Codable {
     let name: String
