@@ -17,4 +17,12 @@ final class ServicesAssembly {
             storage: nftStorage
         )
     }
+    
+    var profileService: ProfileService {
+        ProfileServiceImpl(networkClient: networkClient)
+    }
+    
+    var userLikesService: UserLikesService {
+        UserLikesServiceImpl(networkClient: networkClient)
+    }
 }
