@@ -91,7 +91,7 @@ final class NavigationModel: ObservableObject {
 
 extension NavigationModel {
     @ViewBuilder
-    func destination(for screen: Screens) -> some View {
+    func destination(for screen: Screens, with services: ServicesAssembly) -> some View {
         switch screen {
             
             // Catalog
