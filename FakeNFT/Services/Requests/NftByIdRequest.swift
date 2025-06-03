@@ -1,9 +1,18 @@
 import Foundation
 
+/// Запрос для получения деталей конкретного NFT
 struct NFTRequest: NetworkRequest {
     let id: String
+    
     var endpoint: URL? {
-        URL(string: "\(RequestConstants.baseURL)/api/v1/nft/\(id)")
+        URL(string: RequestConstants.baseURL + RequestConstants.nft + "/\(id)")
     }
-    var dto: Dto?
+    
+    var httpMethod: HttpMethod {
+        .get
+    }
+    
+    var dto: Dto? {
+        nil
+    }
 }

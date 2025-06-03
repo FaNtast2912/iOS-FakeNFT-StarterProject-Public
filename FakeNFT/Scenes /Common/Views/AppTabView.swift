@@ -37,7 +37,7 @@ struct AppTabView: View {
                     }
                     .tag(0)
                 
-                CatalogView()
+                CatalogListView()
                     .tabItem {
                         Text("Каталог")
                         Image("yp.catalogIcon")

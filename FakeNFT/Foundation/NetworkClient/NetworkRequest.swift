@@ -22,3 +22,19 @@ extension NetworkRequest {
     var httpMethod: HttpMethod { .get }
     var dto: Encodable? { nil }
 }
+
+/// Запрос для получения списка коллекций
+struct CatalogRequest: NetworkRequest {
+    var endpoint: URL? {
+        URL(string: RequestConstants.baseURL + RequestConstants.collections)
+    }
+    
+    var httpMethod: HttpMethod {
+        .get
+    }
+    
+    var dto: Dto? {
+        nil
+    }
+}
+
