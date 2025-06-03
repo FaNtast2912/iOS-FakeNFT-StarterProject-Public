@@ -12,6 +12,8 @@ final class ProfileViewModel: ObservableObject {
     @Published var loadingState: LoadingState = .loaded
     @Published var avatarPlaceholderName = "yp.emptyUserPick"
     @Published var alertErrorPresented: Bool = false
+    @Published var nftsCount: Int = 0
+    @Published var nftLikesCount: Int = 0
     private let service: ServicesAssembly
     
     enum LoadingState {
@@ -24,6 +26,9 @@ final class ProfileViewModel: ObservableObject {
         self.service = service
         profile = Profile(name: "Имя", avatar: "", description: "Описание", website: "Сайт", nfts: [], likes: [], id: "")
         
+        Task {
+            await fetchProfile()
+        }
     }
     
     func updateMockProfile(name: String, avatar: String, description: String, website: String) {
@@ -43,6 +48,8 @@ final class ProfileViewModel: ObservableObject {
         loadingState = .loading
         do {
             profile = try await service.profileService.fetchProfile()
+            nftsCount = profile.nfts.count
+            nftLikesCount = profile.likes.count
             loadingState = .loaded
         } catch {
             loadingState = .error

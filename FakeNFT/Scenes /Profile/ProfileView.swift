@@ -58,11 +58,11 @@ struct ProfileView: View {
                 .padding(.bottom, 20)
                 
                 VStack {
-                    ProfileListRowView(text: "Мои NFT" + " (\(profileVM.profile.nfts.count))") {
+                    ProfileListRowView(text: "Мои NFT" + " (\(profileVM.nftsCount))") {
                         
                     }
                     
-                    ProfileListRowView(text: "Избранные NFT" + " (\(profileVM.profile.likes.count))") {
+                    ProfileListRowView(text: "Избранные NFT" + " (\(profileVM.nftLikesCount))") {
                         navigationModel.navigate(to: .myFavoriteNFTView)
                     }
                     
