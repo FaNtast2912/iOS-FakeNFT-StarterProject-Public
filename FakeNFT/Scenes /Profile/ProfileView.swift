@@ -49,7 +49,9 @@ struct ProfileView: View {
                         .font(.system(size: 12, weight: .regular))
                         .frame(height: 72)
                     Button(profileVM.profile.website) {
-                        print("tap on button")
+                        if let url = URL(string: profileVM.profile.website) {
+                            navigationModel.navigate(to: .webView(url: url))
+                        }
                     }
                 }
                 .multilineTextAlignment(.leading)
