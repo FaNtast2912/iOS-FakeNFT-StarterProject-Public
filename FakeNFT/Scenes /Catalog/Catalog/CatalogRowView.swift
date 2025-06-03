@@ -9,7 +9,7 @@ import SwiftUI
 
 /// Ячейка каталога для отображения одной коллекции NFT
 struct CatalogRowView: View {
-    let collection: Collection
+    let collection: NFTCollection
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -27,7 +27,7 @@ struct CatalogRowView: View {
             }
             .frame(height: 140)
             .clipped()
-            .cornerRadius(12)
+            .cornerRadius(12, corners: .allCorners)
             
             VStack(alignment: .leading, spacing: 0) {
                 Text( "\(collection.name) (\(collection.nftCount))")
@@ -47,7 +47,7 @@ struct CatalogRowView: View {
 
 // MARK: - Preview
 #Preview {
-    let sampleCollection = Collection(
+    let sampleCollection = NFTCollection(
         id: "sample-id",
         name: "Peach",
         cover: URL(string: "https://code.s3.yandex.net/Mobile/iOS/NFT/Обложки_коллекций/Brown.png")!,
@@ -62,23 +62,4 @@ struct CatalogRowView: View {
         .previewLayout(.sizeThatFits)
 }
 
-// MARK: - Helper Extension
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
 
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
-
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: radius, height: radius)
-        )
-        return Path(path.cgPath)
-    }
-}

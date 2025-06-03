@@ -5,14 +5,13 @@
 //  Created by Maksim Zakharov on 30.05.2025.
 //
 
-import Foundation
 import SwiftUI
 
 /// Состояния загрузки для каталога
 enum CatalogLoadingState {
     case idle
     case loading
-    case loaded([Collection])
+    case loaded([NFTCollection])
     case error(String)
 }
 
@@ -20,7 +19,7 @@ enum CatalogLoadingState {
 @MainActor
 final class CatalogViewModel: ObservableObject {
     @Published var loadingState: CatalogLoadingState = .idle
-    @Published var collections: [Collection] = []
+    @Published var collections: [NFTCollection] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     
@@ -40,7 +39,7 @@ final class CatalogViewModel: ObservableObject {
         
         do {
             let request = CatalogRequest()
-            let loadedCollections: [Collection] = try await networkClient.send(request, as: [Collection].self)
+            let loadedCollections: [NFTCollection] = try await networkClient.send(request, as: [NFTCollection].self)
             
             collections = loadedCollections
             loadingState = .loaded(loadedCollections)

@@ -52,7 +52,7 @@ struct CatalogListView: View {
     
     // MARK: - Collections List
     
-    private func collectionsList(collections: [Collection]) -> some View {
+    private func collectionsList(collections: [NFTCollection]) -> some View {
         ScrollView {
             LazyVStack(spacing: 8) {
                 ForEach(collections) { collection in
@@ -64,8 +64,7 @@ struct CatalogListView: View {
                         }
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 16)
+            .padding([.horizontal, .top], 16)
         }
     }
     
@@ -96,7 +95,7 @@ struct CatalogListView: View {
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
             .background(Color.ypBlueUniversal.opacity(0.1))
-            .cornerRadius(8)
+            .cornerRadius(8, corners: .allCorners)
         }
     }
     

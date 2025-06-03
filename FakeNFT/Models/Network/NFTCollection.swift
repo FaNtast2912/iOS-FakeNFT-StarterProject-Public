@@ -7,7 +7,7 @@
 import Foundation
 
 /// Модель коллекции NFT
-struct Collection: Codable, Identifiable {
+struct NFTCollection: Codable, Identifiable {
     let id: String
     let name: String
     let cover: URL
@@ -17,7 +17,5 @@ struct Collection: Codable, Identifiable {
     let createdAt: String
     
     /// Количество NFT в коллекции
-    var nftCount: Int {
-        return nfts.count
-    }
+    var nftCount: Int { nfts.count }
 }

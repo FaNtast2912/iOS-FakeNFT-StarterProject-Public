@@ -9,11 +9,11 @@ import SwiftUI
 
 /// Экран деталей коллекции NFT
 struct CollectionDetailView: View {
-    let collection: Collection
+    let collection: NFTCollection
     @StateObject private var viewModel: CollectionDetailViewModel
     @EnvironmentObject private var navigationModel: NavigationModel
     
-    init(collection: Collection) {
+    init(collection: NFTCollection) {
         self.collection = collection
         self._viewModel = StateObject(wrappedValue: CollectionDetailViewModel(collection: collection))
     }
@@ -76,8 +76,7 @@ struct CollectionDetailView: View {
         }
         .frame(height: 310)
         .clipped()
-        .cornerRadius(12, corners: .bottomLeft)
-        .cornerRadius(12, corners: .bottomRight)
+        .cornerRadius(12, corners: [.bottomLeft, .bottomRight])
     }
     
     // MARK: - Collection Info
@@ -184,7 +183,7 @@ struct CollectionDetailView: View {
 
 // MARK: - Preview
 #Preview {
-    let sampleCollection = Collection(
+    let sampleCollection = NFTCollection(
         id: "sample-id",
         name: "Peach",
         cover: URL(string: "https://code.s3.yandex.net/Mobile/iOS/NFT/Обложки_коллекций/Brown.png")!,
