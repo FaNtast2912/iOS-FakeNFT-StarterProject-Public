@@ -52,14 +52,19 @@ struct CartView: View {
     private var sortButton: some View {
         HStack {
             Spacer()
-            Button(action: { showSortOptions.toggle() }) {
-                Image("yp.sort")
-                    .resizable()
-                    .frame(width: Constants.sortButtonImageSize,
-                           height: Constants.sortButtonImageHeight)
-                    .foregroundColor(.black)
-                    .padding(.trailing, Constants.sortButtonTrailingPadding)
-            }
+            Button(
+                action: { showSortOptions.toggle() },
+                label: {
+                    Image("yp.sort")
+                        .resizable()
+                        .frame(
+                            width: Constants.sortButtonImageSize,
+                            height: Constants.sortButtonImageHeight
+                        )
+                        .foregroundColor(.black)
+                        .padding(.trailing, Constants.sortButtonTrailingPadding)
+                }
+            )
             .confirmationDialog(
                 "Сортировка",
                 isPresented: $showSortOptions
@@ -118,15 +123,20 @@ struct CartView: View {
                 
                 Spacer()
                 
-                Button(action: { navigation.navigate(to: .paymentMethodView) }) {
-                    Text("К оплате")
-                        .frame(width: Constants.payButtonWidth,
-                               height: Constants.payButtonHeight)
-                        .font(.system(size: Constants.priceFontSize, weight: .bold))
-                        .background(Color.black)
-                        .foregroundColor(.white)
-                        .cornerRadius(Constants.payButtonCornerRadius)
-                }
+                Button(
+                    action: { navigation.navigate(to: .paymentMethodView) },
+                    label: {
+                        Text("К оплате")
+                            .frame(
+                                width: Constants.payButtonWidth,
+                                height: Constants.payButtonHeight
+                            )
+                            .font(.system(size: Constants.priceFontSize, weight: .bold))
+                            .background(Color.black)
+                            .foregroundColor(.white)
+                            .cornerRadius(Constants.payButtonCornerRadius)
+                    }
+                )
             }
             .padding(.horizontal, Constants.paymentSummaryHorizontalPadding)
         }
