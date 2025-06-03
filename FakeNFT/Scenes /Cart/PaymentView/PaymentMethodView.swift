@@ -67,7 +67,11 @@ struct PaymentMethodView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
                 Button(action: {
-                    navigationModel.navigate(to: .paymentDoneView)
+                    Task {
+                        if await viewModel.processPayment() {
+                            navigationModel.navigate(to: .paymentDoneView)
+                        }
+                    }
                 }, label: {
                     Text("Оплатить")
                         .font(.system(size: 17, weight: .bold))
@@ -83,6 +87,24 @@ struct PaymentMethodView: View {
                 Color(.systemGray6)
                     .edgesIgnoringSafeArea(.bottom)
             )
+            .alert(isPresented: $viewModel.showPaymentError) {
+                Alert(
+                    title: Text(""),
+                    message: Text("Не удалось произвести\nоплату")
+                        .font(.system(size: 17, weight: .bold)),
+                    primaryButton: .default(Text("Повторить")
+                        .font(.system(size: 17, weight: .bold)),
+                                            action: {
+                                                Task {
+                                                    if await viewModel.processPayment() {
+                                                        navigationModel.navigate(to: .paymentDoneView)
+                                                    }
+                                                }
+                                            }),
+                    secondaryButton: .cancel(Text("Отмена")
+                        .font(.system(size: 17, weight: .regular)))
+                )
+            }
         }
         .ignoresSafeArea(.keyboard)
         .navigationBarBackButtonHidden(true)
