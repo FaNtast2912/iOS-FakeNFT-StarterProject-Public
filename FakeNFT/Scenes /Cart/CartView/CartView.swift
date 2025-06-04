@@ -9,9 +9,10 @@ import SwiftUI
 
 struct CartView: View {
     @EnvironmentObject var navigation: NavigationModel
-    @StateObject var viewModel = CartViewModel()
+    @EnvironmentObject var viewModel: CartViewModel
     
     @State private var showDeleteConfirmation = false
+    @State private var nftToDelete: Nft?
     @State private var showSortOptions = false
     
     private enum Constants {
@@ -31,7 +32,7 @@ struct CartView: View {
         static let payButtonHeight: CGFloat = 44
         static let payButtonCornerRadius: CGFloat = 16
     }
-
+    
     var body: some View {
         VStack(spacing: 0) {
             sortButton
@@ -94,8 +95,13 @@ struct CartView: View {
         ScrollView {
             LazyVStack(spacing: Constants.nftListSpacing) {
                 ForEach(viewModel.getSortedNFTs(), id: \.id) { nft in
-                    NFTItemView(nft: nft, showDeleteConfirmation: $showDeleteConfirmation)
-                        .environmentObject(viewModel)
+                    NFTItemView(
+                        nft: nft,
+                        onDeleteTap: {
+                            nftToDelete = nft
+                            showDeleteConfirmation = true
+                        }
+                    )
                 }
             }
             .padding(.top, Constants.nftListTopPadding)
@@ -116,7 +122,7 @@ struct CartView: View {
                         .font(.system(size: Constants.nftCountFontSize, weight: .regular))
                         .padding(.bottom, 2)
                     
-                    Text(String(format: "%.2f ETH", viewModel.nfts.reduce(0) { $0 + $1.price }))
+                    Text(viewModel.formattedTotalPrice)
                         .font(.system(size: Constants.priceFontSize, weight: .bold))
                         .foregroundColor(.ypGreenUniversal)
                 }
@@ -137,6 +143,8 @@ struct CartView: View {
                             .cornerRadius(Constants.payButtonCornerRadius)
                     }
                 )
+                .disabled(viewModel.nfts.isEmpty)
+                .opacity(viewModel.nfts.isEmpty ? 0.6 : 1.0)
             }
             .padding(.horizontal, Constants.paymentSummaryHorizontalPadding)
         }
@@ -144,11 +152,18 @@ struct CartView: View {
     
     private var deleteConfirmationOverlay: some View {
         Group {
-            if showDeleteConfirmation {
+            if showDeleteConfirmation, let nft = nftToDelete {
                 DeleteNFTConfirmationView(
                     nftImage: Image("mockImageNFT"),
-                    onDelete: { showDeleteConfirmation = false },
-                    onCancel: { showDeleteConfirmation = false }
+                    onDelete: {
+                        viewModel.deleteNFT(nft.id)
+                        showDeleteConfirmation = false
+                        nftToDelete = nil
+                    },
+                    onCancel: {
+                        showDeleteConfirmation = false
+                        nftToDelete = nil
+                    }
                 )
             }
         }
@@ -156,18 +171,43 @@ struct CartView: View {
 }
 
 #Preview("With NFTs") {
-    let mockData = MockData()
-    let viewModel = CartViewModel(mockData: mockData)
+    let cartManager = CartManager()
+    let viewModel = CartViewModel(cartManager: cartManager)
+    
+    let nft1 = Nft(
+        id: "1",
+        name: "NFT 1",
+        createdAt: "2025-05-31",
+        images: [],
+        rating: 4,
+        description: "Test NFT 1",
+        price: 1.5,
+        author: "Author 1"
+    )
+    let nft2 = Nft(
+        id: "2",
+        name: "NFT 2",
+        createdAt: "2025-05-31",
+        images: [],
+        rating: 5,
+        description: "Test NFT 2",
+        price: 2.3,
+        author: "Author 2"
+    )
+    
+    cartManager.addToCart(nft1)
+    cartManager.addToCart(nft2)
     
     return CartView()
         .environmentObject(NavigationModel())
+        .environmentObject(viewModel)
 }
 
 #Preview("Empty Cart") {
-    let mockData = MockData()
-    mockData.nfts = []
-    let viewModel = CartViewModel(mockData: mockData)
+    let cartManager = CartManager()
+    let viewModel = CartViewModel(cartManager: cartManager)
     
     return CartView()
         .environmentObject(NavigationModel())
+        .environmentObject(viewModel)
 }

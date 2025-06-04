@@ -8,11 +8,8 @@
 import SwiftUI
 
 struct NFTItemView: View {
-    @EnvironmentObject var mockData: MockData
-    @EnvironmentObject var cartManager: CartManager
-    
     let nft: Nft
-    @Binding var showDeleteConfirmation: Bool
+    let onDeleteTap: () -> Void
     
     private var nftImage: String {
         let images = ["mockImageNFT", "mockImageNFT2", "mockImageNFT3"]
@@ -45,14 +42,13 @@ struct NFTItemView: View {
             
             Spacer()
             
-            Button {
-                showDeleteConfirmation = true
-            } label: {
+            Button(action: onDeleteTap) {
                 Image("yp.cart.delete")
                     .frame(width: 40, height: 40)
                     .foregroundColor(.black)
             }
         }
+        .padding(.vertical, 8)
     }
 }
 
@@ -82,6 +78,12 @@ struct RatingView: View {
         price: 1.78,
         author: "Автор"
     )
-    NFTItemView(nft: mockNFT, showDeleteConfirmation: .constant(false))
-        .environmentObject(MockData())
+    
+    NFTItemView(
+        nft: mockNFT,
+        onDeleteTap: {
+            print("Delete tapped")
+        }
+    )
+    .padding()
 }

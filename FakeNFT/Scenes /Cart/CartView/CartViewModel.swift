@@ -8,9 +8,11 @@
 import Foundation
 import Combine
 
+@MainActor
 final class CartViewModel: ObservableObject {
     
     // MARK: - Sort Options
+    
     enum SortOption: String, CaseIterable {
         case price = "По цене"
         case rating = "По рейтингу"
@@ -34,27 +36,38 @@ final class CartViewModel: ObservableObject {
     
     // MARK: - Dependencies
     
+    private let cartManager: CartManager
     private let mockData: MockData
     private var cancellables = Set<AnyCancellable>()
+    private var hasInitializedCart = false
+    
+    @Published private var sessionCartItems: [Nft] = [] // тестовый метод для отладки работы корзины
+    
+    // MARK: - Computed Properties
+    
+    var formattedTotalPrice: String {
+        let total = nfts.reduce(0) { $0 + $1.price }
+        return String(format: "%.2f ETH", total)
+    }
     
     // MARK: - Initialization
     
-    init(mockData: MockData = MockData()) {
+    init(cartManager: CartManager, mockData: MockData = MockData()) {
+        self.cartManager = cartManager
         self.mockData = mockData
         setupBindings()
-        loadCartItems()
+        loadInitialData()
     }
     
     // MARK: - Public Methods
     
     func loadCartItems() {
         isLoading = true
-        nfts = mockData.nfts
         isLoading = false
     }
     
     func deleteNFT(_ id: String) {
-        mockData.nfts.removeAll { $0.id == id }
+        sessionCartItems.removeAll { $0.id == id }
     }
     
     func getSortedNFTs() -> [Nft] {
@@ -62,14 +75,32 @@ final class CartViewModel: ObservableObject {
         return SortingManager.shared.sort(products: nfts, by: option)
     }
     
+    func loadMockData() { // тестовый метод для отладки работы корзины
+        for nft in mockData.nfts {
+            sessionCartItems.append(nft)
+        }
+    }
+    
     // MARK: - Private Methods
     
     private func setupBindings() {
-        mockData.objectWillChange
+        $sessionCartItems
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.nfts = self?.mockData.nfts ?? []
-            }
+            .assign(to: \.nfts, on: self)
             .store(in: &cancellables)
+    }
+    
+    private func loadInitialData() { // тестовый метод для отладки работы корзины
+        guard !hasInitializedCart else { return }
+        
+        hasInitializedCart = true
+        
+        Task { @MainActor in
+            isLoading = true
+            
+            sessionCartItems = mockData.nfts
+            
+            isLoading = false
+        }
     }
 }
