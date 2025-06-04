@@ -38,10 +38,10 @@ struct StatisticsView: View {
         }
         .confirmationDialog("Сортировка", isPresented: $isShowingSortOptions, titleVisibility: .visible) {
             Button("По имени") {
-                viewModel.updateSortOption(.name(ascending: true))
+                viewModel.updateSortOption(.name)
             }
             Button("По рейтингу") {
-                viewModel.updateSortOption(.rating(ascending: false))
+                viewModel.updateSortOption(.rating)
             }
             Button("Закрыть", role: .cancel) {}
         }

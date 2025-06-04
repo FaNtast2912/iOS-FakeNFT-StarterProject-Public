@@ -8,19 +8,31 @@ import Foundation
 
 final class StatisticsViewModel: ObservableObject {
     @Published var users: [User] = []
-    @Published var sortOption: UsertSortOption = .initial
+    @Published var sortOption: UsertSortOption = .initial {
+        didSet {
+            UserDefaults.standard.set(sortOption.rawValue, forKey: "userSortOption")
+        }
+    }
     
     var sortedUsers: [User] {
         SortingManagerUser.shared.sort(users: users, by: sortOption)
     }
     
     init() {
+        loadSortOption()
         loadMockUsers()
     }
     
     func updateSortOption(_ option: UsertSortOption) {
         sortOption = option
     }
+    
+    private func loadSortOption() {
+            if let raw = UserDefaults.standard.string(forKey: "userSortOption"),
+               let option = UsertSortOption(rawValue: raw) {
+                sortOption = option
+            }
+        }
     
     private func loadMockUsers() {
         let mock: [User] = [

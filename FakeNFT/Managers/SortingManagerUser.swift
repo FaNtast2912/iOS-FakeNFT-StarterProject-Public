@@ -6,11 +6,12 @@
 //
 import Foundation
 
-enum UsertSortOption {
-    case name(ascending: Bool)
-    case rating(ascending: Bool)
+enum UsertSortOption: String {
+    case name
+    case rating
     case initial
 }
+
 
 final class SortingManagerUser {
     static let shared = SortingManagerUser()
@@ -19,19 +20,21 @@ final class SortingManagerUser {
     func sort(users: [User], by option: UsertSortOption) -> [User] {
         switch option {
             
-        case .name(let ascending):
+        case .name:
             return users.sorted {
                 let result = $0.name.localizedCaseInsensitiveCompare($1.name)
-                return ascending ? (result == .orderedAscending) : (result == .orderedDescending)
+                return result == .orderedAscending
             }
             
-        case .rating(let ascending):
+        case .rating:
             return users.sorted {
-                ascending ? ($0.rating < $1.rating) : ($0.rating > $1.rating)
+                $0.rating > $1.rating
             }
             
         case .initial:
-            return users.sorted { $0.nfts.count > $1.nfts.count }
+            return users.sorted {
+                $0.nfts.count > $1.nfts.count
+            }
         }
     }
 }
