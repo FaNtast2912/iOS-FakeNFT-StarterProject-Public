@@ -91,7 +91,7 @@ final class NavigationModel: ObservableObject {
 
 extension NavigationModel {
     @ViewBuilder
-    func destination(for screen: Screens) -> some View {
+    func destination(for screen: Screens, with services: ServicesAssembly) -> some View {
         switch screen {
             
             // Catalog
@@ -102,9 +102,9 @@ extension NavigationModel {
             
             // Nft(profile)
         case .myNFTView:
-            ProfileView()
+            ProfileView(servicesAssembly: services)
         case .myFavoriteNFTView:
-            MyFavoriteNFTView()
+            MyFavoriteNFTView(service: services)
             
             // Statistics
         case .statisticsView:

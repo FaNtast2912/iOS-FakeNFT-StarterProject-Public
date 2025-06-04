@@ -244,12 +244,14 @@ struct DefaultNetworkClient: NetworkClient {
         urlRequest.addValue(RequestConstants.token, forHTTPHeaderField: "X-Practicum-Mobile-Token")
         
         if let dto = request.dto {
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
             switch request.httpMethod {
             case .get, .delete:
                 try appendQueryParameters(to: &urlRequest, from: dto, baseURL: endpoint)
                 
             case .post, .put:
-                try appendJSONBody(to: &urlRequest, from: dto)
+                try appendQueryParameters(to: &urlRequest, from: dto, baseURL: endpoint)
+                urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
             }
         }
         
@@ -278,6 +280,7 @@ struct DefaultNetworkClient: NetworkClient {
             let jsonData = try JSONSerialization.data(withJSONObject: dtoDictionary, options: [])
             urlRequest.httpBody = jsonData
             urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         } catch {
             throw NetworkClientError.parsingError
         }

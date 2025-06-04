@@ -9,17 +9,26 @@ import Foundation
 @MainActor
 final class ProfileViewModel: ObservableObject {
     @Published var profile: Profile
+    @Published var loadingState: LoadingState = .loaded
+    @Published var avatarPlaceholderName = "yp.emptyUserPick"
+    @Published var alertErrorPresented: Bool = false
+    @Published var nftsCount: Int = 0
+    @Published var nftLikesCount: Int = 0
+    private let service: ServicesAssembly
     
-    init() {
-        profile = Profile(
-            name: "Joaquin Phoenix",
-            avatar: "https://avatars.akamai.steamstatic.com/259ff9332254e10c5113cceeb7b5487c1cbd1d3d_full.jpg",
-            description: "Дизайнер из Казани, люблю цифровое искусство и бейглы. В моей коллекции уже 100+ NFT, и еще больше — на моём сайте. Открыт к коллаборациям.",
-            website: "Joaquin Phoenix.com",
-            nfts: ["1", "2", "3", "4"],
-            likes: ["1", "2", "3"],
-            id: "1234fdgsd"
-        )
+    enum LoadingState {
+        case loading
+        case loaded
+        case error
+    }
+    
+    init(service: ServicesAssembly) {
+        self.service = service
+        profile = Profile(name: "Имя", avatar: "", description: "Описание", website: "Сайт", nfts: [], likes: [], id: "")
+        
+        Task {
+            await fetchProfile()
+        }
     }
     
     func updateMockProfile(name: String, avatar: String, description: String, website: String) {
@@ -35,7 +44,22 @@ final class ProfileViewModel: ObservableObject {
         profile = newProfile
     }
     
-    func fetchProfile() async throws {
-        // реализовать реальный запрос
+    func fetchProfile() async {
+        loadingState = .loading
+        do {
+            profile = try await service.profileService.fetchProfile()
+            nftsCount = profile.nfts.count
+            nftLikesCount = profile.likes.count
+            loadingState = .loaded
+        } catch {
+            loadingState = .error
+            alertErrorPresented = loadingState == .error
+            print(String(describing: error.localizedDescription))
+        }
     }
+    
+    func getService() -> ServicesAssembly {
+        return service
+    }
+    
 }
