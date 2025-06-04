@@ -32,8 +32,6 @@ struct ProfileView: View {
                         if let image = phase.image {
                             image
                                 .profileImageViewStyle()
-                        } else if phase.error != nil {
-                            profileImagePlaceholder
                         } else {
                             profileImagePlaceholder
                         }
@@ -78,10 +76,8 @@ struct ProfileView: View {
             .sheet(isPresented: $editProfileIsPresented) {
                 ProfileEditView(profileVM: profileVM, service: profileVM.getService())
             }
-            .onAppear {
-                Task {
+            .task {
                     await profileVM.fetchProfile()
-                }
             }
             .alert( isPresented: $profileVM.alertErrorPresented) {
                 Alert(
@@ -95,9 +91,8 @@ struct ProfileView: View {
                 )
             }
             
-            if profileVM.loadingState == .loading {
-                ProgressHUD(isLoading: profileVM.loadingState == .loading)
-            }
+            ProgressHUD(isLoading: profileVM.loadingState == .loading)
+                .opacity(profileVM.loadingState == .loading ? 1 : 0)
         }
     }
     

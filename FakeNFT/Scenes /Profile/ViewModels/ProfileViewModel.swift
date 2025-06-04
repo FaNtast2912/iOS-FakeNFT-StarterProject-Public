@@ -53,7 +53,7 @@ final class ProfileViewModel: ObservableObject {
             loadingState = .loaded
         } catch {
             loadingState = .error
-            alertErrorPresented = loadingState == .error ? true : false
+            alertErrorPresented = loadingState == .error
             print(String(describing: error.localizedDescription))
         }
     }

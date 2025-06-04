@@ -115,9 +115,8 @@ struct ProfileEditView: View {
                 )
             }
             
-            if profileEditVM.loadingState == .loading {
-                ProgressHUD(isLoading: profileEditVM.loadingState == .loading)
-            }
+            ProgressHUD(isLoading: profileEditVM.loadingState == .loading)
+                .opacity(profileEditVM.loadingState == .loading ? 1 : 0)
         }
         
     }

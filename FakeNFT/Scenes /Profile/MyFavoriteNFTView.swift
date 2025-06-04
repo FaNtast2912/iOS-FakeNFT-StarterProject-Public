@@ -45,16 +45,8 @@ struct MyFavoriteNFTView: View {
                 }
                 
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        navigationModel.navigateBack()
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image("yp.chevron.backward")
-                        }
-                    }
-                }
+            .navigationBarStyle {
+                navigationModel.navigateBack()
             }
             .navigationBarBackButtonHidden(true)
             .navigationBarTitleDisplayMode(.inline)
@@ -64,9 +56,8 @@ struct MyFavoriteNFTView: View {
                 await myFavoriteNFTVM.loadLikesNft()
             }
             
-            if myFavoriteNFTVM.loadingState == .loading {
-                ProgressHUD(isLoading: myFavoriteNFTVM.loadingState == .loading)
-            }
+            ProgressHUD(isLoading: myFavoriteNFTVM.loadingState == .loading)
+                .opacity(myFavoriteNFTVM.loadingState == .loading ? 1 : 0)
         }
     }
 }

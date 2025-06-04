@@ -49,6 +49,7 @@ final class EditingProfileViewModel: ObservableObject {
             loadingState = .loaded
         } catch {
             loadingState = .error
+            alertErrorPresented = loadingState == .error
             print(String(describing: error.localizedDescription))
         }
     }
