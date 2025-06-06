@@ -14,14 +14,46 @@ struct AppTabView: View {
     
     init(servicesAssembly: ServicesAssembly) {
         self.servicesAssembly = servicesAssembly
-        
-        // настраиваем иконки таб бара
+        configureTabBarAppearance()
+    }
+    
+    private func configureTabBarAppearance() {
         let tabBarAppearance = UITabBarAppearance()
         tabBarAppearance.configureWithOpaqueBackground()
-        tabBarAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor(Color.ypBlack)]
-        tabBarAppearance.stackedLayoutAppearance.normal.iconColor = UIColor.black
+        
+        // Настройка фона
+        tabBarAppearance.backgroundColor = UIColor(.ypWhite)
+        
+        // Настройка обычного состояния (не выбран)
+        tabBarAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [
+            .foregroundColor: UIColor(Color.ypBlack)
+        ]
+        tabBarAppearance.stackedLayoutAppearance.normal.iconColor = UIColor(Color.ypBlack)
+        
+        // Настройка выбранного состояния
+        tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [
+            .foregroundColor: UIColor(Color.ypBlueUniversal)
+        ]
         tabBarAppearance.stackedLayoutAppearance.selected.iconColor = UIColor(Color.ypBlueUniversal)
+        
+        // Настройка компактного режима (для маленьких экранов)
+        tabBarAppearance.compactInlineLayoutAppearance.normal.titleTextAttributes = [
+            .foregroundColor: UIColor(Color.ypBlack)
+        ]
+        tabBarAppearance.compactInlineLayoutAppearance.normal.iconColor = UIColor(Color.ypBlack)
+        
+        tabBarAppearance.compactInlineLayoutAppearance.selected.titleTextAttributes = [
+            .foregroundColor: UIColor(Color.ypBlueUniversal)
+        ]
+        tabBarAppearance.compactInlineLayoutAppearance.selected.iconColor = UIColor(Color.ypBlueUniversal)
+        
+        // Применение настроек
         UITabBar.appearance().standardAppearance = tabBarAppearance
+        UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+        
+        // Дополнительные настройки
+        UITabBar.appearance().tintColor = UIColor(Color.ypBlueUniversal)
+        UITabBar.appearance().unselectedItemTintColor = UIColor(Color.ypBlack)
     }
     
     var body: some View {

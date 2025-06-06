@@ -57,12 +57,12 @@ struct NFTItemView: View {
                         // Название
                         Text(nft.name)
                             .font(.system(size: 17, weight: .bold))
-                            .foregroundColor(.ypBlackUniversal)
+                            .foregroundColor(.ypBlack)
                             .lineLimit(1)
                             .padding(.top, 2)
                         Text("\(nft.price, specifier: "%.2f") ETH")
                             .font(.system(size: 10, weight: .medium))
-                            .foregroundColor(.ypBlackUniversal)
+                            .foregroundColor(.ypBlack)
                         
                     }
                     Spacer()
@@ -75,7 +75,7 @@ struct NFTItemView: View {
                         }
                     } label: {
                         Image(cartManager.isInCart(nft) ? "yp.cart.delete" : "yp.cart")
-                            .foregroundColor(.ypBlackUniversal)
+                            .tint(.ypBlack)
                             .font(.system(size: 12))
                     }
                 }

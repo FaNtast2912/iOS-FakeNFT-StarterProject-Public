@@ -20,42 +20,47 @@ struct CollectionDetailView: View {
     }
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                // Обложка коллекции
-                coverImage
+        ZStack {
+            Color.ypWhite
+                .ignoresSafeArea()
             
-                // Информация о коллекции
-                collectionInfo
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Обложка коллекции
+                    coverImage
+                    
+                    // Информация о коллекции
+                    collectionInfo
+                    
+                    // Список NFT
+                    nftContent
+                }
+            }
+            .ignoresSafeArea()
+            .navigationBarBackButtonHidden()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    backButton
+                }
+            }
+            .environmentObject(servicesAssembly.likesManager)
+            .task {
+                if case .idle = viewModel.loadingState {
+                    // Загружаем лайки и NFT параллельно
+                    async let loadNFTs: Void = viewModel.loadNFTs()
+                    async let loadLikes: Void = servicesAssembly.likesManager.loadLikes()
+                    
+                    await loadNFTs
+                    await loadLikes
+                }
+            }
+            .refreshable {
+                async let refreshNFTs: Void = viewModel.refresh()
+                async let refreshLikes: Void = servicesAssembly.likesManager.loadLikes()
                 
-                // Список NFT
-                nftContent
+                await refreshNFTs
+                await refreshLikes
             }
-        }
-        .ignoresSafeArea()
-        .navigationBarBackButtonHidden()
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                backButton
-            }
-        }
-        .environmentObject(servicesAssembly.likesManager)
-        .task {
-            if case .idle = viewModel.loadingState {
-                // Загружаем лайки и NFT параллельно
-                async let loadNFTs: Void = viewModel.loadNFTs()
-                async let loadLikes: Void = servicesAssembly.likesManager.loadLikes()
-                
-                await loadNFTs
-                await loadLikes
-            }
-        }
-        .refreshable {
-            async let refreshNFTs: Void = viewModel.refresh()
-            async let refreshLikes: Void = servicesAssembly.likesManager.loadLikes()
-            
-            await refreshNFTs
-            await refreshLikes
         }
     }
     
@@ -66,7 +71,7 @@ struct CollectionDetailView: View {
             navigationModel.navigateBack()
         } label: {
             Image("yp.chevron.backward")
-                .foregroundColor(.ypBlack)
+                .tint(.ypWhiteUniversal)
         }
     }
     
@@ -96,7 +101,7 @@ struct CollectionDetailView: View {
             // Название коллекции
             Text(collection.name)
                 .font(.system(size: 22, weight: .bold))
-                .foregroundColor(.ypBlackUniversal)
+                .foregroundColor(.ypBlack)
             
             // Автор коллекции
             HStack(spacing: 4.0) {
@@ -111,11 +116,11 @@ struct CollectionDetailView: View {
                         .foregroundColor(.ypBlueUniversal)
                 }
             }
-
+            
             // Описание
             Text(collection.description)
                 .font(.system(size: 13, weight: .regular))
-                .foregroundColor(.ypBlackUniversal)
+                .foregroundColor(.ypBlack)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 4)
         }
@@ -146,15 +151,19 @@ struct CollectionDetailView: View {
     // MARK: - Loading View
     
     private var loadingView: some View {
-        VStack {
-            ProgressHUD(isLoading: true)
+        ZStack {
+            Color.ypWhite
             
-            Text("Загрузка NFT...")
-                .font(.system(size: 15))
-                .foregroundColor(.ypGreyUniversal)
-                .padding(.top, 16)
+            VStack {
+                ProgressHUD(isLoading: true)
+                
+                Text("Загрузка NFT...")
+                    .font(.system(size: 15))
+                    .foregroundColor(.ypGreyUniversal)
+                    .padding(.top, 16)
+            }
+            .frame(height: 120)
         }
-        .frame(height: 120)
     }
     
     // MARK: - Error View
@@ -167,7 +176,7 @@ struct CollectionDetailView: View {
             
             Text("Ошибка загрузки NFT")
                 .font(.headline)
-                .foregroundColor(.ypBlackUniversal)
+                .foregroundColor(.ypBlack)
             
             Text(message)
                 .font(.subheadline)
