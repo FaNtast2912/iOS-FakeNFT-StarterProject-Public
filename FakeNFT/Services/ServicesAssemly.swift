@@ -1,7 +1,12 @@
-final class ServicesAssembly {
+import Foundation
+
+final class ServicesAssembly: ObservableObject {
 
     private let networkClient: NetworkClient
     private let nftStorage: NftStorage
+    
+    // Lazy-инициализация менеджеров
+    private lazy var _likesManager = LikesManager(userLikesService: userLikesService)
 
     init(
         networkClient: NetworkClient,
@@ -16,5 +21,17 @@ final class ServicesAssembly {
             networkClient: networkClient,
             storage: nftStorage
         )
+    }
+    
+    var profileService: ProfileService {
+        ProfileServiceImpl(networkClient: networkClient)
+    }
+    
+    var userLikesService: UserLikesService {
+        UserLikesServiceImpl(networkClient: networkClient)
+    }
+    
+    var likesManager: LikesManager {
+        return _likesManager
     }
 }

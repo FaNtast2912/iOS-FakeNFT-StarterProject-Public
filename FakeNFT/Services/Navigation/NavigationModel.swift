@@ -37,7 +37,7 @@ final class NavigationModel: ObservableObject {
     @Published var path = [Screens]()
     @Published var selectedTab: Int = 0              // Текущий таб в TabView
     @Published var presentedScreen: Screens?         // Флаг для отображения модальных экранов
-    @Published var selectedCollection: Collection?   // Выбранная коллекция для детального просмотра
+    @Published var selectedCollection: NFTCollections?   // Выбранная коллекция для детального просмотра
     
     // MARK: - Навигационные методы
     
@@ -47,7 +47,7 @@ final class NavigationModel: ObservableObject {
     }
     
     /// Переход к экрану деталей коллекции
-    func navigateToCollectionDetail(collection: Collection) {
+    func navigateToCollectionDetail(collection: NFTCollections) {
         selectedCollection = collection
         navigate(to: .collectionDetailView)
     }
@@ -98,7 +98,7 @@ final class NavigationModel: ObservableObject {
 
 extension NavigationModel {
     @ViewBuilder
-    func destination(for screen: Screens) -> some View {
+    func destination(for screen: Screens, with services: ServicesAssembly) -> some View {
         switch screen {
             
             // Catalog
@@ -114,7 +114,7 @@ extension NavigationModel {
             
             // Nft(profile)
         case .myNFTView:
-            ProfileView()
+            ProfileView(servicesAssembly: services)
         case .myFavoriteNFTView:
             MyFavoriteNFTView()
             

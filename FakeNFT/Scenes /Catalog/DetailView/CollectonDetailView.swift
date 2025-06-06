@@ -2,18 +2,19 @@
 //  CollectonDetailView.swift
 //  FakeNFT
 //
-//  Created by Kaider on 28.05.2025.
+//  Created by Maksim Zakharov on 28.05.2025.
 //
 
 import SwiftUI
 
 /// Экран деталей коллекции NFT
 struct CollectionDetailView: View {
-    let collection: Collection
+    let collection: NFTCollections
     @StateObject private var viewModel: CollectionDetailViewModel
     @EnvironmentObject private var navigationModel: NavigationModel
+    @EnvironmentObject private var servicesAssembly: ServicesAssembly
     
-    init(collection: Collection) {
+    init(collection: NFTCollections) {
         self.collection = collection
         self._viewModel = StateObject(wrappedValue: CollectionDetailViewModel(collection: collection))
     }
@@ -38,13 +39,23 @@ struct CollectionDetailView: View {
                 backButton
             }
         }
+        .environmentObject(servicesAssembly.likesManager)
         .task {
             if case .idle = viewModel.loadingState {
-                await viewModel.loadNFTs()
+                // Загружаем лайки и NFT параллельно
+                async let loadNFTs: Void = viewModel.loadNFTs()
+                async let loadLikes: Void = servicesAssembly.likesManager.loadLikes()
+                
+                await loadNFTs
+                await loadLikes
             }
         }
         .refreshable {
-            await viewModel.refresh()
+            async let refreshNFTs: Void = viewModel.refresh()
+            async let refreshLikes: Void = servicesAssembly.likesManager.loadLikes()
+            
+            await refreshNFTs
+            await refreshLikes
         }
     }
     
@@ -75,8 +86,7 @@ struct CollectionDetailView: View {
         }
         .frame(height: 310)
         .clipped()
-        .cornerRadius(12, corners: .bottomLeft)
-        .cornerRadius(12, corners: .bottomRight)
+        .cornerRadius(12, corners: [.bottomLeft, .bottomRight])
     }
     
     // MARK: - Collection Info
@@ -92,6 +102,7 @@ struct CollectionDetailView: View {
             HStack(spacing: 4.0) {
                 Text("Автор Коллекции:")
                     .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(.ypBlack)
                 Button {
                     navigationModel.IOScource()
                 } label: {
@@ -181,7 +192,7 @@ struct CollectionDetailView: View {
 
 // MARK: - Preview
 #Preview {
-    let sampleCollection = Collection(
+    let sampleCollection = NFTCollections(
         id: "sample-id",
         name: "Peach",
         cover: URL(string: "https://code.s3.yandex.net/Mobile/iOS/NFT/Обложки_коллекций/Brown.png")!,
@@ -191,8 +202,14 @@ struct CollectionDetailView: View {
         createdAt: "2023-11-21T15:21:36.683Z[GMT]"
     )
     
+    // Создаем мок-сервисы для превью
+    let mockNetworkClient = DefaultNetworkClient()
+    let mockNftStorage = NftStorageImpl()
+    let mockServicesAssembly = ServicesAssembly(networkClient: mockNetworkClient, nftStorage: mockNftStorage)
+    
     NavigationView {
         CollectionDetailView(collection: sampleCollection)
             .environmentObject(NavigationModel())
+            .environmentObject(mockServicesAssembly)
     }
 }

@@ -18,6 +18,9 @@ struct ProgressHUD: View {
     var body: some View {
         if isLoading {
             ZStack {
+                Color.ypLightGrey.opacity(0.1)
+                    .edgesIgnoringSafeArea(.all)
+                
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle())
                     .scaleEffect(1.5)
