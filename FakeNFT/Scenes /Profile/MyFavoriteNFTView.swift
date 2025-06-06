@@ -42,6 +42,12 @@ struct MyFavoriteNFTView: View {
                         }
                     }
                     .navigationTitle("Избранные NFT")
+                    .scrollIndicators(.hidden)
+                    .refreshable {
+                        Task {
+                            await myFavoriteNFTVM.fetchLikesNft(.loaded)
+                        }
+                    }
                 }
                 
             }
@@ -53,7 +59,7 @@ struct MyFavoriteNFTView: View {
             .padding(.top, 20)
             .padding(.horizontal, 16)
             .task {
-                await myFavoriteNFTVM.loadLikesNft()
+                await myFavoriteNFTVM.fetchLikesNft()
             }
             
             ProgressHUD(isLoading: myFavoriteNFTVM.loadingState == .loading)

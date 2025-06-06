@@ -118,8 +118,8 @@ class MyNFTViewModel: ObservableObject {
         }
     }
     
-    func fetchNfts() async {
-        loadingState = .loading
+    func fetchNfts(_ loading: LoadingState = .loading) async {
+        loadingState = loading
         do {
             nfts = try await service.profileService.fetchProfile().nfts.asyncMap { nftId in
                 try await service.nftService.loadNft(id: nftId)
@@ -130,6 +130,19 @@ class MyNFTViewModel: ObservableObject {
             loadingState = .loaded
         } catch {
             loadingState = .error
+            print(String(describing: error.localizedDescription))
+        }
+    }
+    
+    func refresh() async {
+        do {
+            nfts = try await service.profileService.fetchProfile().nfts.asyncMap { nftId in
+                try await service.nftService.loadNft(id: nftId)
+            }
+            likesNftId = try await service.userLikesService.fetchLikes().likes
+            let filter = SortKeyConstants(rawValue: currentFilter) ?? .notFilter
+            setFilter(by: filter)
+        } catch {
             print(String(describing: error.localizedDescription))
         }
     }

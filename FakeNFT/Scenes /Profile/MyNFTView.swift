@@ -34,10 +34,16 @@ struct MyNFTView: View {
                                         Task {
                                            await myNFTVM.setNftLike(id: nft.id)
                                         }
-                                    }
+                                }
                             }
                         }
                     }
+                    .refreshable {
+                        Task {
+                            await myNFTVM.fetchNfts(.loaded)
+                        }
+                    }
+                    .scrollIndicators(.hidden)
                 }
             }
             .padding(.horizontal, 16)

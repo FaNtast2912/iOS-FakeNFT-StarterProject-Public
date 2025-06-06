@@ -63,7 +63,7 @@ final class MyFavoriteNFTViewModel: ObservableObject {
             )]
     }
     
-    func loadLikesNft() async {
+    func fetchLikesNft(_ loading: LoadingState = .loading) async {
         loadingState = .loading
         do {
             likesNftId = try await service.userLikesService.fetchLikes().likes
