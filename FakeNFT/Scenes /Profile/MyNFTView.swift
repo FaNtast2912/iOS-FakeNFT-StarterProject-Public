@@ -11,8 +11,8 @@ struct MyNFTView: View {
     @StateObject private var myNFTVM: MyNFTViewModel
     @EnvironmentObject private var navigationModel: NavigationModel
     
-    init() {
-        _myNFTVM = StateObject(wrappedValue: MyNFTViewModel())
+    init(service: ServicesAssembly) {
+        _myNFTVM = StateObject(wrappedValue: MyNFTViewModel(service: service))
     }
     
     var body: some View {
@@ -23,7 +23,7 @@ struct MyNFTView: View {
                 } else {
                     ScrollView {
                         LazyVStack(alignment: .leading) {
-                            ForEach(myNFTVM.nfts, id: \.self) { nft in
+                            ForEach(myNFTVM.sortedNfts, id: \.self) { nft in
                                 MyNFTCardView(
                                     imageUrl: nft.images.first?.absoluteString ?? "",
                                     name: nft.name,
@@ -31,7 +31,9 @@ struct MyNFTView: View {
                                     price: String(nft.price) + " ETH",
                                     isFavorite: myNFTVM.isLiked(id: nft.id),
                                     author: nft.author) {
-                                        myNFTVM.setNftLike(id: nft.id)
+                                        Task {
+                                           await myNFTVM.setNftLike(id: nft.id)
+                                        }
                                     }
                             }
                         }
@@ -62,18 +64,21 @@ struct MyNFTView: View {
             }
             .navigationTitle("Мои NFT")
             .confirmationDialog("Сортировка", isPresented: $myNFTVM.showConfirmationDialog, titleVisibility: .visible) {
-                Button("По цене") {  }
-                Button("По рейтингу") {  }
-                Button("По названию") {  }
+                Button("По цене") { myNFTVM.setFilter(by: .price) }
+                Button("По рейтингу") { myNFTVM.setFilter(by: .rating) }
+                Button("По названию") { myNFTVM.setFilter(by: .name) }
                 Button("Закрыть", role: .cancel) { }
             }
+            .task {
+                await myNFTVM.fetchNfts()
+            }
+            
+            ProgressHUD(isLoading: myNFTVM.loadingState == .loading)
+                .opacity(myNFTVM.loadingState == .loading ? 1 : 0)
         }
-        
-        ProgressHUD(isLoading: myNFTVM.loadingState == .loading)
-            .opacity(myNFTVM.loadingState == .loading ? 1 : 0)
     }
 }
 
 #Preview {
-    MyNFTView()
+    MyNFTView(service: ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl()))
 }
