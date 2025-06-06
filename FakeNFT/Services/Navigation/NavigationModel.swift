@@ -37,7 +37,7 @@ final class NavigationModel: ObservableObject {
     @Published var path = [Screens]()
     @Published var selectedTab: Int = 0              // Текущий таб в TabView
     @Published var presentedScreen: Screens?         // Флаг для отображения модальных экранов
-    @Published var selectedCollection: Collection?   // Выбранная коллекция для детального просмотра
+    @Published var selectedCollection: NFTCollection?   // Выбранная коллекция для детального просмотра
     
     // MARK: - Навигационные методы
     
@@ -47,7 +47,7 @@ final class NavigationModel: ObservableObject {
     }
     
     /// Переход к экрану деталей коллекции
-    func navigateToCollectionDetail(collection: Collection) {
+    func navigateToCollectionDetail(collection: NFTCollection) {
         selectedCollection = collection
         navigate(to: .collectionDetailView)
     }
