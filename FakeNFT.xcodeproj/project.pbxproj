@@ -61,6 +61,7 @@
 		D0BA37FA2DE90AD300D88DD7 /* EmptyNFTPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0BA37F92DE90AD300D88DD7 /* EmptyNFTPlaceholderView.swift */; };
 		D0BA3A132DECF04200D88DD7 /* ProfileRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0BA3A122DECF04200D88DD7 /* ProfileRequest.swift */; };
 		D0BA3A152DECF06300D88DD7 /* UpdateProfileRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0BA3A142DECF06300D88DD7 /* UpdateProfileRequest.swift */; };
+		D0E600082DF36E31004EA1E8 /* String+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E600072DF36E31004EA1E8 /* String+Extension.swift */; };
 		D0E6FDC32DEE16B6004EA1E8 /* ProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FDC22DEE16B6004EA1E8 /* ProfileService.swift */; };
 		D0E6FF362DEE4642004EA1E8 /* UserLikesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FF352DEE4642004EA1E8 /* UserLikesService.swift */; };
 		D0E6FF382DEE46BD004EA1E8 /* UserLikes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E6FF372DEE46BD004EA1E8 /* UserLikes.swift */; };
@@ -146,6 +147,7 @@
 		D0BA37F92DE90AD300D88DD7 /* EmptyNFTPlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyNFTPlaceholderView.swift; sourceTree = "<group>"; };
 		D0BA3A122DECF04200D88DD7 /* ProfileRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRequest.swift; sourceTree = "<group>"; };
 		D0BA3A142DECF06300D88DD7 /* UpdateProfileRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateProfileRequest.swift; sourceTree = "<group>"; };
+		D0E600072DF36E31004EA1E8 /* String+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extension.swift"; sourceTree = "<group>"; };
 		D0E6FDC22DEE16B6004EA1E8 /* ProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileService.swift; sourceTree = "<group>"; };
 		D0E6FF352DEE4642004EA1E8 /* UserLikesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLikesService.swift; sourceTree = "<group>"; };
 		D0E6FF372DEE46BD004EA1E8 /* UserLikes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserLikes.swift; sourceTree = "<group>"; };
@@ -475,6 +477,7 @@
 				D0BA37E52DE8F4D100D88DD7 /* ProfileImageSettingsViewModifier.swift */,
 				D0BA37E22DE8F33900D88DD7 /* ProfileListRowView.swift */,
 				D0BA37E72DE8F53B00D88DD7 /* TextAreaEditViewModifier.swift */,
+				D0E600072DF36E31004EA1E8 /* String+Extension.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -685,6 +688,7 @@
 				D0BA37DF2DE8F29300D88DD7 /* ProfileEditView.swift in Sources */,
 				D0BA37BE2DE6633500D88DD7 /* UserLikesRequest.swift in Sources */,
 				C942F53A2DE7AFD700966062 /* PaymentMethodView.swift in Sources */,
+				D0E600082DF36E31004EA1E8 /* String+Extension.swift in Sources */,
 				D0BA3A132DECF04200D88DD7 /* ProfileRequest.swift in Sources */,
 				0CF2C2DD2A783CE600FDC837 /* ErrorView.swift in Sources */,
 				0CFCB7402A78002A0009A829 /* ExamplePutService.swift in Sources */,

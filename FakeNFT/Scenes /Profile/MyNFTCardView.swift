@@ -46,10 +46,11 @@ struct MyNFTCardView: View {
                                 .padding(.trailing, 2)
                         }
                     }
-                    Text("от \(author)")
+                    Text("от \(author.correctAuthorName(with: "https://", ending: ".fakenfts.org/"))")
                         .font(.system(size: 13, weight: .regular))
-                        .lineLimit(2)
+                        .lineLimit(3)
                 }
+                .frame(width: 78)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Цена")
@@ -57,6 +58,7 @@ struct MyNFTCardView: View {
                     Text(price)
                         .font(.system(size: 17, weight: .bold))
                 }
+                
             }
         }
         .padding(.vertical, 16)
