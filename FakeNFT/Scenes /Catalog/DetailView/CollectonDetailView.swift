@@ -102,6 +102,7 @@ struct CollectionDetailView: View {
             HStack(spacing: 4.0) {
                 Text("Автор Коллекции:")
                     .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(.ypBlack)
                 Button {
                     navigationModel.IOScource()
                 } label: {
@@ -203,7 +204,7 @@ struct CollectionDetailView: View {
     
     // Создаем мок-сервисы для превью
     let mockNetworkClient = DefaultNetworkClient()
-    let mockNftStorage = NftStorageImpl() // Предполагаю, что есть такой класс
+    let mockNftStorage = NftStorageImpl()
     let mockServicesAssembly = ServicesAssembly(networkClient: mockNetworkClient, nftStorage: mockNftStorage)
     
     NavigationView {
