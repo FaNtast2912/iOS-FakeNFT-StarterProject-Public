@@ -2,7 +2,7 @@
 //  CollectonDetailView.swift
 //  FakeNFT
 //
-//  Created by Kaider on 28.05.2025.
+//  Created by Maksim Zakharov on 28.05.2025.
 //
 
 import SwiftUI
@@ -12,6 +12,7 @@ struct CollectionDetailView: View {
     let collection: Collection
     @StateObject private var viewModel: CollectionDetailViewModel
     @EnvironmentObject private var navigationModel: NavigationModel
+    @EnvironmentObject private var servicesAssembly: ServicesAssembly
     
     init(collection: Collection) {
         self.collection = collection
@@ -38,13 +39,23 @@ struct CollectionDetailView: View {
                 backButton
             }
         }
+        .environmentObject(servicesAssembly.likesManager)
         .task {
             if case .idle = viewModel.loadingState {
-                await viewModel.loadNFTs()
+                // Загружаем лайки и NFT параллельно
+                async let loadNFTs: Void = viewModel.loadNFTs()
+                async let loadLikes: Void = servicesAssembly.likesManager.loadLikes()
+                
+                await loadNFTs
+                await loadLikes
             }
         }
         .refreshable {
-            await viewModel.refresh()
+            async let refreshNFTs: Void = viewModel.refresh()
+            async let refreshLikes: Void = servicesAssembly.likesManager.loadLikes()
+            
+            await refreshNFTs
+            await refreshLikes
         }
     }
     
@@ -191,8 +202,14 @@ struct CollectionDetailView: View {
         createdAt: "2023-11-21T15:21:36.683Z[GMT]"
     )
     
+    // Создаем мок-сервисы для превью
+    let mockNetworkClient = DefaultNetworkClient()
+    let mockNftStorage = NftStorageImpl() // Предполагаю, что есть такой класс
+    let mockServicesAssembly = ServicesAssembly(networkClient: mockNetworkClient, nftStorage: mockNftStorage)
+    
     NavigationView {
         CollectionDetailView(collection: sampleCollection)
             .environmentObject(NavigationModel())
+            .environmentObject(mockServicesAssembly)
     }
 }

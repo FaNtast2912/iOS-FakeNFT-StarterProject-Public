@@ -10,13 +10,10 @@ import SwiftUI
 struct AppTabView: View {
     @StateObject private var navigationModel = NavigationModel()
     @StateObject private var cartManager = CartManager()
+    private var servicesAssembly: ServicesAssembly
     
-    init() {
-        // по идее надо перенести куда-то во вью модель или оставить здесь
-        let servicesAssembly = ServicesAssembly(
-            networkClient: DefaultNetworkClient(),
-            nftStorage: NftStorageImpl()
-        )
+    init(servicesAssembly: ServicesAssembly) {
+        self.servicesAssembly = servicesAssembly
         
         // настраиваем иконки таб бара
         let tabBarAppearance = UITabBarAppearance()
@@ -30,7 +27,7 @@ struct AppTabView: View {
     var body: some View {
         NavigationStack(path: $navigationModel.path) {
             TabView(selection: $navigationModel.selectedTab) {
-                ProfileView()
+                ProfileView(servicesAssembly: servicesAssembly)
                     .tabItem {
                         Text("Профиль")
                         Image("yp.profileIcon")
@@ -64,15 +61,17 @@ struct AppTabView: View {
             }
             // Общая обработка навигации для всех табов
             .navigationDestination(for: Screens.self) { screen in
-                navigationModel.destination(for: screen)
+                navigationModel.destination(for: screen, with: servicesAssembly)
             }
         }
         .environmentObject(navigationModel)
+        .environmentObject(servicesAssembly)
+        .environmentObject(servicesAssembly.likesManager)
         .environmentObject(cartManager)
     }
 }
 
 #Preview {
-    AppTabView()
+    AppTabView(servicesAssembly: ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl()))
         .environmentObject(NavigationModel())
 }

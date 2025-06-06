@@ -10,8 +10,8 @@ import SwiftUI
 /// Ячейка NFT в коллекции
 struct NFTItemView: View {
     let nft: Nft
-    @State private var isLiked = false
     @EnvironmentObject private var cartManager: CartManager
+    @EnvironmentObject private var likesManager: LikesManager
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -35,10 +35,10 @@ struct NFTItemView: View {
                 
                 // Кнопка лайка
                 Button {
-                    isLiked.toggle()
+                    likesManager.toggleLike(for: nft.id)
                 } label: {
                     Image(systemName:"heart.fill")
-                        .foregroundColor(isLiked ? .ypRedUniversal : .ypWhiteUniversal)
+                        .foregroundColor(likesManager.isLiked(nft.id) ? .ypRedUniversal : .ypWhiteUniversal)
                         .font(.system(size: 14))
                         .frame(width: 24, height: 24)
                         .clipShape(Circle())
@@ -99,8 +99,13 @@ struct NFTItemView: View {
         author: "Sample Author"
     )
     
+    let mockNetworkClient = DefaultNetworkClient()
+    let mockNftStorage = NftStorageImpl()
+    let mockServicesAssembly = ServicesAssembly(networkClient: mockNetworkClient, nftStorage: mockNftStorage)
+    
     NFTItemView(nft: sampleNFT)
         .environmentObject(CartManager())
+        .environmentObject(mockServicesAssembly.likesManager)
         .padding()
         .previewLayout(.sizeThatFits)
 }
