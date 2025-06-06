@@ -25,9 +25,9 @@ final class CollectionDetailViewModel: ObservableObject {
     @Published var errorMessage: String?
     
     private let networkClient: NetworkClient
-    private let collection: NFTCollection
+    private let collection: NFTCollections
     
-    init(collection: NFTCollection, networkClient: NetworkClient = DefaultNetworkClient()) {
+    init(collection: NFTCollections, networkClient: NetworkClient = DefaultNetworkClient()) {
         self.collection = collection
         self.networkClient = networkClient
     }
@@ -83,7 +83,7 @@ final class CollectionDetailViewModel: ObservableObject {
     }
     
     /// Возвращает коллекцию
-    var currentCollection: NFTCollection {
+    var currentCollection: NFTCollections {
         return collection
     }
 }

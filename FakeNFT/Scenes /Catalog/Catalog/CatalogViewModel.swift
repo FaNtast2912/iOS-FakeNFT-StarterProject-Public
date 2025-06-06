@@ -11,7 +11,7 @@ import SwiftUI
 enum CatalogLoadingState {
     case idle
     case loading
-    case loaded([NFTCollection])
+    case loaded([NFTCollections])
     case error(String)
 }
 
@@ -25,7 +25,7 @@ enum CollectionSortOption {
 @MainActor
 final class CatalogViewModel: ObservableObject {
     @Published var loadingState: CatalogLoadingState = .idle
-    @Published var collections: [NFTCollection] = []
+    @Published var collections: [NFTCollections] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var sortOption: CollectionSortOption?
@@ -46,7 +46,7 @@ final class CatalogViewModel: ObservableObject {
         
         do {
             let request = CatalogRequest()
-            let loadedCollections: [NFTCollection] = try await networkClient.send(request, as: [NFTCollection].self)
+            let loadedCollections: [NFTCollections] = try await networkClient.send(request, as: [NFTCollections].self)
             
             collections = loadedCollections
             if let sortOption = sortOption {

@@ -9,12 +9,12 @@ import SwiftUI
 
 /// Экран деталей коллекции NFT
 struct CollectionDetailView: View {
-    let collection: NFTCollection
+    let collection: NFTCollections
     @StateObject private var viewModel: CollectionDetailViewModel
     @EnvironmentObject private var navigationModel: NavigationModel
     @EnvironmentObject private var servicesAssembly: ServicesAssembly
     
-    init(collection: NFTCollection) {
+    init(collection: NFTCollections) {
         self.collection = collection
         self._viewModel = StateObject(wrappedValue: CollectionDetailViewModel(collection: collection))
     }
@@ -191,7 +191,7 @@ struct CollectionDetailView: View {
 
 // MARK: - Preview
 #Preview {
-    let sampleCollection = NFTCollection(
+    let sampleCollection = NFTCollections(
         id: "sample-id",
         name: "Peach",
         cover: URL(string: "https://code.s3.yandex.net/Mobile/iOS/NFT/Обложки_коллекций/Brown.png")!,

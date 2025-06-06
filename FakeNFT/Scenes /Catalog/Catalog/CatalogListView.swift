@@ -60,7 +60,7 @@ struct CatalogListView: View {
     
     // MARK: - Collections List
     
-    private func collectionsList(collections: [NFTCollection]) -> some View {
+    private func collectionsList(collections: [NFTCollections]) -> some View {
         ScrollView {
             LazyVStack(spacing: 8) {
                 ForEach(collections) { collection in
