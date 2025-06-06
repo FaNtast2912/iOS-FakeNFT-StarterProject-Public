@@ -6,8 +6,7 @@ struct FakeNFTApp: App {
     @StateObject private var mockData = MockData()
     @StateObject private var cartManager = CartManager()
     @StateObject private var paymentViewModel: PaymentMethodViewModel = {
-        let mockCurrencies = MockData().paymentCryptos
-        return PaymentMethodViewModel(currencies: mockCurrencies)
+        PaymentMethodViewModel(currencies: MockData().paymentCryptos)
     }()
     
     private var cartViewModel: CartViewModel {

@@ -18,11 +18,7 @@ final class PaymentMethodViewModel: ObservableObject {
     // MARK: - Initialization
     
     init(currencies: [CurrencyModel] = []) {
-        if currencies.isEmpty {
-            self.currencies = loadMockCurrencies()
-        } else {
-            self.currencies = currencies
-        }
+        self.currencies = currencies.isEmpty ? loadMockCurrencies() : currencies
     }
     
     // MARK: - Private Methods
