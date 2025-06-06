@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct StatisticsView: View {
-    @StateObject private var viewModel = StatisticsViewModel()
+    @ObservedObject var viewModel: StatisticsViewModel
     @EnvironmentObject var navigationModel: NavigationModel
     @State private var isShowingSortOptions = false
     
@@ -36,6 +36,7 @@ struct StatisticsView: View {
                     .animation(.easeInOut(duration: 0.2), value: isShowingSortOptions)
             }
         }
+        .progressHUD(isLoading: viewModel.isLoading)
         .confirmationDialog("Сортировка", isPresented: $isShowingSortOptions, titleVisibility: .visible) {
             Button("По имени") {
                 viewModel.updateSortOption(.name)
@@ -45,9 +46,14 @@ struct StatisticsView: View {
             }
             Button("Закрыть", role: .cancel) {}
         }
+        .task {
+            await viewModel.loadUsers()
+        }
     }
 }
 
 #Preview {
-    StatisticsView()
+    StatisticsView(
+        viewModel: StatisticsViewModel(userService: MockUserService())
+    )
 }

@@ -6,11 +6,11 @@
 //
 import Foundation
 
-struct User: Identifiable, Hashable {
+struct User: Identifiable, Hashable, Codable {
     let id: String
     let name: String
     let avatar: String
-    let description: String
+    let description: String?
     let website: String
     let nfts: [String]
     let rating: String

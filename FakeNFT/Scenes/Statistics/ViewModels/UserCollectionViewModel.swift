@@ -6,56 +6,40 @@
 //
 import Foundation
 
+@MainActor
 final class UserCollectionViewModel: ObservableObject {
     @Published var nfts: [Nft] = []
+    @Published var isLoading = false
 
-    func loadNfts(for user: User) {
-        let allNfts = loadMockNfts()
-        nfts = allNfts.filter { user.nfts.contains($0.id) }
+    private let nftService: NftService
+
+    init(nftService: NftService) {
+        self.nftService = nftService
     }
 
-    private func loadMockNfts() -> [Nft] {
-        return [
-            Nft(
-                id: "a",
-                name: "nft1",
-                createdAt: "2023-10-20T10:23:01.305Z[GMT]",
-                images: [],
-                rating: 2,
-                description: "tacimates docendi efficitur tempus non quod cras pellentesque commune",
-                price: 16.56,
-                author: "https://goofy_napier.fakenfts.org/"
-            ),
-            Nft(
-                id: "b",
-                name: "nft2",
-                createdAt: "2023-10-21T10:23:01.305Z[GMT]",
-                images: [],
-                rating: 4,
-                description: "Nulla malesuada ligula id leo fringilla, ac ullamcorper urna sollicitudin.",
-                price: 28.99,
-                author: "https://george_brown.fakenfts.org/"
-            ),
-            Nft(
-                id: "c",
-                name: "nft3",
-                createdAt: "2023-10-20T10:23:01.305Z[GMT]",
-                images: [],
-                rating: 2,
-                description: "tacimates docendi efficitur tempus non quod cras pellentesque commune",
-                price: 16.56,
-                author: "https://goofy_napier.fakenfts.org/"
-            ),
-            Nft(
-                id: "d",
-                name: "nft4",
-                createdAt: "2023-10-21T10:23:01.305Z[GMT]",
-                images: [],
-                rating: 4,
-                description: "Nulla malesuada ligula id leo fringilla, ac ullamcorper urna sollicitudin.",
-                price: 28.99,
-                author: "https://george_brown.fakenfts.org/"
-            )
-        ]
+    func loadNfts(for user: User) async {
+        isLoading = true
+        defer { isLoading = false }
+
+        var loadedNfts: [Nft] = []
+
+        for id in user.nfts {
+            do {
+                let nft = try await loadNftAsync(id: id)
+                loadedNfts.append(nft)
+            } catch {
+                print("Ошибка загрузки NFT с id=\(id): \(error)")
+            }
+        }
+
+        nfts = loadedNfts
+    }
+
+    private func loadNftAsync(id: String) async throws -> Nft {
+        try await withCheckedThrowingContinuation { continuation in
+            nftService.loadNft(id: id) { result in
+                continuation.resume(with: result)
+            }
+        }
     }
 }
