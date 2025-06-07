@@ -37,7 +37,7 @@ struct CartView: View {
         VStack(spacing: 0) {
             sortButton
             
-            if viewModel.nfts.isEmpty {
+            if viewModel.nfts.isEmpty && !viewModel.isLoading {
                 emptyCartView
             } else {
                 nftListView
@@ -45,7 +45,21 @@ struct CartView: View {
             
             paymentSummaryView
         }
+        .progressHUD(isLoading: viewModel.isLoading)
         .overlay(deleteConfirmationOverlay)
+        .onAppear {
+            viewModel.loadCartItems()
+        }
+        .alert("Ошибка", isPresented: .constant(viewModel.error != nil)) {
+            Button("Повторить") {
+                viewModel.loadCartItems()
+            }
+            Button("Отмена", role: .cancel) {
+                viewModel.error = nil
+            }
+        } message: {
+            Text(viewModel.error?.localizedDescription ?? "Неизвестная ошибка")
+        }
     }
     
     // MARK: - Private Subviews
@@ -143,8 +157,8 @@ struct CartView: View {
                             .cornerRadius(Constants.payButtonCornerRadius)
                     }
                 )
-                .disabled(viewModel.nfts.isEmpty)
-                .opacity(viewModel.nfts.isEmpty ? 0.6 : 1.0)
+                .disabled(viewModel.nfts.isEmpty || viewModel.isLoading)
+                .opacity((viewModel.nfts.isEmpty || viewModel.isLoading) ? 0.6 : 1.0)
             }
             .padding(.horizontal, Constants.paymentSummaryHorizontalPadding)
         }
@@ -170,46 +184,67 @@ struct CartView: View {
     }
 }
 
-#Preview("With NFTs") {
-    let cartManager = CartManager()
-    let viewModel = CartViewModel(cartManager: cartManager)
-    
-    let nft1 = Nft(
-        id: "1",
-        name: "NFT 1",
-        createdAt: "2025-05-31",
-        images: [],
-        rating: 4,
-        description: "Test NFT 1",
-        price: 1.5,
-        author: "Author 1"
-    )
-    let nft2 = Nft(
-        id: "2",
-        name: "NFT 2",
-        createdAt: "2025-05-31",
-        images: [],
-        rating: 5,
-        description: "Test NFT 2",
-        price: 2.3,
-        author: "Author 2"
-    )
-    
-    cartManager.addToCart(nft1)
-    cartManager.addToCart(nft2)
-    
-    return CartView()
+#Preview("With Data") {
+    CartView()
         .environmentObject(NavigationModel())
-        .environmentObject(viewModel)
+        .environmentObject({
+            let networkClient = DefaultNetworkClient()
+            let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+            let nftStorage = NftStorageImpl()
+            let servicesAssembly = ServicesAssembly(
+                networkClient: networkClient,
+                nftStorage: nftStorage
+            )
+            let cartManager = CartManager()
+            
+            return CartViewModel(
+                cartManager: cartManager,
+                cartNetworkService: cartNetworkService,
+                nftService: servicesAssembly.nftService
+            )
+        }())
+}
+
+#Preview("Loading State") {
+    CartView()
+        .environmentObject(NavigationModel())
+        .environmentObject({
+            let networkClient = DefaultNetworkClient()
+            let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+            let nftStorage = NftStorageImpl()
+            let servicesAssembly = ServicesAssembly(
+                networkClient: networkClient,
+                nftStorage: nftStorage
+            )
+            let cartManager = CartManager()
+            
+            let viewModel = CartViewModel(
+                cartManager: cartManager,
+                cartNetworkService: cartNetworkService,
+                nftService: servicesAssembly.nftService
+            )
+            viewModel.isLoading = true 
+            return viewModel
+        }())
 }
 
 #Preview("Empty Cart") {
-    let cartManager = CartManager()
-    let viewModel = CartViewModel(cartManager: cartManager)
-    
-    return CartView()
+    CartView()
         .environmentObject(NavigationModel())
-        .environmentObject(viewModel)
+        .environmentObject({
+            let networkClient = DefaultNetworkClient()
+            let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+            let nftStorage = NftStorageImpl()
+            let servicesAssembly = ServicesAssembly(
+                networkClient: networkClient,
+                nftStorage: nftStorage
+            )
+            let cartManager = CartManager()
+            
+            return CartViewModel(
+                cartManager: cartManager,
+                cartNetworkService: cartNetworkService,
+                nftService: servicesAssembly.nftService
+            )
+        }())
 }
-
-// Create branch Epic Cart Part 3

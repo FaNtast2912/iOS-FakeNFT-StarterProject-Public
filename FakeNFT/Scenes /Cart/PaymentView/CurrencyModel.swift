@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CurrencyModel: Identifiable, Equatable {
+struct CurrencyModel: Identifiable, Equatable, Codable {
     let id: String
     let name: String
     let title: String

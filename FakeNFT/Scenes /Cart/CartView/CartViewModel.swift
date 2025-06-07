@@ -37,11 +37,12 @@ final class CartViewModel: ObservableObject {
     // MARK: - Dependencies
     
     private let cartManager: CartManager
-    private let mockData: MockData
+    private let cartNetworkService: CartNetworkService
+    private let nftService: NftService
     private var cancellables = Set<AnyCancellable>()
     private var hasInitializedCart = false
     
-    @Published private var sessionCartItems: [Nft] = [] // тестовый метод для отладки работы корзины
+    @Published private var sessionCartItems: [Nft] = []
     
     // MARK: - Computed Properties
     
@@ -52,33 +53,55 @@ final class CartViewModel: ObservableObject {
     
     // MARK: - Initialization
     
-    init(cartManager: CartManager, mockData: MockData = MockData()) {
+    init(cartManager: CartManager,
+         cartNetworkService: CartNetworkService,
+         nftService: NftService) {
         self.cartManager = cartManager
-        self.mockData = mockData
+        self.cartNetworkService = cartNetworkService
+        self.nftService = nftService
         setupBindings()
-        loadInitialData()
     }
     
     // MARK: - Public Methods
     
     func loadCartItems() {
+        print("[CartViewModel] Загрузка корзины...")
         isLoading = true
-        isLoading = false
+        error = nil
+        
+        Task {
+            do {
+                let order = try await cartNetworkService.fetchOrder()
+                print("[CartViewModel] Получен заказ с \(order.nfts.count) NFT")
+                
+                await loadNftsFromOrder(order.nfts)
+                
+            } catch {
+                await MainActor.run {
+                    self.error = error
+                    self.isLoading = false
+                    print("[CartViewModel] Ошибка загрузки корзины: \(error)")
+                }
+            }
+        }
+    }
+
+    func deleteNFT(_ id: String) {
+        print("[CartViewModel] Удаление NFT: \(id)")
+        
+        sessionCartItems.removeAll { $0.id == id }
+        
+        updateCartOnServer()
     }
     
-    func deleteNFT(_ id: String) {
-        sessionCartItems.removeAll { $0.id == id }
+    func sortItems(by option: SortOption) {
+        print("[CartViewModel] Сортировка по: \(option.rawValue)")
+        currentSortOption = option
     }
     
     func getSortedNFTs() -> [Nft] {
         let option = currentSortOption.toProductSortOption()
         return SortingManager.shared.sort(products: nfts, by: option)
-    }
-    
-    func loadMockData() { // тестовый метод для отладки работы корзины
-        for nft in mockData.nfts {
-            sessionCartItems.append(nft)
-        }
     }
     
     // MARK: - Private Methods
@@ -90,17 +113,59 @@ final class CartViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    private func loadInitialData() { // тестовый метод для отладки работы корзины
-        guard !hasInitializedCart else { return }
+    private func loadNftsFromOrder(_ nftIds: [String]) async {
+        var loadedNfts: [Nft] = []
         
-        hasInitializedCart = true
+        await withTaskGroup(of: Nft?.self) { group in
+            for nftId in nftIds {
+                group.addTask { [weak self] in
+                    await self?.loadSingleNft(id: nftId)
+                }
+            }
+            
+            for await nft in group {
+                if let nft = nft {
+                    loadedNfts.append(nft)
+                }
+            }
+        }
         
-        Task { @MainActor in
-            isLoading = true
-            
-            sessionCartItems = mockData.nfts
-            
-            isLoading = false
+        await MainActor.run {
+            self.sessionCartItems = loadedNfts
+            self.isLoading = false
+            print("[CartViewModel] Корзина загружена: \(loadedNfts.count) NFT")
+        }
+    }
+    
+    private func loadSingleNft(id: String) async -> Nft? {
+        return await withCheckedContinuation { continuation in
+            nftService.loadNft(id: id) { result in
+                switch result {
+                case .success(let nft):
+                    print("[CartViewModel] Загружен NFT: \(nft.name)")
+                    continuation.resume(returning: nft)
+                case .failure(let error):
+                    print("[CartViewModel] Ошибка загрузки NFT \(id): \(error)")
+                    continuation.resume(returning: nil)
+                }
+            }
+        }
+    }
+    
+    private func updateCartOnServer() {
+        print("[CartViewModel] Синхронизация корзины с сервером...")
+        let nftIds = sessionCartItems.map { $0.id }
+        
+        Task {
+            do {
+                let updatedOrder = try await cartNetworkService.updateOrder(nftIds: nftIds)
+                print("[CartViewModel] Корзина синхронизирована: \(updatedOrder.nfts.count) NFT")
+            } catch {
+                print("[CartViewModel] Ошибка синхронизации корзины: \(error)")
+                await MainActor.run {
+                    self.error = error
+                }
+            }
         }
     }
 }
