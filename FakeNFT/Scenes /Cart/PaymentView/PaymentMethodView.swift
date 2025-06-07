@@ -59,12 +59,18 @@ struct PaymentMethodView: View {
         .alert("Ошибка оплаты", isPresented: $viewModel.showPaymentError) {
             Button("Повторить") {
                 Task {
+                    print("[PaymentMethodView] Повторная попытка оплаты через alert")
                     if await viewModel.processPayment() {
+                        print("[PaymentMethodView] Повторная оплата успешна, переход к PaymentDoneView")
                         navigationModel.navigate(to: .paymentDoneView)
+                    } else {
+                        print("[PaymentMethodView] Повторная оплата не удалась")
                     }
                 }
             }
-            Button("Отмена", role: .cancel) {}
+            Button("Отмена", role: .cancel) {
+                print("[PaymentMethodView] Отмена повторной оплаты")
+            }
         } message: {
             Text("Не удалось произвести оплату")
         }
@@ -135,8 +141,19 @@ struct PaymentMethodView: View {
             
             Button(action: {
                 Task {
-                    if await viewModel.processPayment() {
+                    print("[PaymentMethodView] Нажата кнопка оплаты")
+                    print("[PaymentMethodView] Выбранная валюта: \(viewModel.selectedCurrency?.name ?? "nil") (ID: \(viewModel.selectedCurrency?.id ?? "nil"))")
+                    print("[PaymentMethodView] Начало процесса оплаты")
+                    
+                    let paymentResult = await viewModel.processPayment()
+                    
+                    print("[PaymentMethodView] Результат оплаты: \(paymentResult)")
+                    
+                    if paymentResult {
+                        print("[PaymentMethodView] Платеж успешен, переход к PaymentDoneView")
                         navigationModel.navigate(to: .paymentDoneView)
+                    } else {
+                        print("[PaymentMethodView] Платеж не удался, остаемся на экране оплаты")
                     }
                 }
             }, label: {
