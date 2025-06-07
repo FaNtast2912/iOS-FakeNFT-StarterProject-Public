@@ -9,8 +9,8 @@ import Foundation
 
 extension String {
     func correctAuthorName(with prefix: String, ending: String) -> Self {
-        let first = self.trimmingPrefix(prefix)
-        let firstIndex = self.firstIndex(of: "_") ?? self.endIndex
+        let first = trimmingPrefix(prefix)
+        let firstIndex = firstIndex(of: "_") ?? endIndex
         let firstName = first[..<firstIndex]
         var secondName = first[firstIndex...].trimmingPrefix("_")
         if let rangeToRemove = secondName.range(of: ending) {

@@ -90,9 +90,7 @@ struct ProfileView: View {
                     })
                 )
             }
-            
-            ProgressHUD(isLoading: profileVM.loadingState == .loading)
-                .opacity(profileVM.loadingState == .loading ? 1 : 0)
+            .progressHUD(isLoading: profileVM.loadingState == .loading)
         }
     }
     

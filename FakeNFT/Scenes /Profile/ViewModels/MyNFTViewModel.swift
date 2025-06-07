@@ -8,7 +8,7 @@
 import Foundation
 
 @MainActor
-class MyNFTViewModel: ObservableObject {
+final class MyNFTViewModel: ObservableObject {
     @Published var nfts: [Nft] = []
     @Published var sortedNfts: [Nft] = []
     @Published var loadingState: LoadingState = .loaded
@@ -95,7 +95,7 @@ class MyNFTViewModel: ObservableObject {
         
         let dto = UserLikesRequestDto(likes: likesNftId)
         do {
-            try await service.userLikesService.updateLikes(dto: dto)
+            _ = try await service.userLikesService.updateLikes(dto: dto)
         } catch {
             print(error.localizedDescription)
         }
@@ -130,19 +130,6 @@ class MyNFTViewModel: ObservableObject {
             loadingState = .loaded
         } catch {
             loadingState = .error
-            print(String(describing: error.localizedDescription))
-        }
-    }
-    
-    func refresh() async {
-        do {
-            nfts = try await service.profileService.fetchProfile().nfts.asyncMap { nftId in
-                try await service.nftService.loadNft(id: nftId)
-            }
-            likesNftId = try await service.userLikesService.fetchLikes().likes
-            let filter = SortKeyConstants(rawValue: currentFilter) ?? .notFilter
-            setFilter(by: filter)
-        } catch {
             print(String(describing: error.localizedDescription))
         }
     }

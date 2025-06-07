@@ -61,9 +61,7 @@ struct MyFavoriteNFTView: View {
             .task {
                 await myFavoriteNFTVM.fetchLikesNft()
             }
-            
-            ProgressHUD(isLoading: myFavoriteNFTVM.loadingState == .loading)
-                .opacity(myFavoriteNFTVM.loadingState == .loading ? 1 : 0)
+            .progressHUD(isLoading: myFavoriteNFTVM.loadingState == .loading)
         }
     }
 }

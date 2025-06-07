@@ -78,9 +78,8 @@ struct MyNFTView: View {
             .task {
                 await myNFTVM.fetchNfts()
             }
+            .progressHUD(isLoading: myNFTVM.loadingState == .loading)
             
-            ProgressHUD(isLoading: myNFTVM.loadingState == .loading)
-                .opacity(myNFTVM.loadingState == .loading ? 1 : 0)
         }
     }
 }
