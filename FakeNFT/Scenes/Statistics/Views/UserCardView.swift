@@ -16,7 +16,6 @@ struct UserCardView: View {
         self.userId = userId
         _viewModel = StateObject(wrappedValue: UserCardViewModel(userService: userService))
     }
-    
     var body: some View {
         contentView
             .foregroundStyle(Color.ypBlack)
@@ -110,7 +109,6 @@ struct UserCardView: View {
         .font(.system(size: 15))
         .padding(.bottom, 40)
     }
-    
     private func nftCollectionHeaderView(user: User) -> some View {
         HStack {
             Text("Коллекция NFT (\(user.nfts.count))")
@@ -128,5 +126,6 @@ struct UserCardView: View {
     UserCardView(
         userId: "1",
         userService: MockUserByIdService()
+
     )
 }

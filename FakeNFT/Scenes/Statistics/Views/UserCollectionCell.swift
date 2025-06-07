@@ -2,7 +2,6 @@ import SwiftUI
 
 struct UserCollectionCell: View {
     let nft: Nft
-    
     var body: some View {
         contentView
             .foregroundStyle(Color.ypBlack)
@@ -54,7 +53,6 @@ struct UserCollectionCell: View {
             
         }
     }
-    
     private var nftRatingView: some View {
         HStack(spacing: 3) {
             ForEach(1..<6) { index in
@@ -64,7 +62,6 @@ struct UserCollectionCell: View {
             }
         }
     }
-    
     private var nftDetailsView: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -73,12 +70,11 @@ struct UserCollectionCell: View {
                     .padding(.bottom, 4)
                 Text("\(nft.price, specifier: "%.2f") ETH")
                     .font(.system(size: 10, weight: .medium))
-                
             }
             Spacer()
             Image("yp.cart")
                 .frame(width: 40, height: 40)
-            
+
         }
         .frame(alignment: .center)
         

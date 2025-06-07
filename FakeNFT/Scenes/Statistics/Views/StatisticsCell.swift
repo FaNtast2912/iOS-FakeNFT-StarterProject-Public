@@ -15,7 +15,6 @@ struct StatisticsCell: View {
         HStack(spacing: 16) {
             Text("\(rank)")
                 .font(.system(size: 15))
-            
             HStack {
                 if
                     !user.avatar.isEmpty,
@@ -46,7 +45,6 @@ struct StatisticsCell: View {
                         .clipShape(Circle())
                         .opacity(0.5)
                 }
-                
                 Text(user.name)
                 Spacer()
                 Text("\(user.nfts.count)")
