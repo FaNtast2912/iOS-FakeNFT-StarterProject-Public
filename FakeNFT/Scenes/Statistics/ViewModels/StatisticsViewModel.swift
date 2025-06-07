@@ -6,7 +6,6 @@
 //
 import Foundation
 
-
 @MainActor
 final class StatisticsViewModel: ObservableObject {
     @Published var users: [User] = []

@@ -30,4 +30,3 @@ final class UserCardViewModel: ObservableObject {
         self.user = user
     }
 }
-

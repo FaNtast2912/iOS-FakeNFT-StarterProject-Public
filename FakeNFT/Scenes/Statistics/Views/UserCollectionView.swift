@@ -18,7 +18,6 @@ struct UserCollectionView: View {
         self.user = user
     }
     
-    
     let columns = [
         GridItem(.flexible(), spacing: 2),
         GridItem(.flexible(), spacing: 2),

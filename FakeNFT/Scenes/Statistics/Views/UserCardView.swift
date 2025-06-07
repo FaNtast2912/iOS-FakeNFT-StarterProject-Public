@@ -57,7 +57,6 @@ struct UserCardView: View {
         }
     }
 
-    
     private func userHeaderView(user: User) -> some View {
         HStack(spacing: 16) {
             if !user.avatar.isEmpty, let url = URL(string: user.avatar) {

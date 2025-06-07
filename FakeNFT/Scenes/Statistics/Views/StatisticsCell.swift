@@ -17,7 +17,6 @@ struct StatisticsCell: View {
                 .font(.system(size: 15))
             
             HStack {
-                
                 if
                     !user.avatar.isEmpty,
                     let url = URL(string: user.avatar)
