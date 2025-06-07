@@ -8,7 +8,7 @@ struct FakeNFTApp: App {
     
     // Создаем сетевые сервисы через ServicesAssembly
     private let networkClient = DefaultNetworkClient()
-    private lazy var nftStorage = NftStorageImpl() // Предполагаем, что есть реализация
+    private lazy var nftStorage = NftStorageImpl()
     private lazy var servicesAssembly = ServicesAssembly(
         networkClient: networkClient,
         nftStorage: nftStorage
@@ -17,7 +17,7 @@ struct FakeNFTApp: App {
     @StateObject private var cartViewModel: CartViewModel = {
         let networkClient = DefaultNetworkClient()
         let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
-        let nftStorage = NftStorageImpl() // Предполагаем реализацию
+        let nftStorage = NftStorageImpl()
         let servicesAssembly = ServicesAssembly(
             networkClient: networkClient,
             nftStorage: nftStorage
@@ -30,10 +30,6 @@ struct FakeNFTApp: App {
             nftService: servicesAssembly.nftService
         )
     }()
-    
-    @StateObject private var paymentViewModel: PaymentMethodViewModel = {
-        PaymentMethodViewModel(currencies: MockData().paymentCryptos)
-    }()
 
     var body: some Scene {
         WindowGroup {
@@ -42,7 +38,6 @@ struct FakeNFTApp: App {
                 .environmentObject(mockData)
                 .environmentObject(cartManager)
                 .environmentObject(cartViewModel)
-                .environmentObject(paymentViewModel)
         }
     }
 }

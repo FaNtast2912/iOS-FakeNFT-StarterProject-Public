@@ -15,5 +15,4 @@ struct CurrencyModel: Identifiable, Equatable, Codable {
     
     // Для совместимости с текущим UI
     var code: String { title }
-    var iconName: String { image }
 }

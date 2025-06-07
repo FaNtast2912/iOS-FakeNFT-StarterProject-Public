@@ -32,84 +32,47 @@ final class DefaultCartNetworkService: CartNetworkService {
     }
     
     func fetchOrder() async throws -> Order {
-        print("[CartService] Запрос заказа...")
-        let request = OrderRequest()
-        print("[CartService] URL: \(request.endpoint?.absoluteString ?? "nil")")
-        
-        do {
-            let order = try await networkClient.send(request, as: Order.self)
-            print("[CartService] Заказ получен: \(order.nfts.count) NFT")
-            print("[CartService] NFT IDs: \(order.nfts)")
-            return order
-        } catch {
-            print("[CartService] Ошибка получения заказа: \(error)")
-            throw error
+        return try await withCheckedThrowingContinuation { continuation in
+            let request = OrderRequest()
+            networkClient.send(request: request, type: Order.self) { result in
+                continuation.resume(with: result)
+            }
         }
     }
     
     func updateOrder(nftIds: [String]) async throws -> Order {
-        print("[CartService] Обновление заказа...")
-        print("[CartService] Новые NFT IDs: \(nftIds)")
-        let request = UpdateOrderRequest(nftIds: nftIds)
-        print("[CartService] URL: \(request.endpoint?.absoluteString ?? "nil")")
-        
-        do {
-            let order = try await networkClient.send(request, as: Order.self)
-            print("[CartService] Заказ обновлен: \(order.nfts.count) NFT")
-            print("[CartService] Обновленные NFT IDs: \(order.nfts)")
-            return order
-        } catch {
-            print("[CartService] Ошибка обновления заказа: \(error)")
-            throw error
+        return try await withCheckedThrowingContinuation { continuation in
+            let request = UpdateOrderRequest(nftIds: nftIds)
+            networkClient.send(request: request, type: Order.self) { result in
+                continuation.resume(with: result)
+            }
         }
     }
     
     func fetchCurrencies() async throws -> [CurrencyModel] {
-        print("[CartService] Запрос списка валют...")
-        let request = CurrenciesRequest()
-        print("[CartService] URL: \(request.endpoint?.absoluteString ?? "nil")")
-        
-        do {
-            let currencies = try await networkClient.send(request, as: [CurrencyModel].self)
-            print("[CartService] Получено валют: \(currencies.count)")
-            for currency in currencies {
-                print("[CartService] Валюта: \(currency.name) (\(currency.title))")
+        return try await withCheckedThrowingContinuation { continuation in
+            let request = CurrenciesRequest()
+            networkClient.send(request: request, type: [CurrencyModel].self) { result in
+                continuation.resume(with: result)
             }
-            return currencies
-        } catch {
-            print("[CartService] Ошибка получения валют: \(error)")
-            throw error
         }
     }
     
     func fetchCurrency(id: String) async throws -> CurrencyModel {
-        print("[CartService] Запрос валюты с ID: \(id)")
-        let request = CurrencyRequest(id: id)
-        print("[CartService] URL: \(request.endpoint?.absoluteString ?? "nil")")
-        
-        do {
-            let currency = try await networkClient.send(request, as: CurrencyModel.self)
-            print("[CartService] Получена валюта: \(currency.name) (\(currency.title))")
-            return currency
-        } catch {
-            print("[CartService] Ошибка получения валюты: \(error)")
-            throw error
+        return try await withCheckedThrowingContinuation { continuation in
+            let request = CurrencyRequest(id: id)
+            networkClient.send(request: request, type: CurrencyModel.self) { result in
+                continuation.resume(with: result)
+            }
         }
     }
     
     func payOrder(currencyId: String) async throws -> PaymentResult {
-        print("[CartService] Оплата заказа валютой ID: \(currencyId)")
-        let request = PaymentRequest(currencyId: currencyId)
-        print("[CartService] URL: \(request.endpoint?.absoluteString ?? "nil")")
-        
-        do {
-            let result = try await networkClient.send(request, as: PaymentResult.self)
-            print("[CartService] Результат оплаты: success=\(result.success)")
-            print("[CartService] Order ID: \(result.orderId)")
-            return result
-        } catch {
-            print("[CartService] Ошибка оплаты: \(error)")
-            throw error
+        return try await withCheckedThrowingContinuation { continuation in
+            let request = PaymentRequest(currencyId: currencyId)
+            networkClient.send(request: request, type: PaymentResult.self) { result in
+                continuation.resume(with: result)
+            }
         }
     }
 }

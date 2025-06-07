@@ -75,5 +75,9 @@ struct AppTabView: View {
     AppTabView()
         .environmentObject(NavigationModel())
         .environmentObject(MockData())
-        .environmentObject(PaymentMethodViewModel())
+        .environmentObject({
+            let networkClient = DefaultNetworkClient()
+            let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+            return PaymentMethodViewModel(cartNetworkService: cartNetworkService)
+        }())
 }

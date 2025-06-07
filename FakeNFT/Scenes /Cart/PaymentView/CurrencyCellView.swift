@@ -15,10 +15,20 @@ struct CurrencyCellView: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(currency.iconName)
-                .resizable()
-                .frame(width: 36, height: 36)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+            AsyncImage(url: URL(string: currency.image)) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+            } placeholder: {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.3))
+                    .overlay(
+                        ProgressView()
+                            .scaleEffect(0.7)
+                    )
+            }
+            .frame(width: 36, height: 36)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
             
             VStack(alignment: .leading, spacing: 2) {
                 Text(currency.name)
@@ -50,16 +60,37 @@ struct CurrencyCellView: View {
         }
     }
 }
-    
-    #Preview {
-        CurrencyCellView(
-            currency: CurrencyModel(
-                id: "1",
-                name: "Bitcoin",
-                title: "BTC",
-                image: "yp.cripto.bitcoin"
-            ),
-            isSelected: true
-        )
-        .environmentObject(PaymentMethodViewModel())
-    }
+
+#Preview {
+    CurrencyCellView(
+        currency: CurrencyModel(
+            id: "1",
+            name: "Bitcoin",
+            title: "BTC",
+            image: "https://code.s3.yandex.net/Mobile/iOS/Currencies/Bitcoin_(BTC).png"
+        ),
+        isSelected: true
+    )
+    .environmentObject({
+        let networkClient = DefaultNetworkClient()
+        let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+        return PaymentMethodViewModel(cartNetworkService: cartNetworkService)
+    }())
+}
+
+#Preview("Not Selected") {
+    CurrencyCellView(
+        currency: CurrencyModel(
+            id: "2",
+            name: "Ethereum",
+            title: "ETH",
+            image: "https://code.s3.yandex.net/Mobile/iOS/Currencies/Ethereum_(ETH).png"
+        ),
+        isSelected: false
+    )
+    .environmentObject({
+        let networkClient = DefaultNetworkClient()
+        let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+        return PaymentMethodViewModel(cartNetworkService: cartNetworkService)
+    }())
+}
