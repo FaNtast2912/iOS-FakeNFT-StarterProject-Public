@@ -45,20 +45,24 @@ struct CartView: View {
             
             paymentSummaryView
         }
-        .progressHUD(isLoading: viewModel.isLoading)
+        .progressHUD(isLoading: viewModel.isLoading || viewModel.isDeleting)
         .overlay(deleteConfirmationOverlay)
         .onAppear {
             viewModel.loadCartItems()
         }
         .alert("Ошибка", isPresented: .constant(viewModel.error != nil)) {
             Button("Повторить") {
-                viewModel.loadCartItems()
+                if viewModel.nfts.isEmpty {
+                    viewModel.loadCartItems()
+                } else {
+                    viewModel.error = nil
+                }
             }
             Button("Отмена", role: .cancel) {
                 viewModel.error = nil
             }
         } message: {
-            Text(viewModel.error?.localizedDescription ?? "Неизвестная ошибка")
+            Text(viewModel.error?.localizedDescription ?? "Произошла ошибка")
         }
     }
     
@@ -80,6 +84,7 @@ struct CartView: View {
                         .padding(.trailing, Constants.sortButtonTrailingPadding)
                 }
             )
+            .disabled(viewModel.isLoading || viewModel.isDeleting)
             .confirmationDialog(
                 "Сортировка",
                 isPresented: $showSortOptions
@@ -116,6 +121,8 @@ struct CartView: View {
                             showDeleteConfirmation = true
                         }
                     )
+                    .disabled(viewModel.isDeleting)
+                    .opacity(viewModel.isDeleting ? 0.6 : 1.0)
                 }
             }
             .padding(.top, Constants.nftListTopPadding)
@@ -157,8 +164,8 @@ struct CartView: View {
                             .cornerRadius(Constants.payButtonCornerRadius)
                     }
                 )
-                .disabled(viewModel.nfts.isEmpty || viewModel.isLoading)
-                .opacity((viewModel.nfts.isEmpty || viewModel.isLoading) ? 0.6 : 1.0)
+                .disabled(viewModel.nfts.isEmpty || viewModel.isLoading || viewModel.isDeleting)
+                .opacity((viewModel.nfts.isEmpty || viewModel.isLoading || viewModel.isDeleting) ? 0.6 : 1.0)
             }
             .padding(.horizontal, Constants.paymentSummaryHorizontalPadding)
         }
@@ -170,11 +177,13 @@ struct CartView: View {
                 DeleteNFTConfirmationView(
                     nftImage: Image("mockImageNFT"),
                     onDelete: {
+                        print("[CartView] Подтверждение удаления NFT: \(nft.name)")
                         viewModel.deleteNFT(nft.id)
                         showDeleteConfirmation = false
                         nftToDelete = nil
                     },
                     onCancel: {
+                        print("[CartView] Отмена удаления NFT")
                         showDeleteConfirmation = false
                         nftToDelete = nil
                     }
@@ -184,67 +193,44 @@ struct CartView: View {
     }
 }
 
-#Preview("With Data") {
-    CartView()
+#Preview("With NFTs") {
+    let networkClient = DefaultNetworkClient()
+    let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+    let nftStorage = NftStorageImpl()
+    let servicesAssembly = ServicesAssembly(
+        networkClient: networkClient,
+        nftStorage: nftStorage
+    )
+    let cartManager = CartManager()
+    
+    let viewModel = CartViewModel(
+        cartManager: cartManager,
+        cartNetworkService: cartNetworkService,
+        nftService: servicesAssembly.nftService
+    )
+    
+    return CartView()
         .environmentObject(NavigationModel())
-        .environmentObject({
-            let networkClient = DefaultNetworkClient()
-            let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
-            let nftStorage = NftStorageImpl()
-            let servicesAssembly = ServicesAssembly(
-                networkClient: networkClient,
-                nftStorage: nftStorage
-            )
-            let cartManager = CartManager()
-            
-            return CartViewModel(
-                cartManager: cartManager,
-                cartNetworkService: cartNetworkService,
-                nftService: servicesAssembly.nftService
-            )
-        }())
-}
-
-#Preview("Loading State") {
-    CartView()
-        .environmentObject(NavigationModel())
-        .environmentObject({
-            let networkClient = DefaultNetworkClient()
-            let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
-            let nftStorage = NftStorageImpl()
-            let servicesAssembly = ServicesAssembly(
-                networkClient: networkClient,
-                nftStorage: nftStorage
-            )
-            let cartManager = CartManager()
-            
-            let viewModel = CartViewModel(
-                cartManager: cartManager,
-                cartNetworkService: cartNetworkService,
-                nftService: servicesAssembly.nftService
-            )
-            viewModel.isLoading = true 
-            return viewModel
-        }())
+        .environmentObject(viewModel)
 }
 
 #Preview("Empty Cart") {
-    CartView()
+    let networkClient = DefaultNetworkClient()
+    let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+    let nftStorage = NftStorageImpl()
+    let servicesAssembly = ServicesAssembly(
+        networkClient: networkClient,
+        nftStorage: nftStorage
+    )
+    let cartManager = CartManager()
+    
+    let viewModel = CartViewModel(
+        cartManager: cartManager,
+        cartNetworkService: cartNetworkService,
+        nftService: servicesAssembly.nftService
+    )
+    
+    return CartView()
         .environmentObject(NavigationModel())
-        .environmentObject({
-            let networkClient = DefaultNetworkClient()
-            let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
-            let nftStorage = NftStorageImpl()
-            let servicesAssembly = ServicesAssembly(
-                networkClient: networkClient,
-                nftStorage: nftStorage
-            )
-            let cartManager = CartManager()
-            
-            return CartViewModel(
-                cartManager: cartManager,
-                cartNetworkService: cartNetworkService,
-                nftService: servicesAssembly.nftService
-            )
-        }())
+        .environmentObject(viewModel)
 }

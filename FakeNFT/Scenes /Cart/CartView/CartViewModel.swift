@@ -33,6 +33,7 @@ final class CartViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var error: Error?
     @Published var currentSortOption: SortOption = .price
+    @Published var isDeleting = false
     
     // MARK: - Dependencies
     
@@ -40,9 +41,6 @@ final class CartViewModel: ObservableObject {
     private let cartNetworkService: CartNetworkService
     private let nftService: NftService
     private var cancellables = Set<AnyCancellable>()
-    private var hasInitializedCart = false
-    
-    @Published private var sessionCartItems: [Nft] = []
     
     // MARK: - Computed Properties
     
@@ -59,7 +57,6 @@ final class CartViewModel: ObservableObject {
         self.cartManager = cartManager
         self.cartNetworkService = cartNetworkService
         self.nftService = nftService
-        setupBindings()
     }
     
     // MARK: - Public Methods
@@ -87,11 +84,59 @@ final class CartViewModel: ObservableObject {
     }
 
     func deleteNFT(_ id: String) {
-        print("[CartViewModel] Удаление NFT: \(id)")
+        print("[CartViewModel] Начало удаления NFT: \(id)")
+        isDeleting = true
+        error = nil
         
-        sessionCartItems.removeAll { $0.id == id }
-        
-        updateCartOnServer()
+        Task {
+            do {
+                let updatedNftIds = nfts.compactMap { nft in
+                    nft.id != id ? nft.id : nil
+                }
+                
+                print("[CartViewModel] Текущее количество NFT: \(nfts.count)")
+                print("[CartViewModel] Новое количество NFT: \(updatedNftIds.count)")
+                print("[CartViewModel] Отправка обновленного списка на сервер: \(updatedNftIds)")
+                
+                let updatedOrder = try await cartNetworkService.updateOrder(nftIds: updatedNftIds)
+                
+                print("[CartViewModel] Сервер подтвердил удаление")
+                print("[CartViewModel] Ответ сервера - количество NFT: \(updatedOrder.nfts.count)")
+                print("[CartViewModel] Новый список на сервере: \(updatedOrder.nfts)")
+                
+                await loadNftsFromOrder(updatedOrder.nfts)
+                
+                await MainActor.run {
+                    self.isDeleting = false
+                    print("[CartViewModel] NFT успешно удален из корзины")
+                }
+                
+            } catch let error as NetworkClientError {
+                await MainActor.run {
+                    self.error = error
+                    self.isDeleting = false
+                    print("[CartViewModel] Ошибка сети при удалении NFT: \(error)")
+                    
+                    switch error {
+                    case .httpStatusCode(let statusCode):
+                        print("[CartViewModel] HTTP статус код: \(statusCode)")
+                        if statusCode == 406 {
+                            print("[CartViewModel] Сервер не принимает пустой список NFT")
+                        }
+                    case .urlRequestError(let urlError):
+                        print("[CartViewModel] URL ошибка: \(urlError)")
+                    default:
+                        print("[CartViewModel] Другая сетевая ошибка: \(error)")
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    self.error = error
+                    self.isDeleting = false
+                    print("[CartViewModel] Общая ошибка удаления NFT: \(error)")
+                }
+            }
+        }
     }
     
     func sortItems(by option: SortOption) {
@@ -106,14 +151,9 @@ final class CartViewModel: ObservableObject {
     
     // MARK: - Private Methods
     
-    private func setupBindings() {
-        $sessionCartItems
-            .receive(on: DispatchQueue.main)
-            .assign(to: \.nfts, on: self)
-            .store(in: &cancellables)
-    }
-    
     private func loadNftsFromOrder(_ nftIds: [String]) async {
+        print("[CartViewModel] Загрузка \(nftIds.count) NFT по ID...")
+        
         var loadedNfts: [Nft] = []
         
         await withTaskGroup(of: Nft?.self) { group in
@@ -131,9 +171,9 @@ final class CartViewModel: ObservableObject {
         }
         
         await MainActor.run {
-            self.sessionCartItems = loadedNfts
+            self.nfts = loadedNfts
             self.isLoading = false
-            print("[CartViewModel] Корзина загружена: \(loadedNfts.count) NFT")
+            print("[CartViewModel] Корзина обновлена: \(loadedNfts.count) NFT")
         }
     }
     
@@ -147,23 +187,6 @@ final class CartViewModel: ObservableObject {
                 case .failure(let error):
                     print("[CartViewModel] Ошибка загрузки NFT \(id): \(error)")
                     continuation.resume(returning: nil)
-                }
-            }
-        }
-    }
-    
-    private func updateCartOnServer() {
-        print("[CartViewModel] Синхронизация корзины с сервером...")
-        let nftIds = sessionCartItems.map { $0.id }
-        
-        Task {
-            do {
-                let updatedOrder = try await cartNetworkService.updateOrder(nftIds: nftIds)
-                print("[CartViewModel] Корзина синхронизирована: \(updatedOrder.nfts.count) NFT")
-            } catch {
-                print("[CartViewModel] Ошибка синхронизации корзины: \(error)")
-                await MainActor.run {
-                    self.error = error
                 }
             }
         }
