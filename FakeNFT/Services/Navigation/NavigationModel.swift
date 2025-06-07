@@ -102,7 +102,7 @@ extension NavigationModel {
             
             // Nft(profile)
         case .myNFTView:
-            ProfileView(servicesAssembly: services)
+            MyNFTView(service: services)
         case .myFavoriteNFTView:
             MyFavoriteNFTView(service: services)
             

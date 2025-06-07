@@ -57,7 +57,7 @@ struct ProfileView: View {
                 
                 VStack {
                     ProfileListRowView(text: "Мои NFT" + " (\(profileVM.nftsCount))") {
-                        
+                        navigationModel.navigate(to: .myNFTView)
                     }
                     
                     ProfileListRowView(text: "Избранные NFT" + " (\(profileVM.nftLikesCount))") {
@@ -90,9 +90,7 @@ struct ProfileView: View {
                     })
                 )
             }
-            
-            ProgressHUD(isLoading: profileVM.loadingState == .loading)
-                .opacity(profileVM.loadingState == .loading ? 1 : 0)
+            .progressHUD(isLoading: profileVM.loadingState == .loading)
         }
     }
     
