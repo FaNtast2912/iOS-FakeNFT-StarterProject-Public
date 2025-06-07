@@ -8,13 +8,6 @@
 import Foundation
 import Combine
 
-struct PaymentCrypto: Identifiable, Equatable {
-    let id = UUID()
-    let icon: String
-    let title: String
-    let subtitle: String
-}
-
 final class MockData: ObservableObject {
     @Published var nfts: [Nft] = [
         Nft(
@@ -50,13 +43,13 @@ final class MockData: ObservableObject {
     ]
     
     let paymentCryptos: [CurrencyModel] = [
-        CurrencyModel(name: "Bitcoin", code: "BTC", iconName: "yp.cripto.bitcoin"),
-        CurrencyModel(name: "Dogecoin", code: "DOGE", iconName: "yp.cripto.dogecoin"),
-        CurrencyModel(name: "Tether", code: "USDT", iconName: "yp.cripto.tether"),
-        CurrencyModel(name: "Apecoin", code: "APE", iconName: "yp.cripto.apeCoin"),
-        CurrencyModel(name: "Solana", code: "SOL", iconName: "yp.cripto.solana"),
-        CurrencyModel(name: "Ethereum", code: "ETH", iconName: "yp.cripto.ethereum"),
-        CurrencyModel(name: "Cardano", code: "ADA", iconName: "yp.cripto.cardano"),
-        CurrencyModel(name: "Shiba Inu", code: "SHIB", iconName: "yp.cripto.shibaInu")
+        CurrencyModel(id: "1", name: "Bitcoin", title: "BTC", image: "yp.cripto.bitcoin"),
+        CurrencyModel(id: "2", name: "Dogecoin", title: "DOGE", image: "yp.cripto.dogecoin"),
+        CurrencyModel(id: "3", name: "Tether", title: "USDT", image: "yp.cripto.tether"),
+        CurrencyModel(id: "4", name: "Apecoin", title: "APE", image: "yp.cripto.apeCoin"),
+        CurrencyModel(id: "5", name: "Solana", title: "SOL", image: "yp.cripto.solana"),
+        CurrencyModel(id: "6", name: "Ethereum", title: "ETH", image: "yp.cripto.ethereum"),
+        CurrencyModel(id: "7", name: "Cardano", title: "ADA", image: "yp.cripto.cardano"),
+        CurrencyModel(id: "8", name: "Shiba Inu", title: "SHIB", image: "yp.cripto.shibaInu")
     ]
 }

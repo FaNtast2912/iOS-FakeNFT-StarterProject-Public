@@ -2,14 +2,18 @@
 //  CurrencyModel.swift
 //  FakeNFT
 //
-//  Created by Kaider on 28.05.2025.
+//  Created by [Your Name] on [Date].
 //
 
 import Foundation
 
 struct CurrencyModel: Identifiable, Equatable {
-    let id = UUID()
+    let id: String
     let name: String
-    let code: String
-    let iconName: String  // имя SF Symbol или ассета
+    let title: String
+    let image: String
+    
+    // Для совместимости с текущим UI
+    var code: String { title }
+    var iconName: String { image }
 }

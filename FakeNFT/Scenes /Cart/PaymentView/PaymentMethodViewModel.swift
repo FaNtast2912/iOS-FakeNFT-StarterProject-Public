@@ -2,17 +2,48 @@
 //  PaymentMethodViewModel.swift
 //  FakeNFT
 //
-//  Created by Kaider on 28.05.2025.
+//  Created by [Your Name] on [Date].
 //
 
-import Foundation
 import Combine
+import SwiftUI
 
-class PaymentMethodViewModel: ObservableObject {
-    @Published var currencies: [CurrencyModel] = []
-    @Published var selectedCurrency: CurrencyModel? = nil
+final class PaymentMethodViewModel: ObservableObject {
+    // MARK: - Published Properties
     
-    func loadCurrencies(from mockData: MockData) {
-        self.currencies = mockData.paymentCryptos
+    @Published private(set) var currencies: [CurrencyModel] = []
+    @Published var selectedCurrency: CurrencyModel? = nil
+    @Published var showPaymentError = false
+    
+    // MARK: - Initialization
+    
+    init(currencies: [CurrencyModel] = []) {
+        self.currencies = currencies.isEmpty ? loadMockCurrencies() : currencies
+    }
+    
+    // MARK: - Private Methods
+    
+    private func loadMockCurrencies() -> [CurrencyModel] {
+        return [
+            CurrencyModel(id: "1", name: "Bitcoin", title: "BTC", image: "yp.cripto.bitcoin"),
+            CurrencyModel(id: "2", name: "Ethereum", title: "ETH", image: "yp.cripto.ethereum"),
+            CurrencyModel(id: "3", name: "Dogecoin", title: "DOGE", image: "yp.cripto.dogecoin")
+        ]
+    }
+    
+    /// Эмуляция функции успешной и неуспешной оплаты через выбор валюты.
+    /// Пока валюта не выбрана - оплата не будет прозведена
+    /// Comment for commit =)
+    @MainActor
+    func processPayment() async -> Bool {
+        showPaymentError = false
+        // Если валюта не выбрана - будет ошибка оплаты
+        guard selectedCurrency != nil else {
+            try? await Task.sleep(nanoseconds: 50_000_000)
+            showPaymentError = true
+            return false
+        }
+        // Остальные параметры
+        return true
     }
 }

@@ -9,17 +9,17 @@ import SwiftUI
 
 struct CurrencyCellView: View {
     @EnvironmentObject var viewModel: PaymentMethodViewModel
-
+    
     let currency: CurrencyModel
     let isSelected: Bool
-
+    
     var body: some View {
         HStack(spacing: 12) {
             Image(currency.iconName)
                 .resizable()
                 .frame(width: 36, height: 36)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-
+            
             VStack(alignment: .leading, spacing: 2) {
                 Text(currency.name)
                     .font(.system(size: 15, weight: .semibold))
@@ -27,7 +27,7 @@ struct CurrencyCellView: View {
                     .font(.system(size: 13))
                     .foregroundColor(.init(red: 0.25, green: 0.87, blue: 0.63))
             }
-
+            
             Spacer()
         }
         .padding(.vertical, 10)
@@ -40,15 +40,26 @@ struct CurrencyCellView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: Color(.black).opacity(0.03), radius: 1)
         .onTapGesture {
-            viewModel.selectedCurrency = currency
-            print("Selected currency: \(currency.name) (\(currency.code))")
+            if isSelected {
+                viewModel.selectedCurrency = nil
+                print("Deselected currency: \(currency.name) (\(currency.code))")
+            } else {
+                viewModel.selectedCurrency = currency
+                print("Selected currency: \(currency.name) (\(currency.code))")
+            }
         }
     }
 }
-
-#Preview {
-    CurrencyCellView(
-        currency: CurrencyModel(name: "Bitcoin", code: "BTC", iconName: "yp.cripto.bitcoin"),
-        isSelected: true
-    )
-}
+    
+    #Preview {
+        CurrencyCellView(
+            currency: CurrencyModel(
+                id: "1",
+                name: "Bitcoin",
+                title: "BTC",
+                image: "yp.cripto.bitcoin"
+            ),
+            isSelected: true
+        )
+        .environmentObject(PaymentMethodViewModel())
+    }
