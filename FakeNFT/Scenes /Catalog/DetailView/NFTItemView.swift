@@ -74,7 +74,7 @@ struct NFTItemView: View {
                             cartManager.addToCart(nft)
                         }
                     } label: {
-                        Image(cartManager.isInCart(nft) ? "yp.cart.delete" : "yp.cart")
+                        Image(cartManager.isInCart(nft) ? .ypCartDelete : .ypCart)
                             .foregroundColor(.ypBlackUniversal)
                             .font(.system(size: 12))
                     }
