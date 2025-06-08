@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CurrencyModel: Identifiable, Equatable {
+struct CurrencyModel: Identifiable, Equatable, Codable {
     let id: String
     let name: String
     let title: String
@@ -15,5 +15,4 @@ struct CurrencyModel: Identifiable, Equatable {
     
     // Для совместимости с текущим UI
     var code: String { title }
-    var iconName: String { image }
 }

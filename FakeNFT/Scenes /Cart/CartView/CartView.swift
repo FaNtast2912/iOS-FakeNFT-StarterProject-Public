@@ -37,7 +37,7 @@ struct CartView: View {
         VStack(spacing: 0) {
             sortButton
             
-            if viewModel.nfts.isEmpty {
+            if viewModel.nfts.isEmpty && !viewModel.isLoading {
                 emptyCartView
             } else {
                 nftListView
@@ -45,7 +45,25 @@ struct CartView: View {
             
             paymentSummaryView
         }
+        .progressHUD(isLoading: viewModel.isLoading || viewModel.isDeleting)
         .overlay(deleteConfirmationOverlay)
+        .onAppear {
+            viewModel.loadCartItems()
+        }
+        .alert("Ошибка", isPresented: .constant(viewModel.error != nil)) {
+            Button("Повторить") {
+                if viewModel.nfts.isEmpty {
+                    viewModel.loadCartItems()
+                } else {
+                    viewModel.error = nil
+                }
+            }
+            Button("Отмена", role: .cancel) {
+                viewModel.error = nil
+            }
+        } message: {
+            Text(viewModel.error?.localizedDescription ?? "Произошла ошибка")
+        }
     }
     
     // MARK: - Private Subviews
@@ -66,6 +84,7 @@ struct CartView: View {
                         .padding(.trailing, Constants.sortButtonTrailingPadding)
                 }
             )
+            .disabled(viewModel.isLoading || viewModel.isDeleting)
             .confirmationDialog(
                 "Сортировка",
                 isPresented: $showSortOptions
@@ -102,6 +121,8 @@ struct CartView: View {
                             showDeleteConfirmation = true
                         }
                     )
+                    .disabled(viewModel.isDeleting)
+                    .opacity(viewModel.isDeleting ? 0.6 : 1.0)
                 }
             }
             .padding(.top, Constants.nftListTopPadding)
@@ -143,8 +164,8 @@ struct CartView: View {
                             .cornerRadius(Constants.payButtonCornerRadius)
                     }
                 )
-                .disabled(viewModel.nfts.isEmpty)
-                .opacity(viewModel.nfts.isEmpty ? 0.6 : 1.0)
+                .disabled(viewModel.nfts.isEmpty || viewModel.isLoading || viewModel.isDeleting)
+                .opacity((viewModel.nfts.isEmpty || viewModel.isLoading || viewModel.isDeleting) ? 0.6 : 1.0)
             }
             .padding(.horizontal, Constants.paymentSummaryHorizontalPadding)
         }
@@ -156,11 +177,13 @@ struct CartView: View {
                 DeleteNFTConfirmationView(
                     nftImage: Image("mockImageNFT"),
                     onDelete: {
+                        print("[CartView] Подтверждение удаления NFT: \(nft.name)")
                         viewModel.deleteNFT(nft.id)
                         showDeleteConfirmation = false
                         nftToDelete = nil
                     },
                     onCancel: {
+                        print("[CartView] Отмена удаления NFT")
                         showDeleteConfirmation = false
                         nftToDelete = nil
                     }
@@ -171,32 +194,20 @@ struct CartView: View {
 }
 
 #Preview("With NFTs") {
+    let networkClient = DefaultNetworkClient()
+    let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+    let nftStorage = NftStorageImpl()
+    let servicesAssembly = ServicesAssembly(
+        networkClient: networkClient,
+        nftStorage: nftStorage
+    )
     let cartManager = CartManager()
-    let viewModel = CartViewModel(cartManager: cartManager)
     
-    let nft1 = Nft(
-        id: "1",
-        name: "NFT 1",
-        createdAt: "2025-05-31",
-        images: [],
-        rating: 4,
-        description: "Test NFT 1",
-        price: 1.5,
-        author: "Author 1"
+    let viewModel = CartViewModel(
+        cartManager: cartManager,
+        cartNetworkService: cartNetworkService,
+        nftService: servicesAssembly.nftService
     )
-    let nft2 = Nft(
-        id: "2",
-        name: "NFT 2",
-        createdAt: "2025-05-31",
-        images: [],
-        rating: 5,
-        description: "Test NFT 2",
-        price: 2.3,
-        author: "Author 2"
-    )
-    
-    cartManager.addToCart(nft1)
-    cartManager.addToCart(nft2)
     
     return CartView()
         .environmentObject(NavigationModel())
@@ -204,8 +215,20 @@ struct CartView: View {
 }
 
 #Preview("Empty Cart") {
+    let networkClient = DefaultNetworkClient()
+    let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+    let nftStorage = NftStorageImpl()
+    let servicesAssembly = ServicesAssembly(
+        networkClient: networkClient,
+        nftStorage: nftStorage
+    )
     let cartManager = CartManager()
-    let viewModel = CartViewModel(cartManager: cartManager)
+    
+    let viewModel = CartViewModel(
+        cartManager: cartManager,
+        cartNetworkService: cartNetworkService,
+        nftService: servicesAssembly.nftService
+    )
     
     return CartView()
         .environmentObject(NavigationModel())
