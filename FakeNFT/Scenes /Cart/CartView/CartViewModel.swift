@@ -80,15 +80,13 @@ final class CartViewModel: ObservableObject {
 //                    await loadNftsFromOrder(order.nfts)
 //                }
                 
-                /// Закомментировать если прошлая функция  if order.nfts.isEmpty была раскомментирована
+                /// Закомментировать если прошлая функция if order.nfts.isEmpty была раскомментирована
                 await loadNftsFromOrder(order.nfts)
                 
+            } catch let networkError as NetworkClientError {
+                await handleNetworkError(networkError, context: "загрузка корзины")
             } catch {
-                await MainActor.run {
-                    self.error = error
-                    self.isLoading = false
-                    print("[CartViewModel] Ошибка загрузки корзины: \(error)")
-                }
+                await handleGenericError(error, context: "загрузка корзины")
             }
         }
     }
@@ -96,28 +94,26 @@ final class CartViewModel: ObservableObject {
     ///Раскомментировать для тестирования функций удаления корзины
 //    private func addTestNFTAutomatically() async {
 //        print("[CartViewModel] Автоматическое добавление тестового NFT...")
-//        
+//
 //        do {
 //            let testNftIds = ["2c9d09f6-25ac-4d6f-8d6a-175c4de2b42f"]
-//            
+//
 //            print("[CartViewModel] Добавляем тестовый NFT: \(testNftIds)")
-//            
+//
 //            let updatedOrder = try await cartNetworkService.updateOrder(nftIds: testNftIds)
 //            print("[CartViewModel] Сервер подтвердил добавление: \(updatedOrder.nfts)")
-//            
+//
 //            await loadNftsFromOrder(updatedOrder.nfts)
-//            
+//
 //            await MainActor.run {
 //                self.isLoading = false
 //                print("[CartViewModel] Тестовый NFT добавлен")
 //            }
-//            
+//
+//        } catch let networkError as NetworkClientError {
+//            await handleNetworkError(networkError, context: "добавление тестового NFT")
 //        } catch {
-//            await MainActor.run {
-//                self.error = error
-//                self.isLoading = false
-//                print("[CartViewModel] Ошибка добавления тестового NFT: \(error)")
-//            }
+//            await handleGenericError(error, context: "добавление тестового NFT")
 //        }
 //    }
     
@@ -149,30 +145,12 @@ final class CartViewModel: ObservableObject {
                     print("[CartViewModel] NFT успешно удален из корзины")
                 }
                 
-            } catch let error as NetworkClientError {
-                await MainActor.run {
-                    self.error = error
-                    self.isDeleting = false
-                    print("[CartViewModel] Ошибка сети при удалении NFT: \(error)")
-                    
-                    switch error {
-                    case .httpStatusCode(let statusCode):
-                        print("[CartViewModel] HTTP статус код: \(statusCode)")
-                        if statusCode == 406 {
-                            print("[CartViewModel] Сервер не принимает пустой список NFT")
-                        }
-                    case .urlRequestError(let urlError):
-                        print("[CartViewModel] URL ошибка: \(urlError)")
-                    default:
-                        print("[CartViewModel] Другая сетевая ошибка: \(error)")
-                    }
-                }
+            } catch let networkError as NetworkClientError {
+                await handleNetworkError(networkError, context: "удаление NFT")
+                await MainActor.run { self.isDeleting = false }
             } catch {
-                await MainActor.run {
-                    self.error = error
-                    self.isDeleting = false
-                    print("[CartViewModel] Общая ошибка удаления NFT: \(error)")
-                }
+                await handleGenericError(error, context: "удаление NFT")
+                await MainActor.run { self.isDeleting = false }
             }
         }
     }
@@ -185,6 +163,40 @@ final class CartViewModel: ObservableObject {
     func getSortedNFTs() -> [Nft] {
         let option = currentSortOption.toProductSortOption()
         return SortingManager.shared.sort(products: nfts, by: option)
+    }
+    
+    // MARK: - Error Handling
+    
+    private func handleNetworkError(_ error: NetworkClientError, context: String) async {
+        await MainActor.run {
+            self.isLoading = false
+            print("[CartViewModel] NetworkClientError при \(context): \(error)")
+            
+            self.error = error
+            
+            switch error {
+            case .httpStatusCode(let statusCode):
+                print("[CartViewModel] HTTP статус код: \(statusCode)")
+            case .urlRequestError(let urlError):
+                print("[CartViewModel] URL ошибка: \(urlError)")
+            case .urlSessionError:
+                print("[CartViewModel] URL Session ошибка")
+            case .parsingError:
+                print("[CartViewModel] Ошибка парсинга данных")
+            case .invalidEndpoint:
+                print("[CartViewModel] Некорректный endpoint")
+            case .invalidResponse:
+                print("[CartViewModel] Некорректный ответ сервера")
+            }
+        }
+    }
+    
+    private func handleGenericError(_ error: Error, context: String) async {
+        await MainActor.run {
+            self.isLoading = false
+            print("[CartViewModel] Общая ошибка при \(context): \(error)")
+            self.error = error
+        }
     }
     
     // MARK: - Private Methods
