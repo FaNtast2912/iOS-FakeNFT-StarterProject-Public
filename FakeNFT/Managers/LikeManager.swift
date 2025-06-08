@@ -55,7 +55,7 @@ final class LikesManager: ObservableObject {
     private func syncLikesWithServer() async {
         do {
             let likesDto = UserLikesRequestDto(likes: Array(likedNFTs))
-            let _ = try await userLikesService.updateLikes(dto: likesDto)
+            _ = try await userLikesService.updateLikes(dto: likesDto)
         } catch {
             print("❌ Ошибка синхронизации лайков: \(error.localizedDescription)")
             // В случае ошибки можно добавить retry логику или показать уведомление
