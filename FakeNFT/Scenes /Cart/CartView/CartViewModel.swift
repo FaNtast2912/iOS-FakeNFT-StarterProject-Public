@@ -122,7 +122,8 @@ final class CartViewModel: ObservableObject {
         isDeleting = true
         error = nil
         
-        Task {
+        Task { [weak self] in
+            guard let self = self else { return }
             do {
                 let updatedNftIds = nfts.compactMap { nft in
                     nft.id != id ? nft.id : nil
@@ -167,40 +168,39 @@ final class CartViewModel: ObservableObject {
     
     // MARK: - Error Handling
     
-    private func handleNetworkError(_ error: NetworkClientError, context: String) async {
-        await MainActor.run {
-            self.isLoading = false
-            print("[CartViewModel] NetworkClientError при \(context): \(error)")
-            
-            self.error = error
-            
-            switch error {
-            case .httpStatusCode(let statusCode):
-                print("[CartViewModel] HTTP статус код: \(statusCode)")
-            case .urlRequestError(let urlError):
-                print("[CartViewModel] URL ошибка: \(urlError)")
-            case .urlSessionError:
-                print("[CartViewModel] URL Session ошибка")
-            case .parsingError:
-                print("[CartViewModel] Ошибка парсинга данных")
-            case .invalidEndpoint:
-                print("[CartViewModel] Некорректный endpoint")
-            case .invalidResponse:
-                print("[CartViewModel] Некорректный ответ сервера")
-            }
+    @MainActor
+    private func handleNetworkError(_ error: NetworkClientError, context: String) {
+        isLoading = false
+        print("[CartViewModel] NetworkClientError при \(context): \(error)")
+        
+        self.error = error
+        
+        switch error {
+        case .httpStatusCode(let statusCode):
+            print("[CartViewModel] HTTP статус код: \(statusCode)")
+        case .urlRequestError(let urlError):
+            print("[CartViewModel] URL ошибка: \(urlError)")
+        case .urlSessionError:
+            print("[CartViewModel] URL Session ошибка")
+        case .parsingError:
+            print("[CartViewModel] Ошибка парсинга данных")
+        case .invalidEndpoint:
+            print("[CartViewModel] Некорректный endpoint")
+        case .invalidResponse:
+            print("[CartViewModel] Некорректный ответ сервера")
         }
     }
     
-    private func handleGenericError(_ error: Error, context: String) async {
-        await MainActor.run {
-            self.isLoading = false
-            print("[CartViewModel] Общая ошибка при \(context): \(error)")
-            self.error = error
-        }
+    @MainActor
+    private func handleGenericError(_ error: Error, context: String) {
+        isLoading = false
+        print("[CartViewModel] Общая ошибка при \(context): \(error)")
+        self.error = error
     }
     
     // MARK: - Private Methods
     
+    @MainActor
     private func loadNftsFromOrder(_ nftIds: [String]) async {
         print("[CartViewModel] Загрузка \(nftIds.count) NFT по ID...")
         
@@ -220,11 +220,9 @@ final class CartViewModel: ObservableObject {
             }
         }
         
-        await MainActor.run {
-            self.nfts = loadedNfts
-            self.isLoading = false
-            print("[CartViewModel] Корзина обновлена: \(loadedNfts.count) NFT")
-        }
+        nfts = loadedNfts
+        isLoading = false
+        print("[CartViewModel] Корзина обновлена: \(loadedNfts.count) NFT")
     }
     
     private func loadSingleNft(id: String) async -> Nft? {
