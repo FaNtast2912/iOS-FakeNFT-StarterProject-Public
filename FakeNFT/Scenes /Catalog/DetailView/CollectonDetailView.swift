@@ -2,18 +2,19 @@
 //  CollectonDetailView.swift
 //  FakeNFT
 //
-//  Created by Kaider on 28.05.2025.
+//  Created by Maksim Zakharov on 28.05.2025.
 //
 
 import SwiftUI
 
 /// Экран деталей коллекции NFT
 struct CollectionDetailView: View {
-    let collection: NFTCollection
+    let collection: NFTCollections
     @StateObject private var viewModel: CollectionDetailViewModel
     @EnvironmentObject private var navigationModel: NavigationModel
+    @EnvironmentObject private var servicesAssembly: ServicesAssembly
     
-    init(collection: NFTCollection) {
+    init(collection: NFTCollections) {
         self.collection = collection
         self._viewModel = StateObject(wrappedValue: CollectionDetailViewModel(collection: collection))
     }
@@ -38,13 +39,23 @@ struct CollectionDetailView: View {
                 backButton
             }
         }
+        .environmentObject(servicesAssembly.likesManager)
         .task {
             if case .idle = viewModel.loadingState {
-                await viewModel.loadNFTs()
+                // Загружаем лайки и NFT параллельно
+                async let loadNFTs: Void = viewModel.loadNFTs()
+                async let loadLikes: Void = servicesAssembly.likesManager.loadLikes()
+                
+                await loadNFTs
+                await loadLikes
             }
         }
         .refreshable {
-            await viewModel.refresh()
+            async let refreshNFTs: Void = viewModel.refresh()
+            async let refreshLikes: Void = servicesAssembly.likesManager.loadLikes()
+            
+            await refreshNFTs
+            await refreshLikes
         }
     }
     
@@ -70,8 +81,7 @@ struct CollectionDetailView: View {
             Rectangle()
                 .fill(Color.ypLightGrey)
                 .overlay {
-                    ProgressView()
-                        .tint(.ypBlueUniversal)
+                    ProgressHUD(isLoading: true)
                 }
         }
         .frame(height: 310)
@@ -92,6 +102,7 @@ struct CollectionDetailView: View {
             HStack(spacing: 4.0) {
                 Text("Автор Коллекции:")
                     .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(.ypBlack)
                 Button {
                     navigationModel.IOScource()
                 } label: {
@@ -136,9 +147,7 @@ struct CollectionDetailView: View {
     
     private var loadingView: some View {
         VStack {
-            ProgressView()
-                .scaleEffect(1.5)
-                .tint(.ypBlueUniversal)
+            ProgressHUD(isLoading: true)
             
             Text("Загрузка NFT...")
                 .font(.system(size: 15))
@@ -183,7 +192,7 @@ struct CollectionDetailView: View {
 
 // MARK: - Preview
 #Preview {
-    let sampleCollection = NFTCollection(
+    let sampleCollection = NFTCollections(
         id: "sample-id",
         name: "Peach",
         cover: URL(string: "https://code.s3.yandex.net/Mobile/iOS/NFT/Обложки_коллекций/Brown.png")!,
@@ -193,8 +202,14 @@ struct CollectionDetailView: View {
         createdAt: "2023-11-21T15:21:36.683Z[GMT]"
     )
     
+    // Создаем мок-сервисы для превью
+    let mockNetworkClient = DefaultNetworkClient()
+    let mockNftStorage = NftStorageImpl()
+    let mockServicesAssembly = ServicesAssembly(networkClient: mockNetworkClient, nftStorage: mockNftStorage)
+    
     NavigationView {
         CollectionDetailView(collection: sampleCollection)
             .environmentObject(NavigationModel())
+            .environmentObject(mockServicesAssembly)
     }
 }

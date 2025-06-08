@@ -11,17 +11,24 @@ import SwiftUI
 enum CatalogLoadingState {
     case idle
     case loading
-    case loaded([NFTCollection])
+    case loaded([NFTCollections])
     case error(String)
+}
+
+/// Опции сортировки коллекций
+enum CollectionSortOption {
+    case name(ascending: Bool)
+    case nftCount(ascending: Bool)
 }
 
 /// ViewModel для экрана каталога коллекций
 @MainActor
 final class CatalogViewModel: ObservableObject {
     @Published var loadingState: CatalogLoadingState = .idle
-    @Published var collections: [NFTCollection] = []
+    @Published var collections: [NFTCollections] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var sortOption: CollectionSortOption?
     
     private let networkClient: NetworkClient
     
@@ -39,10 +46,13 @@ final class CatalogViewModel: ObservableObject {
         
         do {
             let request = CatalogRequest()
-            let loadedCollections: [NFTCollection] = try await networkClient.send(request, as: [NFTCollection].self)
+            let loadedCollections: [NFTCollections] = try await networkClient.send(request, as: [NFTCollections].self)
             
             collections = loadedCollections
-            loadingState = .loaded(loadedCollections)
+            if let sortOption = sortOption {
+                sortCollections(by: sortOption)
+            }
+            loadingState = .loaded(collections)
             isLoading = false
         } catch {
             let message = error.localizedDescription
@@ -55,5 +65,22 @@ final class CatalogViewModel: ObservableObject {
     /// Перезагружает коллекции
     func refresh() async {
         await loadCollections()
+    }
+    
+    /// Сортирует коллекции
+    func sortCollections(by option: CollectionSortOption) {
+        sortOption = option
+        switch option {
+        case .name(let ascending):
+            collections.sort {
+                let result = $0.name.localizedCaseInsensitiveCompare($1.name)
+                return ascending ? (result == .orderedAscending) : (result == .orderedDescending)
+            }
+        case .nftCount(let ascending):
+            collections.sort {
+                ascending ? ($0.nftCount < $1.nftCount) : ($0.nftCount > $1.nftCount)
+            }
+        }
+        loadingState = .loaded(collections)
     }
 }

@@ -9,7 +9,7 @@ import SwiftUI
 
 /// Ячейка каталога для отображения одной коллекции NFT
 struct CatalogRowView: View {
-    let collection: NFTCollection
+    let collection: NFTCollections
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -47,7 +47,7 @@ struct CatalogRowView: View {
 
 // MARK: - Preview
 #Preview {
-    let sampleCollection = NFTCollection(
+    let sampleCollection = NFTCollections(
         id: "sample-id",
         name: "Peach",
         cover: URL(string: "https://code.s3.yandex.net/Mobile/iOS/NFT/Обложки_коллекций/Brown.png")!,

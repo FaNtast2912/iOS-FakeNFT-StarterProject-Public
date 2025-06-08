@@ -8,11 +8,15 @@
 import SwiftUI
 
 struct ProfileView: View {
-    var body: some View {
-        Text("Hello, Profile")
+    @EnvironmentObject private var navigationModel: NavigationModel
+    
+    init(servicesAssembly: ServicesAssembly) {
+
     }
+    
+    var body: some View {
+        Text("Hello World")
+    }
+    
 }
 
-#Preview {
-    ProfileView()
-}
