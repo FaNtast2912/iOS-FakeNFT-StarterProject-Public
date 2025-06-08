@@ -71,6 +71,16 @@ final class CartViewModel: ObservableObject {
                 let order = try await cartNetworkService.fetchOrder()
                 print("[CartViewModel] Получен заказ с \(order.nfts.count) NFT")
                 
+                ///Метод автоматически добавляет тестовый NFT, если корзина пустая
+                ///Раскомментировать для тестирования функций удаления корзины
+//                if order.nfts.isEmpty {
+//                    print("[CartViewModel] Корзина пустая, добавляем тестовый NFT автоматически")
+//                    await addTestNFTAutomatically()
+//                } else {
+//                    await loadNftsFromOrder(order.nfts)
+//                }
+                
+                /// Закомментировать если прошлая функция  if order.nfts.isEmpty была раскомментирована
                 await loadNftsFromOrder(order.nfts)
                 
             } catch {
@@ -82,7 +92,35 @@ final class CartViewModel: ObservableObject {
             }
         }
     }
-
+      
+    ///Раскомментировать для тестирования функций удаления корзины
+//    private func addTestNFTAutomatically() async {
+//        print("[CartViewModel] Автоматическое добавление тестового NFT...")
+//        
+//        do {
+//            let testNftIds = ["2c9d09f6-25ac-4d6f-8d6a-175c4de2b42f"]
+//            
+//            print("[CartViewModel] Добавляем тестовый NFT: \(testNftIds)")
+//            
+//            let updatedOrder = try await cartNetworkService.updateOrder(nftIds: testNftIds)
+//            print("[CartViewModel] Сервер подтвердил добавление: \(updatedOrder.nfts)")
+//            
+//            await loadNftsFromOrder(updatedOrder.nfts)
+//            
+//            await MainActor.run {
+//                self.isLoading = false
+//                print("[CartViewModel] Тестовый NFT добавлен")
+//            }
+//            
+//        } catch {
+//            await MainActor.run {
+//                self.error = error
+//                self.isLoading = false
+//                print("[CartViewModel] Ошибка добавления тестового NFT: \(error)")
+//            }
+//        }
+//    }
+    
     func deleteNFT(_ id: String) {
         print("[CartViewModel] Начало удаления NFT: \(id)")
         isDeleting = true

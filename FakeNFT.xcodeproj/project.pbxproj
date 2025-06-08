@@ -443,9 +443,9 @@
 			isa = PBXGroup;
 			children = (
 				C942F56D2DE7B78A00966062 /* PaymentDoneView */,
-				C942F56C2DE7B76400966062 /* PaymentView */,
 				C942F56B2DE7B74F00966062 /* CartView */,
 				C9D3DE6B2DEC592D0098CD8E /* MockData.swift */,
+				C942F56C2DE7B76400966062 /* PaymentView */,
 			);
 			path = Cart;
 			sourceTree = "<group>";

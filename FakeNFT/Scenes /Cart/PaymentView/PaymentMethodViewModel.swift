@@ -17,6 +17,7 @@ final class PaymentMethodViewModel: ObservableObject {
     @Published var showPaymentError = false
     @Published var isLoading = false
     @Published var error: Error?
+    @Published var paymentSuccess = false
     
     // MARK: - Dependencies
     
@@ -58,7 +59,9 @@ final class PaymentMethodViewModel: ObservableObject {
         
         guard let selectedCurrency = selectedCurrency else {
             print("[PaymentViewModel] Валюта не выбрана")
-            showPaymentError = true
+            await MainActor.run {
+                self.showPaymentError = true
+            }
             return false
         }
         
@@ -68,23 +71,58 @@ final class PaymentMethodViewModel: ObservableObject {
     // MARK: - Private Methods
     
     private func processNetworkPayment(currencyId: String) async -> Bool {
-        print("[PaymentViewModel] Обработка платежа для валюты: \(currencyId)")
-        isLoading = true
+        print("[PaymentViewModel] Начало обработки платежа для валюты ID: \(currencyId)")
+        
+        await MainActor.run {
+            self.isLoading = true
+            self.error = nil
+        }
         
         do {
+            // Обрабатываем платеж
             let result = try await cartNetworkService.payOrder(currencyId: currencyId)
-            await MainActor.run {
-                self.isLoading = false
+            
+            if result.success {
+                print("[PaymentViewModel] Платеж успешно обработан")
+                
+                // Очищаем корзину после успешной оплаты
+                let clearedOrder = try await clearCartAfterPayment()
+                
+                await MainActor.run {
+                    self.isLoading = false
+                    self.paymentSuccess = true
+                }
+                
+                print("[PaymentViewModel] Корзина очищена после оплаты")
+                return true
+                
+            } else {
+                print("[PaymentViewModel] Платеж отклонен сервером")
+                await MainActor.run {
+                    self.isLoading = false
+                    self.showPaymentError = true
+                }
+                return false
             }
-            print("[PaymentViewModel] Платеж обработан: success=\(result.success)")
-            return result.success
+            
         } catch {
             await MainActor.run {
                 self.isLoading = false
                 self.showPaymentError = true
+                self.error = error
             }
             print("[PaymentViewModel] Ошибка платежа: \(error)")
             return false
         }
+    }
+    
+    private func clearCartAfterPayment() async throws -> Order {
+        print("[PaymentViewModel] Очистка корзины после успешной оплаты...")
+        
+        // Отправляем пустой список NFT для очистки корзины
+        let clearedOrder = try await cartNetworkService.updateOrder(nftIds: [])
+        
+        print("[PaymentViewModel] Корзина очищена, количество NFT на сервере: \(clearedOrder.nfts.count)")
+        return clearedOrder
     }
 }
