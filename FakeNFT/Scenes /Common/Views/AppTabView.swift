@@ -9,7 +9,6 @@ import SwiftUI
 
 struct AppTabView: View {
     @StateObject private var navigationModel = NavigationModel()
-    @StateObject private var mockData = MockData()
     
     init() {
         // по идее надо перенести куда-то во вью модель или оставить здесь
@@ -74,7 +73,6 @@ struct AppTabView: View {
 #Preview {
     AppTabView()
         .environmentObject(NavigationModel())
-        .environmentObject(MockData())
         .environmentObject({
             let networkClient = DefaultNetworkClient()
             let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)

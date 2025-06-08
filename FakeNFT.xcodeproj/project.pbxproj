@@ -50,7 +50,6 @@
 		C9D3DE662DEC58DC0098CD8E /* CurrencyCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D3DE652DEC58DC0098CD8E /* CurrencyCellView.swift */; };
 		C9D3DE682DEC58F40098CD8E /* CurrencyModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D3DE672DEC58F40098CD8E /* CurrencyModel.swift */; };
 		C9D3DE6A2DEC59160098CD8E /* PaymentMethodViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D3DE692DEC59160098CD8E /* PaymentMethodViewModel.swift */; };
-		C9D3DE6C2DEC592D0098CD8E /* MockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9D3DE6B2DEC592D0098CD8E /* MockData.swift */; };
 		D04790BD2DE393EC000585F0 /* AppTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D04790BC2DE393EC000585F0 /* AppTabView.swift */; };
 		D04790BF2DE393FE000585F0 /* FakeNFTApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D04790BE2DE393FE000585F0 /* FakeNFTApp.swift */; };
 		D04790C12DE3A59E000585F0 /* CatalogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D04790C02DE3A59E000585F0 /* CatalogView.swift */; };
@@ -134,7 +133,6 @@
 		C9D3DE652DEC58DC0098CD8E /* CurrencyCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyCellView.swift; sourceTree = "<group>"; };
 		C9D3DE672DEC58F40098CD8E /* CurrencyModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyModel.swift; sourceTree = "<group>"; };
 		C9D3DE692DEC59160098CD8E /* PaymentMethodViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentMethodViewModel.swift; sourceTree = "<group>"; };
-		C9D3DE6B2DEC592D0098CD8E /* MockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockData.swift; sourceTree = "<group>"; };
 		D04790BC2DE393EC000585F0 /* AppTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTabView.swift; sourceTree = "<group>"; };
 		D04790BE2DE393FE000585F0 /* FakeNFTApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeNFTApp.swift; sourceTree = "<group>"; };
 		D04790C02DE3A59E000585F0 /* CatalogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogView.swift; sourceTree = "<group>"; };
@@ -444,7 +442,6 @@
 			children = (
 				C942F56D2DE7B78A00966062 /* PaymentDoneView */,
 				C942F56B2DE7B74F00966062 /* CartView */,
-				C9D3DE6B2DEC592D0098CD8E /* MockData.swift */,
 				C942F56C2DE7B76400966062 /* PaymentView */,
 			);
 			path = Cart;
@@ -674,7 +671,6 @@
 				D0E6FF742DEF1939004EA1E8 /* Profile.swift in Sources */,
 				0CF2C2DD2A783CE600FDC837 /* ErrorView.swift in Sources */,
 				0CFCB7402A78002A0009A829 /* ExamplePutService.swift in Sources */,
-				C9D3DE6C2DEC592D0098CD8E /* MockData.swift in Sources */,
 				3F6806D529CBBEC700B4F915 /* NetworkTask.swift in Sources */,
 				558E39E72C68CE0A00FB86AC /* NftService.swift in Sources */,
 				D04790BF2DE393FE000585F0 /* FakeNFTApp.swift in Sources */,

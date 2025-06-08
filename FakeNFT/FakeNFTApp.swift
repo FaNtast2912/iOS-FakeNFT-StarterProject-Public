@@ -3,7 +3,6 @@ import SwiftUI
 @main
 struct FakeNFTApp: App {
     @StateObject private var navigation = NavigationModel()
-    @StateObject private var mockData = MockData()
     @StateObject private var cartManager = CartManager()
     
     // Создаем сетевые сервисы через ServicesAssembly
@@ -35,7 +34,6 @@ struct FakeNFTApp: App {
         WindowGroup {
             AppTabView()
                 .environmentObject(navigation)
-                .environmentObject(mockData)
                 .environmentObject(cartManager)
                 .environmentObject(cartViewModel)
         }
