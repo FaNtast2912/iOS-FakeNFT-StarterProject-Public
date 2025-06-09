@@ -16,8 +16,9 @@ struct NavigationBarStyle: ViewModifier {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: dismissAction) {
-                        Image("yp.chevron.backward")
+                        Image(.ypChevronBackward)
                             .frame(width: 24, height: 24)
+                            .foregroundStyle(Color.ypBlack)
                     }
                 }
             }
