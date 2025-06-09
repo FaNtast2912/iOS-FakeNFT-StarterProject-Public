@@ -186,18 +186,26 @@ final class CartViewModel: ObservableObject {
         print("[CartViewModel] Корзина обновлена: \(loadedNfts.count) NFT")
     }
     
-    private func loadSingleNft(id: String) async -> Nft? {
-        return await withCheckedContinuation { continuation in
-            nftService.loadNft(id: id) { result in
-                switch result {
-                case .success(let nft):
-                    print("[CartViewModel] Загружен NFT: \(nft.name)")
-                    continuation.resume(returning: nft)
-                case .failure(let error):
-                    print("[CartViewModel] Ошибка загрузки NFT \(id): \(error)")
-                    continuation.resume(returning: nil)
-                }
+    func loadNfts(for user: User) async {
+        isLoading = true
+        defer { isLoading = false }
+
+        var loadedNfts: [Nft] = []
+
+        for id in user.nfts {
+            do {
+                let nft = try await nftService.loadNft(id: id)
+                loadedNfts.append(nft)
+            } catch {
+                print("Ошибка загрузки NFT с id=\(id): \(error)")
             }
         }
+        nfts = loadedNfts
+    }
+    
+    private func loadSingleNft(id: String) async -> Nft? {
+        isLoading = true
+        defer { isLoading = false }
+        return try? await nftService.loadNft(id: id)
     }
 }

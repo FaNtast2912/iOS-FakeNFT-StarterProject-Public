@@ -11,5 +11,6 @@ struct FakeNFTApp: App {
                 .environmentObject(navigation)
         }
     }
+    
 }
 

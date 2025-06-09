@@ -31,7 +31,7 @@ final class ServicesAssembly: ObservableObject {
     var userLikesService: UserLikesService {
         UserLikesServiceImpl(networkClient: networkClient)
     }
-    
+
     var cartNetworkService: CartNetworkService {
         DefaultCartNetworkService(networkClient: networkClient)
     }

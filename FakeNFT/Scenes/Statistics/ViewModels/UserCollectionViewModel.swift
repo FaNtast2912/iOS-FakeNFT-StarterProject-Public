@@ -25,22 +25,12 @@ final class UserCollectionViewModel: ObservableObject {
 
         for id in user.nfts {
             do {
-                let nft = try await loadNftAsync(id: id)
+                let nft = try await nftService.loadNft(id: id)
                 loadedNfts.append(nft)
             } catch {
                 print("Ошибка загрузки NFT с id=\(id): \(error)")
             }
         }
-
         nfts = loadedNfts
-    }
-
-    private func loadNftAsync(id: String) async throws -> Nft {
-        try await withCheckedThrowingContinuation { continuation in
-            nftService.loadNft(id: id) { result in
-                continuation.resume(with: result)
-            }
-        }
-     
     }
 }

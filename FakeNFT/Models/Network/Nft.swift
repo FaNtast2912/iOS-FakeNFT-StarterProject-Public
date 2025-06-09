@@ -1,6 +1,6 @@
 import Foundation
 
-struct Nft: Codable {
+struct Nft: Codable, Hashable {
     let id: String
     let name: String
     let createdAt: String

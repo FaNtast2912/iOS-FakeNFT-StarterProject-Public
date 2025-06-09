@@ -280,6 +280,7 @@ struct DefaultNetworkClient: NetworkClient {
             let jsonData = try JSONSerialization.data(withJSONObject: dtoDictionary, options: [])
             urlRequest.httpBody = jsonData
             urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         } catch {
             throw NetworkClientError.parsingError
         }
