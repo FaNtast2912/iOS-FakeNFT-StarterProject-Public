@@ -56,6 +56,7 @@ struct MyNFTView: View {
                     } label: {
                         Image(.ypChevronBackward)
                             .frame(width: 24, height: 24)
+                            .foregroundStyle(Color.ypBlack)
                     }
                 }
                 
@@ -65,6 +66,7 @@ struct MyNFTView: View {
                     } label: {
                         Image(.ypSort)
                             .frame(width: 24, height: 24)
+                            .foregroundStyle(Color.ypBlack)
                     }
                 }
             }

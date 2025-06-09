@@ -21,7 +21,7 @@ struct ProfileView: View {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
                     Spacer()
-                    Image("yp.Edit")
+                    Image(.ypEdit)
                         .onTapGesture {
                             editProfileIsPresented.toggle()
                         }
@@ -46,10 +46,13 @@ struct ProfileView: View {
                         .lineLimit(5)
                         .font(.system(size: 12, weight: .regular))
                         .frame(height: 72)
-                    Button(profileVM.profile.website) {
+                    Button {
                         if let url = URL(string: profileVM.profile.website) {
                             navigationModel.navigate(to: .webView(url: url))
                         }
+                    } label: {
+                        Text(profileVM.profile.website)
+                            .multilineTextAlignment(.leading)
                     }
                 }
                 .multilineTextAlignment(.leading)
