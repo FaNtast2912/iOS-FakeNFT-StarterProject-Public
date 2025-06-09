@@ -8,10 +8,15 @@
 import SwiftUI
 
 struct UserCollectionView: View {
-    @StateObject private var viewModel = UserCollectionViewModel()
+    @StateObject private var viewModel: UserCollectionViewModel
     @EnvironmentObject var navigationModel: NavigationModel
     
     let user: User
+    
+    init(user: User, nftService: NftService) {
+        _viewModel = StateObject(wrappedValue: UserCollectionViewModel(nftService: nftService))
+        self.user = user
+    }
     
     let columns = [
         GridItem(.flexible(), spacing: 2),
@@ -36,8 +41,9 @@ struct UserCollectionView: View {
         .navigationBarStyle(dismissAction: {
             navigationModel.navigateBack()
         })
-        .onAppear {
-            viewModel.loadNfts(for: user)
+        .progressHUD(isLoading: viewModel.isLoading)
+        .task {
+            await viewModel.loadNfts(for: user)
         }
     }
 }
@@ -52,6 +58,7 @@ struct UserCollectionView: View {
             website: "https://example.com",
             nfts: ["a", "c", "c", "a", "d"],
             rating: "3"
-        )
+        ),
+        nftService: MockUserCollectionService()
     )
 }

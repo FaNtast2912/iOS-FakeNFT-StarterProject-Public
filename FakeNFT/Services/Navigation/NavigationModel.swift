@@ -36,7 +36,14 @@ enum Screens: Hashable {
 final class NavigationModel: ObservableObject {
     @Published var path = [Screens]()
     @Published var selectedTab: Int = 0              // Текущий таб в TabView
-    @Published var presentedScreen: Screens?         // Флаг для отображения модальных экранов
+    @Published var presentedScreen: Screens?
+    
+    let statisticsViewModel: StatisticsViewModel
+    init(services: ServicesAssembly) {
+        self.statisticsViewModel = StatisticsViewModel(userService: services.userService)
+    }
+    
+    // Флаг для отображения модальных экранов
     
     // MARK: - Навигационные методы
     
@@ -91,7 +98,7 @@ final class NavigationModel: ObservableObject {
 
 extension NavigationModel {
     @ViewBuilder
-    func destination(for screen: Screens) -> some View {
+    func destination(for screen: Screens, with services: ServicesAssembly) -> some View {
         switch screen {
             
             // Catalog
@@ -108,11 +115,11 @@ extension NavigationModel {
             
             // Statistics
         case .statisticsView:
-            StatisticsView()
+            StatisticsView(viewModel: statisticsViewModel)
         case .userCard(let user):
-            UserCardView(user: user)
+            UserCardView(userId: user.id, userService: services.userByIdService)
         case .userCollection(let user):
-            UserCollectionView(user: user)
+            UserCollectionView(user: user, nftService: services.nftService)
             
             // Cart
         case .cartView:

@@ -12,7 +12,6 @@ enum UsertSortOption: String {
     case initial
 }
 
-
 final class SortingManagerUser {
     static let shared = SortingManagerUser()
     private init() {}
@@ -28,12 +27,16 @@ final class SortingManagerUser {
             
         case .rating:
             return users.sorted {
-                $0.rating > $1.rating
+                (Int($0.rating) ?? 0) > (Int($1.rating) ?? 0)
             }
             
         case .initial:
             return users.sorted {
-                $0.nfts.count > $1.nfts.count
+                if $0.nfts.count != $1.nfts.count {
+                    return $0.nfts.count > $1.nfts.count
+                } else {
+                    return (Int($0.rating) ?? 0) > (Int($1.rating) ?? 0)
+                }
             }
         }
     }

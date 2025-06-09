@@ -8,10 +8,14 @@
 import SwiftUI
 
 struct UserCardView: View {
-    let user: User
-    @StateObject private var viewModel = UserCardViewModel()
+    private let userId: String
+    @StateObject private var viewModel: UserCardViewModel
     @EnvironmentObject var navigationModel: NavigationModel
-
+    
+    init(userId: String, userService: UserByIdService) {
+        self.userId = userId
+        _viewModel = StateObject(wrappedValue: UserCardViewModel(userService: userService))
+    }
     var body: some View {
         contentView
             .foregroundStyle(Color.ypBlack)
@@ -20,15 +24,23 @@ struct UserCardView: View {
                 navigationModel.navigateBack()
             })
             .onAppear {
-                viewModel.loadMockUser(user: user)
+                if viewModel.user == nil {
+                    Task {
+                        await viewModel.loadUser(by: userId)
+                    }
+                }
             }
     }
-
+    
     // MARK: - Content View
-
+    
     @ViewBuilder
     private var contentView: some View {
-        if let user = viewModel.user {
+        if viewModel.isLoading {
+            Spacer()
+            .progressHUD(isLoading: viewModel.isLoading)
+            Spacer()
+        } else if let user = viewModel.user {
             VStack(alignment: .leading) {
                 userHeaderView(user: user)
                 userDescriptionView(user: user)
@@ -37,35 +49,59 @@ struct UserCardView: View {
                 Spacer()
             }
         } else {
-            Text("Загрузка...")
+            Text("Пользователь не найден")
+                .foregroundColor(Color.ypBlack)
+                .font(.system(size: 24))
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
     }
 
     private func userHeaderView(user: User) -> some View {
         HStack(spacing: 16) {
-            Image("yp.userPickMock")
-                .resizable()
-                .frame(width: 70, height: 70)
-                .clipShape(Circle())
-
+            if !user.avatar.isEmpty, let url = URL(string: user.avatar) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 70, height: 70)
+                            .clipShape(Circle())
+                    default:
+                        Image("yp.emptyUserPick")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 70, height: 70)
+                            .clipShape(Circle())
+                            .opacity(0.5)
+                    }
+                }
+            } else {
+                Image("yp.userPickMock")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 70, height: 70)
+                    .clipShape(Circle())
+                    .opacity(0.5)
+            }
+            
             Text(user.name)
                 .font(.system(size: 22, weight: .bold))
         }
         .padding(.bottom, 20)
     }
-
+    
     private func userDescriptionView(user: User) -> some View {
-        Text(user.description)
+        Text(user.description ?? "")
             .font(.system(size: 15))
             .padding(.trailing, 2)
             .padding(.bottom, 28)
-        
     }
-
+    
     private func websiteButtonView(user: User) -> some View {
         Button("Перейти на сайт пользователя") {
-            // будет обработка позже
-        }
+                navigationModel.IOScource() // добавила единый так как у большинста юзеров ссылка на сайт нерабочая приходит с сервера 
+            }
         .padding(10)
         .frame(maxWidth: .infinity)
         .overlay(RoundedRectangle(cornerRadius: 16).stroke(Color.ypBlack))
@@ -73,7 +109,6 @@ struct UserCardView: View {
         .font(.system(size: 15))
         .padding(.bottom, 40)
     }
-
     private func nftCollectionHeaderView(user: User) -> some View {
         HStack {
             Text("Коллекция NFT (\(user.nfts.count))")
@@ -87,18 +122,10 @@ struct UserCardView: View {
         }
     }
 }
-
 #Preview {
     UserCardView(
-        user: User(
-            id: "1",
-            name: "Mock User",
-            avatar: "",
-            description: "Дизайнер из Казани, люблю цифровое искусство и бейглы. В моей коллекции уже 100+ NFT, и еще больше — на моём сайте. Открыт к коллаборациям.",
-            website: "https://example.com",
-            nfts: ["nft1", "nft2"],
-            rating: "3"
-            
-        )
+        userId: "1",
+        userService: MockUserByIdService()
+
     )
 }

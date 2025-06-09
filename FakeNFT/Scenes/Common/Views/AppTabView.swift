@@ -8,14 +8,11 @@
 import SwiftUI
 
 struct AppTabView: View {
-    @StateObject private var navigationModel = NavigationModel()
-    
-    init() {
-        // по идее надо перенести куда-то во вью модель или оставить здесь
-        let servicesAssembly = ServicesAssembly(
-            networkClient: DefaultNetworkClient(),
-            nftStorage: NftStorageImpl()
-        )
+    @EnvironmentObject private var navigationModel: NavigationModel
+    private var servicesAssembly: ServicesAssembly
+
+    init(servicesAssembly: ServicesAssembly) {
+        self.servicesAssembly = servicesAssembly
         
         // настраиваем иконки таб бара
         let tabBarAppearance = UITabBarAppearance()
@@ -53,7 +50,9 @@ struct AppTabView: View {
                     }
                     .tag(2)
                 
-                StatisticsView()
+                StatisticsView(
+                    viewModel: StatisticsViewModel(userService: servicesAssembly.userService)
+                )
                     .tabItem {
                         Text("Статистика")
                         Image("yp.statisticsIcon")
@@ -63,7 +62,7 @@ struct AppTabView: View {
             }
             // Общая обработка навигации для всех табов
             .navigationDestination(for: Screens.self) { screen in
-                navigationModel.destination(for: screen)
+                navigationModel.destination(for: screen,  with: servicesAssembly)
             }
         }
         .environmentObject(navigationModel)
@@ -71,6 +70,7 @@ struct AppTabView: View {
 }
 
 #Preview {
-    AppTabView()
-        .environmentObject(NavigationModel())
+    let services = ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl())
+    return AppTabView(servicesAssembly: services)
+        .environmentObject(NavigationModel(services: services))
 }

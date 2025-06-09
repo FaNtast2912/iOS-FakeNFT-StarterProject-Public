@@ -2,7 +2,6 @@ import SwiftUI
 
 struct UserCollectionCell: View {
     let nft: Nft
-
     var body: some View {
         contentView
             .foregroundStyle(Color.ypBlack)
@@ -18,20 +17,42 @@ struct UserCollectionCell: View {
         }
         .frame(width: 108, height: 192)
     }
-
+    
     private var nftImageView: some View {
         ZStack(alignment: .topTrailing) {
-            Image("yp.mockNFTImg")
-                .resizable()
-                .frame(width: 108, height: 108)
-                .cornerRadius(12)
+            if let firstURL = nft.images.first {
+                AsyncImage(url: firstURL) { phase in
+                    switch phase {
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 108, height: 108)
+                            .cornerRadius(12)
+                    default:
+                        Image("yp.mockNFTImg")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 108, height: 108)
+                            .cornerRadius(12)
+                            .opacity(0.5)
+                    }
+                }
+            } else {
+               
+                Image("yp.mockNFTImg")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 108, height: 108)
+                    .cornerRadius(12)
+                    .opacity(0.5)
+            }
             
             Image("yp.favorites.noActive")
                 .frame(width: 40, height: 40)
             
         }
     }
-
     private var nftRatingView: some View {
         HStack(spacing: 3) {
             ForEach(1..<6) { index in
@@ -41,7 +62,6 @@ struct UserCollectionCell: View {
             }
         }
     }
-
     private var nftDetailsView: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -50,12 +70,11 @@ struct UserCollectionCell: View {
                     .padding(.bottom, 4)
                 Text("\(nft.price, specifier: "%.2f") ETH")
                     .font(.system(size: 10, weight: .medium))
-                  
             }
             Spacer()
             Image("yp.cart")
                 .frame(width: 40, height: 40)
-           
+
         }
         .frame(alignment: .center)
         

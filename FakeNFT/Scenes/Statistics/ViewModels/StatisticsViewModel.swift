@@ -6,6 +6,7 @@
 //
 import Foundation
 
+@MainActor
 final class StatisticsViewModel: ObservableObject {
     @Published var users: [User] = []
     @Published var sortOption: UsertSortOption = .initial {
@@ -13,58 +14,30 @@ final class StatisticsViewModel: ObservableObject {
             UserDefaults.standard.set(sortOption.rawValue, forKey: "userSortOption")
         }
     }
-    
-    var sortedUsers: [User] {
-        SortingManagerUser.shared.sort(users: users, by: sortOption)
+    @Published var isLoading = false
+
+    private let userService: UserService
+
+    init(userService: UserService) {
+        self.userService = userService
+        sortOption = .initial
     }
-    
-    init() {
-        loadSortOption()
-        loadMockUsers()
-    }
-    
+
     func updateSortOption(_ option: UsertSortOption) {
         sortOption = option
     }
-    
-    private func loadSortOption() {
-            if let raw = UserDefaults.standard.string(forKey: "userSortOption"),
-               let option = UsertSortOption(rawValue: raw) {
-                sortOption = option
-            }
+
+    func loadUsers() async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            users = try await userService.fetchAllUsers()
+        } catch {
+            print("Ошибка загрузки пользователей: \(error)")
         }
-    
-    private func loadMockUsers() {
-        let mock: [User] = [
-            User(
-                id: "1",
-                name: "Mitchell Acevedo",
-                avatar: "",
-                description: "Дизайнер из Казани, люблю цифровое искусство и бейглы. В моей коллекции уже 100+ NFT, и еще больше — на моём сайте. Открыт к коллаборациям.",
-                website: "https://student15.students.practicum.org",
-                nfts: ["c"],
-                rating: "1"
-            ),
-            User(
-                id: "2",
-                name: "Fred Hensley",
-                avatar: "",
-                description: "Дизайнер из Казани, люблю цифровое искусство и бейглы. В моей коллекции уже 100+ NFT, и еще больше — на моём сайте. Открыт к коллаборациям.",
-                website: "https://student4.students.practicum.org",
-                nfts: ["a"],
-                rating: "5"
-            ),
-            User(
-                id: "3",
-                name: "Evangelina Mullen",
-                avatar: "",
-                description: "Дизайнер из Казани, люблю цифровое искусство и бейглы. В моей коллекции уже 100+ NFT, и еще больше — на моём сайте. Открыт к коллаборациям.",
-                website: "https://example.com",
-                nfts: ["a", "b", "c", "d"],
-                rating: "4"
-            )
-        ]
-        
-        users = mock
+    }
+
+    var sortedUsers: [User] {
+        SortingManagerUser.shared.sort(users: users, by: sortOption)
     }
 }
