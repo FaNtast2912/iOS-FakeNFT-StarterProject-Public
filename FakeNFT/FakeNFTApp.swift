@@ -3,7 +3,6 @@ import SwiftUI
 @main
 struct FakeNFTApp: App {
     @StateObject private var navigation = NavigationModel()
-    @StateObject private var cartManager = CartManager()
     @StateObject private var servicesAssembly = ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl())
     
     @StateObject private var cartViewModel: CartViewModel = {
@@ -14,10 +13,8 @@ struct FakeNFTApp: App {
             networkClient: networkClient,
             nftStorage: nftStorage
         )
-        let cartManager = CartManager()
         
         return CartViewModel(
-            cartManager: cartManager,
             cartNetworkService: cartNetworkService,
             nftService: servicesAssembly.nftService
         )
@@ -27,7 +24,6 @@ struct FakeNFTApp: App {
         WindowGroup {
             AppTabView(servicesAssembly: servicesAssembly)
                 .environmentObject(navigation)
-                .environmentObject(cartManager)
                 .environmentObject(cartViewModel)
         }
     }

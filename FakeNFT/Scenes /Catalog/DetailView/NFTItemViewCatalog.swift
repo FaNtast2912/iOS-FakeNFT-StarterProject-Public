@@ -104,7 +104,7 @@ struct NFTItemViewCatalog: View {
     let mockServicesAssembly = ServicesAssembly(networkClient: mockNetworkClient, nftStorage: mockNftStorage)
     
     NFTItemViewCatalog(nft: sampleNFT)
-        .environmentObject(CartManager())
+        .environmentObject(mockServicesAssembly.cartManager)
         .environmentObject(mockServicesAssembly.likesManager)
         .padding()
         .previewLayout(.sizeThatFits)

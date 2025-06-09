@@ -201,15 +201,13 @@ struct CartView: View {
         networkClient: networkClient,
         nftStorage: nftStorage
     )
-    let cartManager = CartManager()
     
     let viewModel = CartViewModel(
-        cartManager: cartManager,
         cartNetworkService: cartNetworkService,
         nftService: servicesAssembly.nftService
     )
     
-    return CartView()
+    CartView()
         .environmentObject(NavigationModel())
         .environmentObject(viewModel)
 }
@@ -222,15 +220,13 @@ struct CartView: View {
         networkClient: networkClient,
         nftStorage: nftStorage
     )
-    let cartManager = CartManager()
     
     let viewModel = CartViewModel(
-        cartManager: cartManager,
         cartNetworkService: cartNetworkService,
         nftService: servicesAssembly.nftService
     )
     
-    return CartView()
+    CartView()
         .environmentObject(NavigationModel())
         .environmentObject(viewModel)
 }

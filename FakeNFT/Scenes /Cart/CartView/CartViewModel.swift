@@ -36,8 +36,7 @@ final class CartViewModel: ObservableObject {
     @Published var isDeleting = false
     
     // MARK: - Dependencies
-    
-    private let cartManager: CartManager
+
     private let cartNetworkService: CartNetworkService
     private let nftService: NftService
     private var cancellables = Set<AnyCancellable>()
@@ -51,10 +50,8 @@ final class CartViewModel: ObservableObject {
     
     // MARK: - Initialization
     
-    init(cartManager: CartManager,
-         cartNetworkService: CartNetworkService,
+    init(cartNetworkService: CartNetworkService,
          nftService: NftService) {
-        self.cartManager = cartManager
         self.cartNetworkService = cartNetworkService
         self.nftService = nftService
     }
@@ -71,16 +68,6 @@ final class CartViewModel: ObservableObject {
                 let order = try await cartNetworkService.fetchOrder()
                 print("[CartViewModel] Получен заказ с \(order.nfts.count) NFT")
                 
-                ///Метод автоматически добавляет тестовый NFT, если корзина пустая
-                ///Раскомментировать для тестирования функций удаления корзины
-//                if order.nfts.isEmpty {
-//                    print("[CartViewModel] Корзина пустая, добавляем тестовый NFT автоматически")
-//                    await addTestNFTAutomatically()
-//                } else {
-//                    await loadNftsFromOrder(order.nfts)
-//                }
-                
-                /// Закомментировать если прошлая функция if order.nfts.isEmpty была раскомментирована
                 await loadNftsFromOrder(order.nfts)
                 
             } catch let networkError as NetworkClientError {
@@ -90,32 +77,6 @@ final class CartViewModel: ObservableObject {
             }
         }
     }
-      
-    ///Раскомментировать для тестирования функций удаления корзины
-//    private func addTestNFTAutomatically() async {
-//        print("[CartViewModel] Автоматическое добавление тестового NFT...")
-//
-//        do {
-//            let testNftIds = ["2c9d09f6-25ac-4d6f-8d6a-175c4de2b42f"]
-//
-//            print("[CartViewModel] Добавляем тестовый NFT: \(testNftIds)")
-//
-//            let updatedOrder = try await cartNetworkService.updateOrder(nftIds: testNftIds)
-//            print("[CartViewModel] Сервер подтвердил добавление: \(updatedOrder.nfts)")
-//
-//            await loadNftsFromOrder(updatedOrder.nfts)
-//
-//            await MainActor.run {
-//                self.isLoading = false
-//                print("[CartViewModel] Тестовый NFT добавлен")
-//            }
-//
-//        } catch let networkError as NetworkClientError {
-//            await handleNetworkError(networkError, context: "добавление тестового NFT")
-//        } catch {
-//            await handleGenericError(error, context: "добавление тестового NFT")
-//        }
-//    }
     
     func deleteNFT(_ id: String) {
         print("[CartViewModel] Начало удаления NFT: \(id)")

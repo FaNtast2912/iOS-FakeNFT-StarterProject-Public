@@ -20,10 +20,21 @@ struct NFTItemView: View {
     
     var body: some View {
         HStack(spacing: 16) {
-            Image(nftImage)
-                .resizable()
-                .frame(width: 108, height: 108)
-                .cornerRadius(12)
+            AsyncImage(url: nft.images.first) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Rectangle()
+                    .fill(Color.ypLightGrey)
+                    .overlay {
+                        ProgressView()
+                            .tint(.ypBlueUniversal)
+                    }
+            }
+            .frame(width: 108, height: 108)
+            .clipped()
+            .cornerRadius(12)
             
             VStack(alignment: .leading, spacing: 8) {
                 Text(nft.name)

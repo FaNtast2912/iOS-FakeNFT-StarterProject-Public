@@ -9,7 +9,6 @@ import SwiftUI
 
 struct AppTabView: View {
     @StateObject private var navigationModel = NavigationModel()
-    @StateObject private var cartManager = CartManager()
     private var servicesAssembly: ServicesAssembly
     
     init(servicesAssembly: ServicesAssembly) {
@@ -99,7 +98,7 @@ struct AppTabView: View {
         .environmentObject(navigationModel)
         .environmentObject(servicesAssembly)
         .environmentObject(servicesAssembly.likesManager)
-        .environmentObject(cartManager)
+        .environmentObject(servicesAssembly.cartManager)
     }
 }
 

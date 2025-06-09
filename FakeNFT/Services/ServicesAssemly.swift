@@ -7,6 +7,7 @@ final class ServicesAssembly: ObservableObject {
     
     // Lazy-инициализация менеджеров
     private lazy var _likesManager = LikesManager(userLikesService: userLikesService)
+    private lazy var _cartManager = CartManager(cartNetworkService: cartNetworkService)
 
     init(
         networkClient: NetworkClient,
@@ -31,7 +32,15 @@ final class ServicesAssembly: ObservableObject {
         UserLikesServiceImpl(networkClient: networkClient)
     }
     
+    var cartNetworkService: CartNetworkService {
+        DefaultCartNetworkService(networkClient: networkClient)
+    }
+    
     var likesManager: LikesManager {
         return _likesManager
+    }
+    
+    var cartManager: CartManager {
+        return _cartManager
     }
 }

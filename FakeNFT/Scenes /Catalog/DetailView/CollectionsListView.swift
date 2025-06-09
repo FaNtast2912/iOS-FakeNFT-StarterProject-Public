@@ -16,7 +16,7 @@ struct CollectionsListView: View {
     var body: some View {
         LazyVGrid(columns: columns, spacing: 8) {
             ForEach(nfts, id: \.id) { nft in
-                NFTItemView(nft: nft)
+                NFTItemViewCatalog(nft: nft)
             }
         }
         .padding(.horizontal, 16)
