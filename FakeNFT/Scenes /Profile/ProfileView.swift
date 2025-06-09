@@ -65,7 +65,9 @@ struct ProfileView: View {
                     }
                     
                     ProfileListRowView(text: "О Разработчике") {
-                        
+                        if let url = URL(string: profileVM.developerWebsite) {
+                            navigationModel.navigate(to: .webView(url: url))
+                        }
                     }
                 }
                 

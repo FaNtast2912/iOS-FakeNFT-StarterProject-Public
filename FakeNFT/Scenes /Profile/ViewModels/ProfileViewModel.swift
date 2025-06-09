@@ -14,6 +14,7 @@ final class ProfileViewModel: ObservableObject {
     @Published var alertErrorPresented: Bool = false
     @Published var nftsCount: Int = 0
     @Published var nftLikesCount: Int = 0
+    @Published var developerWebsite = "https://practicum.yandex.ru/ios-developer/"
     private let service: ServicesAssembly
     
     enum LoadingState {
