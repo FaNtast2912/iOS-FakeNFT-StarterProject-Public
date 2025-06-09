@@ -9,6 +9,20 @@ import SwiftUI
 
 struct AppTabView: View {
     @StateObject private var navigationModel = NavigationModel()
+    @StateObject private var cartViewModel: CartViewModel = {
+        let networkClient = DefaultNetworkClient()
+        let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+        let nftStorage = NftStorageImpl()
+        let servicesAssembly = ServicesAssembly(
+            networkClient: networkClient,
+            nftStorage: nftStorage
+        )
+        
+        return CartViewModel(
+            cartNetworkService: cartNetworkService,
+            nftService: servicesAssembly.nftService
+        )
+    }()
     private var servicesAssembly: ServicesAssembly
     
     init(servicesAssembly: ServicesAssembly) {
@@ -75,6 +89,7 @@ struct AppTabView: View {
                     .tag(1)
                 
                 CartView()
+                    .environmentObject(cartViewModel)
                     .tabItem {
                         Text("Корзина")
                         Image("yp.cartIcon")
@@ -83,6 +98,7 @@ struct AppTabView: View {
                     .tag(2)
                 
                 StatisticsView()
+                    .environmentObject(StatisticsViewModel(userService: servicesAssembly.userService))
                     .tabItem {
                         Text("Статистика")
                         Image("yp.statisticsIcon")
@@ -102,12 +118,18 @@ struct AppTabView: View {
     }
 }
 
-#Preview {
-    AppTabView(servicesAssembly: ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl()))
-        .environmentObject(NavigationModel())
-        .environmentObject({
-            let networkClient = DefaultNetworkClient()
-            let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
-            return PaymentMethodViewModel(cartNetworkService: cartNetworkService)
-        }())
-}
+//#Preview {
+//HEAD:FakeNFT/Scenes /Common/Views/AppTabView.swift
+//    AppTabView(servicesAssembly: ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl()))
+//        .environmentObject(NavigationModel())
+//        .environmentObject({
+//            let networkClient = DefaultNetworkClient()
+//            let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+//            return PaymentMethodViewModel(cartNetworkService: cartNetworkService)
+//        }())
+//////
+//    let services = ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl())
+//    return AppTabView(servicesAssembly: services)
+//        .environmentObject(NavigationModel(services: services))
+// feature/new-statistics-screen:FakeNFT/Scenes/Common/Views/AppTabView.swift
+//}

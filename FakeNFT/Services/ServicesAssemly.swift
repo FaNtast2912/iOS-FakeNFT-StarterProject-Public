@@ -1,7 +1,7 @@
 import Foundation
 
 final class ServicesAssembly: ObservableObject {
-
+    
     private let networkClient: NetworkClient
     private let nftStorage: NftStorage
     
@@ -16,7 +16,7 @@ final class ServicesAssembly: ObservableObject {
         self.networkClient = networkClient
         self.nftStorage = nftStorage
     }
-
+    
     var nftService: NftService {
         NftServiceImpl(
             networkClient: networkClient,
@@ -42,5 +42,16 @@ final class ServicesAssembly: ObservableObject {
     
     var cartManager: CartManager {
         return _cartManager
+    }
+    
+    var userService: UserService {
+        UserServiceImpl(
+            networkClient: networkClient
+        )
+    }
+    var userByIdService: UserByIdService {
+        UserByIdServiceImpl(
+            networkClient: networkClient
+        )
     }
 }
