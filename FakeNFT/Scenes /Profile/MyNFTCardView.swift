@@ -19,13 +19,18 @@ struct MyNFTCardView: View {
     var body: some View {
         HStack(spacing: 20) {
             ZStack(alignment: .topTrailing) {
-                AsyncImage(url: URL(string: imageUrl)) { image in
-                    image
-                        .image?.resizable()
-                        .frame(width: 108, height: 108)
-                        .clipShape(.rect(cornerRadius: 12))
-                        .aspectRatio(contentMode: .fit)
+                AsyncImage(url: URL(string: imageUrl)) { phase in
+                    if let image =  phase.image {
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    } else {
+                        RoundedRectangle(cornerRadius: 12)
+                            .foregroundStyle(Color.ypLightGrey)
+                    }
                 }
+                .frame(width: 108, height: 108)
+                .clipShape(.rect(cornerRadius: 12))
                 Button {
                     completion()
                 } label: {
