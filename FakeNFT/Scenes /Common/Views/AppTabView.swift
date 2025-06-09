@@ -106,4 +106,9 @@ struct AppTabView: View {
 #Preview {
     AppTabView(servicesAssembly: ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl()))
         .environmentObject(NavigationModel())
+        .environmentObject({
+            let networkClient = DefaultNetworkClient()
+            let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
+            return PaymentMethodViewModel(cartNetworkService: cartNetworkService)
+        }())
 }

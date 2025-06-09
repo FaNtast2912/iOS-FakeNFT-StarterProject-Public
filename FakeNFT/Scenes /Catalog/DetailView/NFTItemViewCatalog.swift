@@ -1,5 +1,5 @@
 //
-//  NFTItemView.swift
+//  NFTItemViewCatalog.swift
 //  FakeNFT
 //
 //  Created by Maksim Zakharov on 30.05.2025.
@@ -8,7 +8,7 @@
 import SwiftUI
 
 /// Ячейка NFT в коллекции
-struct NFTItemView: View {
+struct NFTItemViewCatalog: View {
     let nft: Nft
     @EnvironmentObject private var cartManager: CartManager
     @EnvironmentObject private var likesManager: LikesManager
@@ -103,7 +103,7 @@ struct NFTItemView: View {
     let mockNftStorage = NftStorageImpl()
     let mockServicesAssembly = ServicesAssembly(networkClient: mockNetworkClient, nftStorage: mockNftStorage)
     
-    NFTItemView(nft: sampleNFT)
+    NFTItemViewCatalog(nft: sampleNFT)
         .environmentObject(CartManager())
         .environmentObject(mockServicesAssembly.likesManager)
         .padding()
