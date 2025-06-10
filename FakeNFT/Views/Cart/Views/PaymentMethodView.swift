@@ -8,85 +8,66 @@
 import SwiftUI
 
 struct PaymentMethodView: View {
-    @EnvironmentObject var navigationModel: NavigationModel
     @StateObject private var viewModel: PaymentMethodViewModel
+    @EnvironmentObject var navigationModel: NavigationModel
     
     private let columns = [
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
     
-    // MARK: - Initialization
-    init() {
-        let networkClient = DefaultNetworkClient()
-        let cartNetworkService = CartNetworkServiceImpl(networkClient: networkClient)
-        
-        self._viewModel = StateObject(wrappedValue: PaymentMethodViewModel(
-            cartNetworkService: cartNetworkService
-        ))
+    init(viewModel: PaymentMethodViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
     var body: some View {
         VStack(spacing: 0) {
             headerView
             
-            if viewModel.currencies.isEmpty && !viewModel.isLoading {
-                emptyStateView
-            } else {
-                currencyGridView
+            BaseContentView(
+                loadingState: viewModel.loadingState,
+                loadingMessage: "Загрузка валют...",
+                onRetry: { Task { await viewModel.loadData() } }
+            ) { currencies in
+                if currencies.isEmpty {
+                    emptyStateView
+                } else {
+                    currencyGridView(currencies: currencies)
+                }
             }
             
             Spacer()
-            
             paymentBottomView
         }
-        .progressHUD(isLoading: viewModel.isLoading)
-        .ignoresSafeArea(.keyboard)
         .navigationBarBackButtonHidden(true)
-        .onAppear {
-            viewModel.loadCurrencies()
-        }
-        .alert("Ошибка", isPresented: .constant(viewModel.error != nil)) {
-            Button("Повторить") {
-                viewModel.loadCurrencies()
+        .task {
+            if case .idle = viewModel.loadingState {
+                await viewModel.loadData()
             }
-            Button("Отмена", role: .cancel) {
-                viewModel.error = nil
-            }
-        } message: {
-            Text(viewModel.error?.localizedDescription ?? "Не удалось загрузить список валют")
         }
         .alert("Ошибка оплаты", isPresented: $viewModel.showPaymentError) {
             Button("Повторить") {
                 Task {
-                    print("[PaymentMethodView] Повторная попытка оплаты через alert")
                     if await viewModel.processPayment() {
-                        print("[PaymentMethodView] Повторная оплата успешна, переход к PaymentDoneView")
                         navigationModel.navigate(to: .paymentDoneView)
-                    } else {
-                        print("[PaymentMethodView] Повторная оплата не удалась")
                     }
                 }
             }
-            Button("Отмена", role: .cancel) {
-                print("[PaymentMethodView] Отмена повторной оплаты")
-            }
+            Button("Отмена", role: .cancel) {}
         } message: {
             Text("Не удалось произвести оплату")
         }
     }
     
-    // MARK: - Private Views
-    
     private var headerView: some View {
         HStack {
             Button(action: {
                 navigationModel.navigateBack()
-            }, label: {
+            }) {
                 Image(systemName: "chevron.backward")
                     .foregroundColor(.black)
                     .padding(.leading)
-            })
+            }
             
             Spacer()
             Text("Выберите способ оплаты")
@@ -107,10 +88,10 @@ struct PaymentMethodView: View {
         }
     }
     
-    private var currencyGridView: some View {
+    private func currencyGridView(currencies: [CurrencyModel]) -> some View {
         ScrollView {
             LazyVGrid(columns: columns, spacing: 12) {
-                ForEach(viewModel.currencies) { currency in
+                ForEach(currencies) { currency in
                     CurrencyCellView(
                         currency: currency,
                         isSelected: viewModel.selectedCurrency?.id == currency.id
@@ -141,30 +122,19 @@ struct PaymentMethodView: View {
             
             Button(action: {
                 Task {
-                    print("[PaymentMethodView] Нажата кнопка оплаты")
-                    print("[PaymentMethodView] Выбранная валюта: \(viewModel.selectedCurrency?.name ?? "nil") (ID: \(viewModel.selectedCurrency?.id ?? "nil"))")
-                    print("[PaymentMethodView] Начало процесса оплаты")
-                    
-                    let paymentResult = await viewModel.processPayment()
-                    
-                    print("[PaymentMethodView] Результат оплаты: \(paymentResult)")
-                    
-                    if paymentResult {
-                        print("[PaymentMethodView] Платеж успешен, переход к PaymentDoneView")
+                    if await viewModel.processPayment() {
                         navigationModel.navigate(to: .paymentDoneView)
-                    } else {
-                        print("[PaymentMethodView] Платеж не удался, остаемся на экране оплаты")
                     }
                 }
-            }, label: {
+            }) {
                 Text("Оплатить")
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, minHeight: 54)
                     .background(viewModel.selectedCurrency != nil ? Color.black : Color.gray)
                     .cornerRadius(12)
-            })
-            .disabled(viewModel.selectedCurrency == nil || viewModel.isLoading)
+            }
+            .disabled(viewModel.selectedCurrency == nil || viewModel.loadingState.isLoading)
         }
         .padding(16)
         .frame(maxWidth: .infinity)
@@ -175,12 +145,14 @@ struct PaymentMethodView: View {
     }
 }
 
-#Preview("Loading") {
-    PaymentMethodView()
-        .environmentObject(NavigationModel())
-}
-
-#Preview("With Data") {
-    PaymentMethodView()
-        .environmentObject(NavigationModel())
-}
+//Макс не забудь!
+//
+//#Preview("Loading") {
+//    PaymentMethodView()
+//        .environmentObject(NavigationModel())
+//}
+//
+//#Preview("With Data") {
+//    PaymentMethodView()
+//        .environmentObject(NavigationModel())
+//}

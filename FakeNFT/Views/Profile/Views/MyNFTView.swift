@@ -1,0 +1,106 @@
+//
+//  MyNFTView.swift
+//  FakeNFT
+//
+//  Created by Olga Trofimova on 04.06.2025.
+//
+
+import SwiftUI
+
+struct MyNFTView: View {
+    @StateObject private var viewModel: MyNFTViewModel
+    @EnvironmentObject private var navigationModel: NavigationModel
+    
+    init(viewModel: MyNFTViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+    }
+    
+    var body: some View {
+        ZStack {
+            BaseContentView(
+                loadingState: viewModel.loadingState,
+                loadingMessage: "Загрузка NFT...",
+                onRetry: { Task { await viewModel.loadData() } }
+            ) { _ in
+                if viewModel.sortedNfts.isEmpty {
+                    EmptyNFTPlaceholderView(isFavoriteCollection: false)
+                } else {
+                    nftListContent
+                }
+            }
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .navigationTitle("Мои NFT")
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    navigationModel.navigateBack()
+                } label: {
+                    Image(.ypChevronBackward)
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(Color.ypBlack)
+                }
+            }
+            
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    viewModel.showConfirmationDialog = true
+                } label: {
+                    Image(.ypSort)
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(Color.ypBlack)
+                }
+            }
+        }
+        .confirmationDialog("Сортировка", isPresented: $viewModel.showConfirmationDialog, titleVisibility: .visible) {
+            Button("По цене") {
+                viewModel.setSortOption(.nftPrice(ascending: true))
+            }
+            Button("По рейтингу") {
+                viewModel.setSortOption(.nftRating(ascending: true))
+            }
+            Button("По названию") {
+                viewModel.setSortOption(.nftName(ascending: true))
+            }
+            Button("Закрыть", role: .cancel) {}
+        }
+        .task {
+            if case .idle = viewModel.loadingState {
+                await viewModel.loadData()
+            }
+        }
+        .refreshable {
+            await viewModel.refresh()
+        }
+    }
+    
+    private var nftListContent: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading) {
+                ForEach(viewModel.sortedNfts, id: \.id) { nft in
+                    MyNFTCardView(
+                        imageUrl: nft.images.first?.absoluteString ?? "",
+                        name: nft.name,
+                        rating: nft.rating,
+                        price: String(nft.price) + " ETH",
+                        isFavorite: viewModel.isLiked(id: nft.id),
+                        author: nft.author
+                    ) {
+                        Task {
+                            await viewModel.toggleLike(for: nft.id)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, AppConstants.UI.defaultPadding)
+        .scrollIndicators(.hidden)
+    }
+}
+
+
+//Макс не забудь!
+//#Preview {
+//    MyNFTView(service: ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl()))
+//}

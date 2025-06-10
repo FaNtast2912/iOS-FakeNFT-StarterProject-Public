@@ -8,65 +8,71 @@
 import SwiftUI
 
 struct MyFavoriteNFTView: View {
-    @StateObject private var myFavoriteNFTVM: MyFavoriteNFTViewModel
+    @StateObject private var viewModel: MyFavoriteNFTViewModel
     @EnvironmentObject private var navigationModel: NavigationModel
     
     private let columns = [GridItem(.flexible(), spacing: 7), GridItem(.flexible(), spacing: 7)]
     
-    init(service: ServicesAssembly) {
-        _myFavoriteNFTVM = StateObject(wrappedValue: MyFavoriteNFTViewModel(service: service))
+    init(viewModel: MyFavoriteNFTViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
     var body: some View {
         ZStack {
-            VStack {
-                if myFavoriteNFTVM.favoriteNfts.isEmpty && myFavoriteNFTVM.loadingState != .loading {
+            BaseContentView(
+                loadingState: viewModel.loadingState,
+                loadingMessage: "Загрузка избранных NFT...",
+                onRetry: { Task { await viewModel.loadData() } }
+            ) { nfts in
+                if nfts.isEmpty {
                     EmptyNFTPlaceholderView(isFavoriteCollection: true)
                 } else {
-                    ScrollView {
-                        LazyVGrid(columns: columns, spacing: 20) {
-                            ForEach(myFavoriteNFTVM.favoriteNfts, id: \.self) { nft in
-                                MyFavoriteNFTCardView(
-                                    imageUrl: nft.images.first?.absoluteString ?? "",
-                                    name: nft.name,
-                                    rating: nft.rating,
-                                    price: String(nft.price) + " ETH",
-                                    isFavorite: true,
-                                    completion: {
-                                        Task {
-                                            await myFavoriteNFTVM.updateLikesNft(id: nft.id)
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    .navigationTitle("Избранные NFT")
-                    .scrollIndicators(.hidden)
-                    .refreshable {
+                    favoriteNftsGrid(nfts: nfts)
+                }
+            }
+        }
+        .navigationTitle("Избранные NFT")
+        .navigationBarStyle {
+            navigationModel.navigateBack()
+        }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarTitleDisplayMode(.inline)
+        .padding(.top, 20)
+        .padding(.horizontal, AppConstants.UI.defaultPadding)
+        .task {
+            if case .idle = viewModel.loadingState {
+                await viewModel.loadData()
+            }
+        }
+        .refreshable {
+            await viewModel.refresh()
+        }
+    }
+    
+    private func favoriteNftsGrid(nfts: [Nft]) -> some View {
+        ScrollView {
+            LazyVGrid(columns: columns, spacing: 20) {
+                ForEach(nfts, id: \.id) { nft in
+                    MyFavoriteNFTCardView(
+                        imageUrl: nft.images.first?.absoluteString ?? "",
+                        name: nft.name,
+                        rating: nft.rating,
+                        price: String(nft.price) + " ETH",
+                        isFavorite: true
+                    ) {
                         Task {
-                            await myFavoriteNFTVM.fetchLikesNft(.loaded)
+                            await viewModel.removeLike(for: nft.id)
                         }
                     }
                 }
-                
             }
-            .navigationBarStyle {
-                navigationModel.navigateBack()
-            }
-            .navigationBarBackButtonHidden(true)
-            .navigationBarTitleDisplayMode(.inline)
-            .padding(.top, 20)
-            .padding(.horizontal, 16)
-            .task {
-                await myFavoriteNFTVM.fetchLikesNft()
-            }
-            .progressHUD(isLoading: myFavoriteNFTVM.loadingState == .loading)
         }
+        .scrollIndicators(.hidden)
     }
 }
 
-#Preview {
-    MyFavoriteNFTView(service: ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl()))
-        .environmentObject(NavigationModel())
-}
+//Макс не забудь
+//#Preview {
+//    MyFavoriteNFTView(service: ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl()))
+//        .environmentObject(NavigationModel())
+//}

@@ -1,5 +1,5 @@
 //
-//  CartViewFactory.swift
+//  ProfileViewFactory.swift
 //  FakeNFT
 //
 //  Created by Maksim Zakharov on 10.06.2025.
@@ -7,10 +7,10 @@
 
 import SwiftUI
 
-struct CartViewFactory: View {
+struct ProfileViewFactory: View {
     let servicesAssembly: ServicesAssembly
     
     var body: some View {
-        CartView(viewModel: servicesAssembly.makeCartViewModel())
+        ProfileView(viewModel: servicesAssembly.makeProfileViewModel())
     }
 }
