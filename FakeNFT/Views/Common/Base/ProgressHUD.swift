@@ -32,16 +32,6 @@ struct ProgressHUD: View {
     }
 }
 
-// MARK: - Extention для использования в проекте
-// .progressHUD(isLoading:)
-
-extension View {
-    func progressHUD(isLoading: Bool) -> some View {
-        self.overlay(
-            ProgressHUD(isLoading: isLoading)
-        )
-    }
-}
 struct ProgressHUD_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
