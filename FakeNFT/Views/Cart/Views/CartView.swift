@@ -195,17 +195,12 @@ struct CartView: View {
 
 #Preview("With NFTs") {
     let networkClient = DefaultNetworkClient()
-    let cartNetworkService = CartNetworkServiceImpl(networkClient: networkClient)
     let nftStorage = NftStorageImpl()
     let servicesAssembly = ServicesAssembly(
         networkClient: networkClient,
         nftStorage: nftStorage
     )
-    
-    let viewModel = CartViewModel(
-        cartNetworkService: cartNetworkService,
-        nftService: servicesAssembly.nftService
-    )
+    let viewModel = CartViewModel(servicesAssembly: servicesAssembly)
     
     CartView()
         .environmentObject(NavigationModel())
@@ -214,17 +209,12 @@ struct CartView: View {
 
 #Preview("Empty Cart") {
     let networkClient = DefaultNetworkClient()
-    let cartNetworkService = CartNetworkServiceImpl(networkClient: networkClient)
     let nftStorage = NftStorageImpl()
     let servicesAssembly = ServicesAssembly(
         networkClient: networkClient,
         nftStorage: nftStorage
     )
-    
-    let viewModel = CartViewModel(
-        cartNetworkService: cartNetworkService,
-        nftService: servicesAssembly.nftService
-    )
+    let viewModel = CartViewModel(servicesAssembly: servicesAssembly)
     
     CartView()
         .environmentObject(NavigationModel())

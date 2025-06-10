@@ -7,80 +7,40 @@
 
 import SwiftUI
 
-/// Состояния загрузки для каталога
-enum CatalogLoadingState {
-    case idle
-    case loading
-    case loaded([NFTCollections])
-    case error(String)
-}
-
-/// Опции сортировки коллекций
-enum CollectionSortOption {
-    case name(ascending: Bool)
-    case nftCount(ascending: Bool)
-}
-
 /// ViewModel для экрана каталога коллекций
 @MainActor
-final class CatalogViewModel: ObservableObject {
-    @Published var loadingState: CatalogLoadingState = .idle
-    @Published var collections: [NFTCollections] = []
-    @Published var isLoading = false
-    @Published var errorMessage: String?
-    @Published var sortOption: CollectionSortOption?
+final class CatalogViewModel: BaseViewModel<[NFTCollections]> {
+    @Published var sortOption: UnifiedSortOption?
+    @Published var sortedCollections: [NFTCollections] = []
     
-    private let networkClient: NetworkClient
-    
-    init(networkClient: NetworkClient = DefaultNetworkClient()) {
-        self.networkClient = networkClient
+    private var catalogService: CatalogServiceProtocol {
+        servicesAssembly.catalogService
     }
     
-    /// Загружает список коллекций
-    func loadCollections() async {
-        guard !isLoading else { return }
-        
-        isLoading = true
-        errorMessage = nil
-        loadingState = .loading
+    override func loadData() async {
+        setLoading()
         
         do {
-            let request = CatalogRequest()
-            let loadedCollections: [NFTCollections] = try await networkClient.send(request, as: [NFTCollections].self)
-            
-            collections = loadedCollections
-            if let sortOption = sortOption {
-                sortCollections(by: sortOption)
-            }
-            loadingState = .loaded(collections)
-            isLoading = false
+            let collections = try await catalogService.fetchCollections()
+            setLoaded(collections)
+            updateSortedCollections()
         } catch {
-            let message = error.localizedDescription
-            errorMessage = message
-            loadingState = .error(message)
-            isLoading = false
+            handleError(error)
         }
     }
     
-    /// Перезагружает коллекции
-    func refresh() async {
-        await loadCollections()
-    }
-    
-    /// Сортирует коллекции
-    func sortCollections(by option: CollectionSortOption) {
+    func sortCollections(by option: UnifiedSortOption) {
         sortOption = option
-        switch option {
-        case .name(let ascending):
-            collections.sort {
-                let result = $0.name.localizedCaseInsensitiveCompare($1.name)
-                return ascending ? (result == .orderedAscending) : (result == .orderedDescending)
-            }
-        case .nftCount(let ascending):
-            collections.sort {
-                ascending ? ($0.nftCount < $1.nftCount) : ($0.nftCount > $1.nftCount)
-            }
+        updateSortedCollections()
+    }
+    
+    private func updateSortedCollections() {
+        guard let collections = loadingState.data else { return }
+        
+        if let sortOption = sortOption {
+            sortedCollections = UnifiedSortingManager.shared.sort(items: collections, by: sortOption) as? [NFTCollections] ?? collections
+        } else {
+            sortedCollections = collections
         }
-        loadingState = .loaded(collections)
     }
 }

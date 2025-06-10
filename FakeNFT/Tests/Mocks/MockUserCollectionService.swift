@@ -7,6 +7,34 @@
 import Foundation
 
 final class MockUserCollectionService: NftServiceProtocol {
+    
+    var networkClient: any NetworkClient = DefaultNetworkClient()
+    
+    func loadNft(id: String) async throws -> Nft {
+        return Nft(
+            id: "b",
+            name: "nft2",
+            createdAt: "2023-10-21T10:23:01.305Z[GMT]",
+            images: [],
+            rating: 4,
+            description: "Mock description 2",
+            price: 28.99,
+            author: "https://mock_author_2.com"
+        )
+    }
+    
+    func loadNfts(ids: [String]) async throws -> [Nft] {
+        return [Nft(
+            id: "b",
+            name: "nft2",
+            createdAt: "2023-10-21T10:23:01.305Z[GMT]",
+            images: [],
+            rating: 4,
+            description: "Mock description 2",
+            price: 28.99,
+            author: "https://mock_author_2.com"
+        )]
+    }
 
     private let mockNfts: [Nft] = [
         Nft(
@@ -40,19 +68,4 @@ final class MockUserCollectionService: NftServiceProtocol {
             author: "https://mock_author_3.com"
         )
     ]
-    
-    func loadNft(id: String) async throws -> Nft {
-        guard let nft = self.mockNfts.first(where: { $0.id == id }) else {
-            return Nft(
-            id: "c",
-            name: "nft3",
-            createdAt: "2023-10-22T10:23:01.305Z[GMT]",
-            images: [],
-            rating: 3,
-            description: "Mock description 3",
-            price: 19.99,
-            author: "https://mock_author_3.com"
-        ) }
-        return nft
-    }
 }

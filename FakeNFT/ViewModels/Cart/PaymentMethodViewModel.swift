@@ -2,55 +2,53 @@
 //  PaymentMethodViewModel.swift
 //  FakeNFT
 //
-//  Created by [Your Name] on [Date].
+//  Created by Maksim Zakharov on 10.06.2025
 //
 
-import Combine
 import SwiftUI
 
 @MainActor
-final class PaymentMethodViewModel: ObservableObject {
-    // MARK: - Published Properties
-    
-    @Published private(set) var currencies: [CurrencyModel] = []
+final class PaymentMethodViewModel: BaseViewModel<[CurrencyModel]> {
     @Published var selectedCurrency: CurrencyModel? = nil
     @Published var showPaymentError = false
-    @Published var isLoading = false
-    @Published var error: Error?
     @Published var paymentSuccess = false
     
-    // MARK: - Dependencies
-    
-    private let cartNetworkService: CartNetworkServiceProtocol
-    
-    // MARK: - Initialization
-    
-    init(cartNetworkService: CartNetworkServiceProtocol) {
-        self.cartNetworkService = cartNetworkService
+    private var cartNetworkService: CartNetworkServiceProtocol {
+        servicesAssembly.cartNetworkService
     }
     
-    // MARK: - Public Methods
+    /// Получить валюты (алиас для совместимости)
+    var currencies: [CurrencyModel] {
+        return loadingState.data ?? []
+    }
     
-    func loadCurrencies() {
-        print("[PaymentViewModel] Загрузка валют с сервера...")
-        isLoading = true
-        error = nil
+    /// Состояние загрузки (алиас для совместимости)
+    var isLoading: Bool {
+        return loadingState.isLoading
+    }
+    
+    /// Ошибка (алиас для совместимости)
+    var error: Error? {
+        return loadingState.error
+    }
+    
+    override func loadData() async {
+        print("[PaymentViewModel] Загрузка валют...")
+        setLoading()
         
+        do {
+            let currencies = try await cartNetworkService.fetchCurrencies()
+            print("[PaymentViewModel] Загружено валют: \(currencies.count)")
+            setLoaded(currencies)
+        } catch {
+            handleError(error)
+        }
+    }
+    
+    /// Загрузить валюты (алиас для совместимости)
+    func loadCurrencies() {
         Task {
-            do {
-                let loadedCurrencies = try await cartNetworkService.fetchCurrencies()
-                await MainActor.run {
-                    self.currencies = loadedCurrencies
-                    self.isLoading = false
-                    print("[PaymentViewModel] Загружено валют: \(loadedCurrencies.count)")
-                }
-            } catch {
-                await MainActor.run {
-                    self.error = error
-                    self.isLoading = false
-                    print("[PaymentViewModel] Ошибка загрузки валют: \(error)")
-                }
-            }
+            await loadData()
         }
     }
     
@@ -59,70 +57,38 @@ final class PaymentMethodViewModel: ObservableObject {
         
         guard let selectedCurrency = selectedCurrency else {
             print("[PaymentViewModel] Валюта не выбрана")
-            await MainActor.run {
-                self.showPaymentError = true
-            }
+            showPaymentError = true
             return false
         }
         
         return await processNetworkPayment(currencyId: selectedCurrency.id)
     }
     
-    // MARK: - Private Methods
-    
     private func processNetworkPayment(currencyId: String) async -> Bool {
         print("[PaymentViewModel] Начало обработки платежа для валюты ID: \(currencyId)")
         
-        await MainActor.run {
-            self.isLoading = true
-            self.error = nil
-        }
-        
         do {
-            // Обрабатываем платеж
             let result = try await cartNetworkService.payOrder(currencyId: currencyId)
             
             if result.success {
                 print("[PaymentViewModel] Платеж успешно обработан")
                 
                 // Очищаем корзину после успешной оплаты
-                let clearedOrder = try await clearCartAfterPayment()
+                _ = try await cartNetworkService.updateOrder(nftIds: [])
                 
-                await MainActor.run {
-                    self.isLoading = false
-                    self.paymentSuccess = true
-                }
-                
-                print("[PaymentViewModel] Корзина очищена после оплаты")
+                paymentSuccess = true
                 return true
                 
             } else {
                 print("[PaymentViewModel] Платеж отклонен сервером")
-                await MainActor.run {
-                    self.isLoading = false
-                    self.showPaymentError = true
-                }
+                showPaymentError = true
                 return false
             }
             
         } catch {
-            await MainActor.run {
-                self.isLoading = false
-                self.showPaymentError = true
-                self.error = error
-            }
-            print("[PaymentViewModel] Ошибка платежа: \(error)")
+            handleError(error)
+            showPaymentError = true
             return false
         }
-    }
-    
-    private func clearCartAfterPayment() async throws -> Order {
-        print("[PaymentViewModel] Очистка корзины после успешной оплаты...")
-        
-        // Отправляем пустой список NFT для очистки корзины
-        let clearedOrder = try await cartNetworkService.updateOrder(nftIds: [])
-        
-        print("[PaymentViewModel] Корзина очищена, количество NFT на сервере: \(clearedOrder.nfts.count)")
-        return clearedOrder
     }
 }

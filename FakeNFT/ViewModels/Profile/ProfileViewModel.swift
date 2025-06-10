@@ -7,60 +7,50 @@
 import Foundation
 
 @MainActor
-final class ProfileViewModel: ObservableObject {
-    @Published var profile: Profile
-    @Published var loadingState: LoadingState = .loaded
+final class ProfileViewModel: BaseViewModel<Profile> {
     @Published var avatarPlaceholderName = "yp.emptyUserPick"
     @Published var alertErrorPresented: Bool = false
     @Published var nftsCount: Int = 0
     @Published var nftLikesCount: Int = 0
     @Published var developerWebsite = "https://practicum.yandex.ru/ios-developer/"
-    private let service: ServicesAssembly
     
-    enum LoadingState {
-        case loading
-        case loaded
-        case error
+    private var profileService: ProfileServiceProtocol {
+        servicesAssembly.profileService
     }
     
-    init(service: ServicesAssembly) {
-        self.service = service
-        profile = Profile(name: "Имя", avatar: "", description: "Описание", website: "Сайт", nfts: [], likes: [], id: "")
-        
-        Task {
-            await fetchProfile()
-        }
-    }
-    
-    func updateMockProfile(name: String, avatar: String, description: String, website: String) {
-        let newProfile = Profile(
-            name: name,
-            avatar: avatar,
-            description: description,
-            website: website,
-            nfts: self.profile.nfts,
-            likes: self.profile.likes,
-            id: self.profile.id
+    // Computed property for easy access to profile
+    var profile: Profile {
+        return loadingState.data ?? Profile(
+            name: "Имя", avatar: "", description: "Описание",
+            website: "Сайт", nfts: [], likes: [], id: ""
         )
-        profile = newProfile
     }
     
-    func fetchProfile() async {
-        loadingState = .loading
+    override func loadData() async {
+        setLoading()
+        
         do {
-            profile = try await service.profileService.fetchProfile()
+            let profile = try await profileService.fetchProfile()
             nftsCount = profile.nfts.count
             nftLikesCount = profile.likes.count
-            loadingState = .loaded
+            setLoaded(profile)
         } catch {
-            loadingState = .error
-            alertErrorPresented = loadingState == .error
-            print(String(describing: error.localizedDescription))
+            handleError(error)
+            alertErrorPresented = true
         }
     }
     
-    func getService() -> ServicesAssembly {
-        return service
+    func updateProfile(name: String, avatar: String, description: String, website: String) async {
+        let dto = UpdateProfileDto(avatar: avatar, name: name, description: description, website: website)
+        
+        do {
+            let updatedProfile = try await profileService.updateProfile(dto: dto)
+            nftsCount = updatedProfile.nfts.count
+            nftLikesCount = updatedProfile.likes.count
+            setLoaded(updatedProfile)
+        } catch {
+            handleError(error)
+            alertErrorPresented = true
+        }
     }
-    
 }

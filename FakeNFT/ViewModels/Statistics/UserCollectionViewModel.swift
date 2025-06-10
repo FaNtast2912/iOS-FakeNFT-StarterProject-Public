@@ -7,30 +7,24 @@
 import Foundation
 
 @MainActor
-final class UserCollectionViewModel: ObservableObject {
-    @Published var nfts: [Nft] = []
-    @Published var isLoading = false
-
-    private let nftService: NftServiceProtocol
-
-    init(nftService: NftServiceProtocol) {
-        self.nftService = nftService
+final class UserCollectionViewModel: BaseViewModel<[Nft]> {
+    private var nftService: NftServiceProtocol {
+        servicesAssembly.nftService
     }
-
+    
+    override func loadData() async {
+        // Should not be called without user
+        fatalError("Use loadNfts(for:) instead")
+    }
+    
     func loadNfts(for user: User) async {
-        isLoading = true
-        defer { isLoading = false }
-
-        var loadedNfts: [Nft] = []
-
-        for id in user.nfts {
-            do {
-                let nft = try await nftService.loadNft(id: id)
-                loadedNfts.append(nft)
-            } catch {
-                print("Ошибка загрузки NFT с id=\(id): \(error)")
-            }
+        setLoading()
+        
+        do {
+            let nfts = try await nftService.loadNfts(ids: user.nfts)
+            setLoaded(nfts)
+        } catch {
+            handleError(error)
         }
-        nfts = loadedNfts
     }
 }

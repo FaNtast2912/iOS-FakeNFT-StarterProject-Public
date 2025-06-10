@@ -7,37 +7,46 @@
 import Foundation
 
 @MainActor
-final class StatisticsViewModel: ObservableObject {
-    @Published var users: [User] = []
-    @Published var sortOption: UsertSortOption = .initial {
+final class StatisticsViewModel: BaseViewModel<[User]> {
+    @Published var sortOption: UnifiedSortOption = .userNftCount {
         didSet {
-            UserDefaults.standard.set(sortOption.rawValue, forKey: "userSortOption")
+            UserDefaults.standard.set(sortOption.description, forKey: "userSortOption")
+            updateSortedUsers()
         }
     }
-    @Published var isLoading = false
-
-    private let userService: UserServiceProtocol
-
-    init(userService: UserServiceProtocol) {
-        self.userService = userService
-        sortOption = .initial
+    @Published var sortedUsers: [User] = []
+    
+    private var userService: UserServiceProtocol {
+        servicesAssembly.userService
     }
-
-    func updateSortOption(_ option: UsertSortOption) {
+    
+    override init(servicesAssembly: ServicesAssembly) {
+        super.init(servicesAssembly: servicesAssembly)
+        
+        // Load saved sort option
+        if let savedOption = UserDefaults.standard.string(forKey: "userSortOption") {
+            sortOption = UnifiedSortOption.from(string: savedOption) ?? .userNftCount
+        }
+    }
+    
+    override func loadData() async {
+        setLoading()
+        
+        do {
+            let users = try await userService.fetchAllUsers()
+            setLoaded(users)
+            updateSortedUsers()
+        } catch {
+            handleError(error)
+        }
+    }
+    
+    func updateSortOption(_ option: UnifiedSortOption) {
         sortOption = option
     }
-
-    func loadUsers() async {
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            users = try await userService.fetchAllUsers()
-        } catch {
-            print("Ошибка загрузки пользователей: \(error)")
-        }
-    }
-
-    var sortedUsers: [User] {
-        SortingManagerUser.shared.sort(users: users, by: sortOption)
+    
+    private func updateSortedUsers() {
+        guard let users = loadingState.data else { return }
+        sortedUsers = UnifiedSortingManager.shared.sort(items: users, by: sortOption) as? [User] ?? users
     }
 }

@@ -61,47 +61,47 @@ final class ServicesAssembly: ObservableObject {
 }
 
 extension ServicesAssembly {
-    func makeProfileViewModel() -> ProfileViewModel {
+    @MainActor func makeProfileViewModel() -> ProfileViewModel {
         ProfileViewModel(servicesAssembly: self)
     }
     
-    func makeMyNFTViewModel() -> MyNFTViewModel {
+    @MainActor func makeMyNFTViewModel() -> MyNFTViewModel {
         MyNFTViewModel(servicesAssembly: self)
     }
     
-    func makeMyFavoriteNFTViewModel() -> MyFavoriteNFTViewModel {
+    @MainActor func makeMyFavoriteNFTViewModel() -> MyFavoriteNFTViewModel {
         MyFavoriteNFTViewModel(servicesAssembly: self)
     }
     
-    func makeEditingProfileViewModel(profile: Profile) -> EditingProfileViewModel {
+    @MainActor func makeEditingProfileViewModel(profile: Profile) -> EditingProfileViewModel {
         EditingProfileViewModel(profile: profile, servicesAssembly: self)
     }
     
-    func makeStatisticsViewModel() -> StatisticsViewModel {
+    @MainActor func makeStatisticsViewModel() -> StatisticsViewModel {
         StatisticsViewModel(servicesAssembly: self)
     }
     
-    func makeUserCardViewModel() -> UserCardViewModel {
+    @MainActor func makeUserCardViewModel() -> UserCardViewModel {
         UserCardViewModel(servicesAssembly: self)
     }
     
-    func makeUserCollectionViewModel() -> UserCollectionViewModel {
+    @MainActor func makeUserCollectionViewModel() -> UserCollectionViewModel {
         UserCollectionViewModel(servicesAssembly: self)
     }
     
-    func makeCatalogViewModel() -> CatalogViewModel {
+    @MainActor func makeCatalogViewModel() -> CatalogViewModel {
         CatalogViewModel(servicesAssembly: self)
     }
     
-    func makeCollectionDetailViewModel(collection: NFTCollections) -> CollectionDetailViewModel {
+    @MainActor func makeCollectionDetailViewModel(collection: NFTCollections) -> CollectionDetailViewModel {
         CollectionDetailViewModel(collection: collection, servicesAssembly: self)
     }
     
-    func makeCartViewModel() -> CartViewModel {
-        CartViewModel(servicesAssembly: self)
+    @MainActor func makePaymentMethodViewModel() -> PaymentMethodViewModel {
+        PaymentMethodViewModel(servicesAssembly: self)
     }
     
-    func makePaymentMethodViewModel() -> PaymentMethodViewModel {
-        PaymentMethodViewModel(servicesAssembly: self)
+    @MainActor func makeCartViewModel() -> CartViewModel {
+        CartViewModel(servicesAssembly: self)
     }
 }
