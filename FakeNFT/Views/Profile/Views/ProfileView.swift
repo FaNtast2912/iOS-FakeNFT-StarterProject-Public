@@ -26,21 +26,16 @@ struct ProfileView: View {
             }
         }
         .task {
-            if case .idle = viewModel.loadingState {
-                await viewModel.loadData()
-            }
-        }
-        .alert("Не удалось получить данные", isPresented: $viewModel.alertErrorPresented) {
-            Button("Отмена", role: .cancel) {}
-            Button("Повторить") {
-                Task { await viewModel.loadData() }
-            }
+            await viewModel.loadData()
         }
         .sheet(isPresented: $editProfileIsPresented) {
             ProfileEditViewFactory(
                 profile: viewModel.profile,
                 servicesAssembly: viewModel.servicesAssembly
             )
+        }
+        .onChange(of: editProfileIsPresented) { _ in
+            Task { await viewModel.loadData() }
         }
     }
     
