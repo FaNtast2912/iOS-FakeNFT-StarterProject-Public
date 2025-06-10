@@ -10,43 +10,69 @@ import Combine
 
 final class CartManager: ObservableObject {
     @Published private(set) var cartItems: [Nft] = []
+    @Published private(set) var isLoading = false
     
     private let cartNetworkService: CartNetworkService
-    private let userDefaultsKey = "FakeNFT_CartItems"
-    private var cancellables = Set<AnyCancellable>()
+    private let networkClient: NetworkClient
     
-    init(cartNetworkService: CartNetworkService) {
+    init(cartNetworkService: CartNetworkService, networkClient: NetworkClient) {
         self.cartNetworkService = cartNetworkService
+        self.networkClient = networkClient
         
         Task {
-            await loadCart()
+            await loadCartFromServer()
         }
-        
-        $cartItems
-            .dropFirst()
-            .sink { [weak self] items in
-                Task {
-                    await self?.saveCart(items: items)
-                }
-            }
-            .store(in: &cancellables)
     }
     
+    // MARK: - Public Methods
+    
     @MainActor
-    func addToCart(_ product: Nft) {
-        guard !cartItems.contains(where: { $0.id == product.id }) else { return }
+    func addToCart(_ product: Nft) async {
+        guard isValidNFTId(product.id) else {
+            print("❌ CartManager: Некорректный ID NFT: \(product.id)")
+            return
+        }
+        
+        guard !cartItems.contains(where: { $0.id == product.id }) else {
+            return
+        }
+        
+        isLoading = true
+        
         cartItems.append(product)
-        Task {
-            await updateOrder()
-        }
+        
+        let allIds = cartItems.map { $0.id }
+        await updateServerCart(with: allIds)
+        
+        isLoading = false
     }
     
     @MainActor
-    func removeFromCart(_ product: Nft) {
+    func removeFromCart(_ product: Nft) async {
+        isLoading = true
+        
         cartItems.removeAll { $0.id == product.id }
-        Task {
-            await updateOrder()
-        }
+        
+        let allIds = cartItems.map { $0.id }
+        await updateServerCart(with: allIds)
+        
+        isLoading = false
+    }
+    
+    @MainActor
+    func clearCart() async {
+        isLoading = true
+        
+        cartItems.removeAll()
+        
+        await updateServerCart(with: [])
+        
+        isLoading = false
+    }
+    
+    @MainActor
+    func refreshCart() async {
+        await loadCartFromServer()
     }
     
     @MainActor
@@ -54,67 +80,113 @@ final class CartManager: ObservableObject {
         cartItems.contains(where: { $0.id == product.id })
     }
     
-    @MainActor
-    func clearCart() {
-        cartItems.removeAll()
-        Task {
-            await updateOrder()
-        }
-    }
+    // MARK: - Private Methods
     
     @MainActor
-    private func updateOrder() async {
+    private func loadCartFromServer() async {
+        isLoading = true
+        
         do {
-            let stringIdArr = cartItems.map { $0.id }
-            _ = try await cartNetworkService.updateOrder(nftIds: stringIdArr)
+            let order = try await cartNetworkService.fetchOrder()
+
+            let validIds = order.nfts.filter { isValidNFTId($0) }
             
-        } catch let networkError as NetworkClientError {
-            print(networkError)
+            if validIds != order.nfts {
+                await updateServerCart(with: validIds)
+            }
+            
+            await loadNFTDetails(for: validIds)
+            
         } catch {
-            print(error)
+            print("CartManager: Ошибка загрузки корзины: \(error)")
+            cartItems = []
         }
-    }
-    
-    private func saveCart(items: [Nft]) async {
-        do {
-            let data = try JSONEncoder().encode(items)
-            try await saveToUserDefaults(data)
-        } catch {
-            print("Ошибка при сохранении корзины: \(error)")
-        }
+        
+        isLoading = false
     }
     
     @MainActor
-    private func loadCart() async {
-        do {
-            if let data = try await loadFromUserDefaults() {
-                do {
-                    let decoded = try JSONDecoder().decode([Nft].self, from: data)
-                    cartItems = decoded
-                } catch {
-                    print("Ошибка декодирования корзины: \(error)")
+    private func loadNFTDetails(for ids: [String]) async {
+        guard !ids.isEmpty else {
+            cartItems = []
+            return
+        }
+        
+        var loadedNFTs: [Nft] = []
+        
+        await withTaskGroup(of: (String, Nft?).self) { group in
+            for id in ids {
+                group.addTask { [weak self] in
+                    do {
+                        let nft = try await self?.loadNFTById(id)
+                        return (id, nft)
+                    } catch {
+                        print("CartManager: Ошибка загрузки NFT \(id): \(error)")
+                        return (id, nil)
+                    }
                 }
             }
+            
+            for await (id, nft) in group {
+                if let nft = nft {
+                    loadedNFTs.append(nft)
+                }
+            }
+        }
+        
+        cartItems = ids.compactMap { id in
+            loadedNFTs.first { $0.id == id }
+        }
+    }
+    
+    private func updateServerCart(with ids: [String]) async {
+        do {
+            let _ = try await cartNetworkService.updateOrder(nftIds: ids)
+            
         } catch {
-            print("Ошибка при загрузке корзины: \(error)")
-        }
-    }
-    
-    private func saveToUserDefaults(_ data: Data) async throws {
-        try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global().async {
-                UserDefaults.standard.set(data, forKey: self.userDefaultsKey)
-                continuation.resume()
+            print("CartManager: Ошибка обновления корзины: \(error)")
+            
+            await MainActor.run {
+                Task {
+                    await loadCartFromServer()
+                }
             }
         }
     }
     
-    private func loadFromUserDefaults() async throws -> Data? {
-        try await withCheckedThrowingContinuation { continuation in
-            DispatchQueue.global().async {
-                let data = UserDefaults.standard.data(forKey: self.userDefaultsKey)
-                continuation.resume(returning: data)
-            }
+    private func isValidNFTId(_ id: String) -> Bool {
+        return id.count > 10 && id.contains("-")
+    }
+    
+    // MARK: - Helper method для загрузки NFT по ID
+    
+    private func loadNFTById(_ id: String) async throws -> Nft {
+        let request = NFTRequest(id: id)
+        return try await networkClient.send(request, as: Nft.self)
+    }
+}
+
+// MARK: - Sync methods для совместимости с существующим кодом
+
+extension CartManager {
+    @MainActor
+    func addToCart(_ product: Nft) {
+        Task {
+            await addToCart(product)
+        }
+    }
+    
+    @MainActor
+    func removeFromCart(_ product: Nft) {
+        Task {
+            await removeFromCart(product)
+        }
+    }
+    
+    @MainActor
+    func clearCart() {
+        Task {
+            await clearCart()
         }
     }
 }

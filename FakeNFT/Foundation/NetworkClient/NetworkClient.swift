@@ -134,6 +134,10 @@ struct DefaultNetworkClient: NetworkClient {
             throw NetworkClientError.invalidEndpoint
         }
         
+        #if DEBUG
+        print("Request: \(urlRequest.httpMethod ?? "Unknown") \(urlRequest.url?.absoluteString ?? "Unknown URL")")
+        #endif
+        
         do {
             let (data, response) = try await session.data(for: urlRequest)
             
@@ -141,14 +145,26 @@ struct DefaultNetworkClient: NetworkClient {
                 throw NetworkClientError.invalidResponse
             }
             
+            #if DEBUG
+            if httpResponse.statusCode >= 400 {
+                print("Error \(httpResponse.statusCode): \(String(data: data, encoding: .utf8) ?? "")")
+            }
+            #endif
+            
             guard 200..<300 ~= httpResponse.statusCode else {
                 throw NetworkClientError.httpStatusCode(httpResponse.statusCode)
             }
             
             return data
         } catch let error as NetworkClientError {
+            #if DEBUG
+            print("NetworkClientError: \(error.localizedDescription ?? "Unknown error")")
+            #endif
             throw error
         } catch {
+            #if DEBUG
+            print("Network error: \(error.localizedDescription)")
+            #endif
             throw NetworkClientError.urlRequestError(error)
         }
     }
@@ -159,6 +175,9 @@ struct DefaultNetworkClient: NetworkClient {
         do {
             return try decoder.decode(T.self, from: data)
         } catch {
+            #if DEBUG
+            print("Decoding error: \(error)")
+            #endif
             throw NetworkClientError.parsingError
         }
     }
@@ -220,9 +239,6 @@ struct DefaultNetworkClient: NetworkClient {
                     let decoded = try self.decoder.decode(T.self, from: data)
                     onResponse(.success(decoded))
                 } catch {
-#if DEBUG
-                    print("NetworkClient decoding error: \(error)")
-#endif
                     onResponse(.failure(NetworkClientError.parsingError))
                 }
             case .failure(let error):
@@ -241,21 +257,50 @@ struct DefaultNetworkClient: NetworkClient {
         var urlRequest = URLRequest(url: endpoint)
         urlRequest.httpMethod = request.httpMethod.rawValue
         
-        urlRequest.addValue(RequestConstants.token, forHTTPHeaderField: "X-Practicum-Mobile-Token")
+        if let customHeaders = request.headers {
+            for (key, value) in customHeaders {
+                urlRequest.setValue(value, forHTTPHeaderField: key)
+            }
+        } else {
+            urlRequest.addValue(RequestConstants.token, forHTTPHeaderField: "X-Practicum-Mobile-Token")
+        }
         
         if let dto = request.dto {
-            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
             switch request.httpMethod {
             case .get, .delete:
+                if urlRequest.value(forHTTPHeaderField: "Accept") == nil {
+                    urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+                }
                 try appendQueryParameters(to: &urlRequest, from: dto, baseURL: endpoint)
                 
             case .post, .put:
-                try appendQueryParameters(to: &urlRequest, from: dto, baseURL: endpoint)
-                urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+                let contentType = urlRequest.value(forHTTPHeaderField: "Content-Type")
+                
+                if contentType == "application/x-www-form-urlencoded" {
+                    try appendFormData(to: &urlRequest, from: dto)
+                } else {
+                    urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                    if urlRequest.value(forHTTPHeaderField: "Accept") == nil {
+                        urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+                    }
+                    try appendJSONBody(to: &urlRequest, from: dto)
+                }
+            }
+        } else {
+            if request.httpMethod == .get && urlRequest.value(forHTTPHeaderField: "Accept") == nil {
+                urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
             }
         }
         
         return urlRequest
+    }
+
+    private func appendFormData(to urlRequest: inout URLRequest, from dto: Dto) throws {
+        let dtoDictionary = dto.asDictionary()
+        let formData = dtoDictionary.map { "\($0.key)=\($0.value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? $0.value)" }
+            .joined(separator: "&")
+        
+        urlRequest.httpBody = formData.data(using: .utf8)
     }
     
     private func appendQueryParameters(to urlRequest: inout URLRequest,
@@ -279,8 +324,6 @@ struct DefaultNetworkClient: NetworkClient {
             let dtoDictionary = dto.asDictionary()
             let jsonData = try JSONSerialization.data(withJSONObject: dtoDictionary, options: [])
             urlRequest.httpBody = jsonData
-            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            urlRequest.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         } catch {
             throw NetworkClientError.parsingError
         }

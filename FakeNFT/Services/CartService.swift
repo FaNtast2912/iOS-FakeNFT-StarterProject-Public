@@ -27,52 +27,37 @@ protocol CartNetworkService {
 final class DefaultCartNetworkService: CartNetworkService {
     private let networkClient: NetworkClient
     
-    init(networkClient: NetworkClient) {
+    init(networkClient: NetworkClient = DefaultNetworkClient()) {
         self.networkClient = networkClient
     }
     
-    func fetchOrder() async throws -> Order {
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = OrderRequest()
-            networkClient.send(request: request, type: Order.self) { result in
-                continuation.resume(with: result)
-            }
-        }
+    func updateOrder(nftIds: [String]) async throws -> Order {
+        let request = UpdateOrderRequest(nftIds: nftIds)
+        let order = try await networkClient.send(request, as: Order.self)
+        return order
     }
     
-    func updateOrder(nftIds: [String]) async throws -> Order {
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = UpdateOrderRequest(nftIds: nftIds)
-            networkClient.send(request: request, type: Order.self) { result in
-                continuation.resume(with: result)
-            }
-        }
+    func fetchOrder() async throws -> Order {
+        let request = OrderRequest()
+        let order = try await networkClient.send(request, as: Order.self)
+        return order
     }
     
     func fetchCurrencies() async throws -> [CurrencyModel] {
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = CurrenciesRequest()
-            networkClient.send(request: request, type: [CurrencyModel].self) { result in
-                continuation.resume(with: result)
-            }
-        }
+        let request = CurrenciesRequest()
+        let currencies = try await networkClient.send(request, as: [CurrencyModel].self)
+        return currencies
     }
     
     func fetchCurrency(id: String) async throws -> CurrencyModel {
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = CurrencyRequest(id: id)
-            networkClient.send(request: request, type: CurrencyModel.self) { result in
-                continuation.resume(with: result)
-            }
-        }
+        let request = CurrencyRequest(id: id)
+        let currency = try await networkClient.send(request, as: CurrencyModel.self)
+        return currency
     }
     
     func payOrder(currencyId: String) async throws -> PaymentResult {
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = PaymentRequest(currencyId: currencyId)
-            networkClient.send(request: request, type: PaymentResult.self) { result in
-                continuation.resume(with: result)
-            }
-        }
+        let request = PaymentRequest(currencyId: currencyId)
+        let result = try await networkClient.send(request, as: PaymentResult.self)
+        return result
     }
 }
