@@ -50,6 +50,9 @@
 		583D11A62DF889C600010D8B /* CollectionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 583D11A52DF889BD00010D8B /* CollectionDetailView.swift */; };
 		583D11A82DF889EE00010D8B /* CartViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 583D11A72DF889E700010D8B /* CartViewFactory.swift */; };
 		583D11AA2DF88A0700010D8B /* PaymentMethodViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 583D11A92DF88A0500010D8B /* PaymentMethodViewFactory.swift */; };
+		583D11AC2DF88D6800010D8B /* MockServicesAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 583D11AB2DF88D5900010D8B /* MockServicesAssembly.swift */; };
+		583D11AE2DF88DD200010D8B /* MockNetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 583D11AD2DF88DD000010D8B /* MockNetworkClient.swift */; };
+		583D11B02DF88DEF00010D8B /* MockNFTStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 583D11AF2DF88DE800010D8B /* MockNFTStorage.swift */; };
 		5851C8B92DEEC4E000FAC5DA /* ViewCornerRadiusExtention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5851C8B72DEEC4C100FAC5DA /* ViewCornerRadiusExtention.swift */; };
 		58877EE72DEF036900BE87A3 /* LikeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58877EE62DEF036100BE87A3 /* LikeManager.swift */; };
 		58877EEB2DEF041600BE87A3 /* ProfileRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58877EEA2DEF040900BE87A3 /* ProfileRequest.swift */; };
@@ -213,6 +216,9 @@
 		583D11A52DF889BD00010D8B /* CollectionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionDetailView.swift; sourceTree = "<group>"; };
 		583D11A72DF889E700010D8B /* CartViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartViewFactory.swift; sourceTree = "<group>"; };
 		583D11A92DF88A0500010D8B /* PaymentMethodViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaymentMethodViewFactory.swift; sourceTree = "<group>"; };
+		583D11AB2DF88D5900010D8B /* MockServicesAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockServicesAssembly.swift; sourceTree = "<group>"; };
+		583D11AD2DF88DD000010D8B /* MockNetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockNetworkClient.swift; sourceTree = "<group>"; };
+		583D11AF2DF88DE800010D8B /* MockNFTStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockNFTStorage.swift; sourceTree = "<group>"; };
 		5851C8B72DEEC4C100FAC5DA /* ViewCornerRadiusExtention.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewCornerRadiusExtention.swift; sourceTree = "<group>"; };
 		58877EE62DEF036100BE87A3 /* LikeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeManager.swift; sourceTree = "<group>"; };
 		58877EEA2DEF040900BE87A3 /* ProfileRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRequest.swift; sourceTree = "<group>"; };
@@ -671,17 +677,6 @@
 			path = Storage;
 			sourceTree = "<group>";
 		};
-		58DEB4FE2DF84C230096AF5F /* Legacy */ = {
-			isa = PBXGroup;
-			children = (
-				58877EE62DEF036100BE87A3 /* LikeManager.swift */,
-				0AA503522DEC9ECE008CB0E1 /* SortingManagerUser.swift */,
-				C942F5762DEA4FE600966062 /* CartManager.swift */,
-				C942F5772DEA4FE600966062 /* SortingManager.swift */,
-			);
-			path = Legacy;
-			sourceTree = "<group>";
-		};
 		58DEB4FF2DF84C3F0096AF5F /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
@@ -1040,6 +1035,9 @@
 		58DEB5242DF84DAD0096AF5F /* Mocks */ = {
 			isa = PBXGroup;
 			children = (
+				583D11AF2DF88DE800010D8B /* MockNFTStorage.swift */,
+				583D11AD2DF88DD000010D8B /* MockNetworkClient.swift */,
+				583D11AB2DF88D5900010D8B /* MockServicesAssembly.swift */,
 				58DEB4D92DF81FC40096AF5F /* MockUserCardService.swift */,
 				58DEB4DA2DF81FC40096AF5F /* MockUserCollectionService.swift */,
 				58DEB4DB2DF81FC40096AF5F /* MockUserService.swift */,
@@ -1075,7 +1073,10 @@
 		C942F5782DEA4FE600966062 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				58DEB4FE2DF84C230096AF5F /* Legacy */,
+				58877EE62DEF036100BE87A3 /* LikeManager.swift */,
+				0AA503522DEC9ECE008CB0E1 /* SortingManagerUser.swift */,
+				C942F5762DEA4FE600966062 /* CartManager.swift */,
+				C942F5772DEA4FE600966062 /* SortingManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -1283,6 +1284,7 @@
 				C942F5792DEA4FE600966062 /* SortingManager.swift in Sources */,
 				58DEB55F2DF868DE0096AF5F /* ProgressHUD+View.swift in Sources */,
 				58DEB5432DF855D40096AF5F /* NFTStorageImpl.swift in Sources */,
+				583D11AC2DF88D6800010D8B /* MockServicesAssembly.swift in Sources */,
 				58DEB56D2DF86A390096AF5F /* User+Equatable.swift in Sources */,
 				58F1A44B2DF726060071E590 /* Profile.swift in Sources */,
 				C91D1D7D2DF4C06D0024052E /* Order.swift in Sources */,
@@ -1319,6 +1321,7 @@
 				583D11A42DF8899900010D8B /* CatalogListViewFactory.swift in Sources */,
 				58DEB53B2DF854A50096AF5F /* NftServiceImpl.swift in Sources */,
 				558E39E72C68CE0A00FB86AC /* NftServiceProtocol.swift in Sources */,
+				583D11AE2DF88DD200010D8B /* MockNetworkClient.swift in Sources */,
 				58018AEB2DF2F8000022D4CA /* NFTCollections.swift in Sources */,
 				0ADFC26E2DF3810F004312F4 /* UserByIdServiceImpl.swift in Sources */,
 				D04790BF2DE393FE000585F0 /* FakeNFTApp.swift in Sources */,
@@ -1374,6 +1377,7 @@
 				58DEB4DD2DF81FC40096AF5F /* MockUserCollectionService.swift in Sources */,
 				58DEB4DE2DF81FC40096AF5F /* MockUserService.swift in Sources */,
 				3F6806D329CBBE9600B4F915 /* NetworkRequest.swift in Sources */,
+				583D11B02DF88DEF00010D8B /* MockNFTStorage.swift in Sources */,
 				0A06E8142DF3152600D5AC2A /* UserServiceImpl.swift in Sources */,
 				58DEB5262DF84F670096AF5F /* DefaultNetworkClient.swift in Sources */,
 				0AA5034E2DEC9E1B008CB0E1 /* UserCollectionViewModel.swift in Sources */,

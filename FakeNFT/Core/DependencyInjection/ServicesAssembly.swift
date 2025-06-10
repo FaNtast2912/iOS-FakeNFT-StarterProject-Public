@@ -1,6 +1,7 @@
 import Foundation
 
-final class ServicesAssembly: ObservableObject {
+@MainActor
+class ServicesAssembly: ObservableObject {
     
     private let networkClient: NetworkClient
     private let nftStorage: NftStorage

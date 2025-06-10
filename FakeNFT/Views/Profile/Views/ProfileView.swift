@@ -117,9 +117,9 @@ struct ProfileView: View {
     }
 }
 
-//МАКС НЕ забудь!
-//#Preview {
-//    ProfileView(servicesAssembly: ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl()))
-//        .environmentObject(NavigationModel())
-//}
+#Preview {
+    let mockServices = MockServicesAssembly()
+    return ProfileViewFactory(servicesAssembly: mockServices)
+        .environmentObject(NavigationModel())
+}
 

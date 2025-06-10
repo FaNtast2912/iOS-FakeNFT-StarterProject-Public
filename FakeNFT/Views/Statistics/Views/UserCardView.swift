@@ -43,10 +43,8 @@ struct UserCardView: View {
     }
 }
 
-// Макс, не забудь!
-//#Preview {
-//    UserCardView(
-//        userId: "1",
-//        userService: MockUserByIdService()
-//    )
-//}
+#Preview {
+    let mockServices = MockServicesAssembly()
+    return UserCardViewFactory(userId: "mock-user-id", servicesAssembly: mockServices)
+        .environmentObject(NavigationModel())
+}

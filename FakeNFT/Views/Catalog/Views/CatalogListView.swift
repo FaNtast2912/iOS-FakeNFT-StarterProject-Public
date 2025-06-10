@@ -74,8 +74,8 @@ struct CatalogListView: View {
 
 // MARK: - Preview
 
-//МАКС не забудь
-//#Preview {
-//    CatalogListView()
-//        .environmentObject(NavigationModel())
-//}
+#Preview {
+    let mockServices = MockServicesAssembly()
+    return CatalogListViewFactory(servicesAssembly: mockServices)
+        .environmentObject(NavigationModel())
+}

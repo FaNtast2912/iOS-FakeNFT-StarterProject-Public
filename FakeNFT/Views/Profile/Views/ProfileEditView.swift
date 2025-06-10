@@ -122,8 +122,17 @@ struct ProfileEditView: View {
     }
 }
 
-// Макс Не забудь!
-//#Preview {
-//    let service = ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl())
-//    ProfileEditView(profileVM: ProfileViewModel(service: service), service: service)
-//}
+#Preview {
+    let mockServices = MockServicesAssembly()
+    let mockProfile = Profile(
+        name: "Mock User",
+        avatar: "https://example.com/avatar.jpg",
+        description: "Mock description",
+        website: "https://example.com",
+        nfts: ["1", "2"],
+        likes: ["1"],
+        id: "1"
+    )
+    return ProfileEditViewFactory(profile: mockProfile, servicesAssembly: mockServices)
+        .environmentObject(NavigationModel())
+}

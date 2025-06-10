@@ -60,9 +60,8 @@ struct StatisticsView: View {
     }
 }
 
-// Макс, не забудь!
-//#Preview {
-//    StatisticsView()
-//        .environmentObject(StatisticsViewModel(userService: MockUserService())
-//    )
-//}
+#Preview {
+    let mockServices = MockServicesAssembly()
+    return StatisticsViewFactory(servicesAssembly: mockServices)
+        .environmentObject(NavigationModel())
+}

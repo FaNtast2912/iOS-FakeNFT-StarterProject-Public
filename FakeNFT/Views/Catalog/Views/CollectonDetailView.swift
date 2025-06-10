@@ -120,27 +120,20 @@ struct CollectionDetailView: View {
 }
 
 
-//МАКС не забудь!
-// MARK: - Preview
-//#Preview {
-//    let sampleCollection = NFTCollections(
-//        id: "sample-id",
-//        name: "Peach",
-//        cover: URL(string: "https://code.s3.yandex.net/Mobile/iOS/NFT/Обложки_коллекций/Brown.png")!,
-//        nfts: ["28829968-8639-4e08-8853-2f30fcf09783", "77c9aa30-f07a-4bed-886b-dd41051fade2", "ca34d35a-4507-47d9-9312-5ea7053994c0"],
-//        description: "Персиковый — как облака над закатным солнцем в океане. В этой коллекции совмещены трогательные нежность живая игривость сказочных зверей.",
-//        author: "John Doe",
-//        createdAt: "2023-11-21T15:21:36.683Z[GMT]"
-//    )
-//    
-//    // Создаем мок-сервисы для превью
-//    let mockNetworkClient = DefaultNetworkClient()
-//    let mockNftStorage = NftStorageImpl()
-//    let mockServicesAssembly = ServicesAssembly(networkClient: mockNetworkClient, nftStorage: mockNftStorage)
-//    
-//    NavigationView {
-//        CollectionDetailView(collection: sampleCollection)
-//            .environmentObject(NavigationModel())
-//            .environmentObject(mockServicesAssembly)
-//    }
-//}
+#Preview {
+    let mockServices = MockServicesAssembly()
+    let mockCollection = NFTCollections(
+        id: "sample-id",
+        name: "Peach Collection",
+        cover: URL(string: "https://code.s3.yandex.net/Mobile/iOS/NFT/Обложки_коллекций/Brown.png")!,
+        nfts: ["1", "2", "3"],
+        description: "Beautiful peach colored NFT collection with amazing artworks",
+        author: "John Doe",
+        createdAt: "2023-11-21T15:21:36.683Z[GMT]"
+    )
+    
+    return NavigationView {
+        CollectionDetailViewFactory(collection: mockCollection, servicesAssembly: mockServices)
+            .environmentObject(NavigationModel())
+    }
+}

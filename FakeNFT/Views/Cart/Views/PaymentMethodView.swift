@@ -145,14 +145,8 @@ struct PaymentMethodView: View {
     }
 }
 
-//Макс не забудь!
-//
-//#Preview("Loading") {
-//    PaymentMethodView()
-//        .environmentObject(NavigationModel())
-//}
-//
-//#Preview("With Data") {
-//    PaymentMethodView()
-//        .environmentObject(NavigationModel())
-//}
+#Preview {
+    let mockServices = MockServicesAssembly()
+    return PaymentMethodViewFactory(servicesAssembly: mockServices)
+        .environmentObject(NavigationModel())
+}

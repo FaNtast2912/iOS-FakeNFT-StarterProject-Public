@@ -100,7 +100,8 @@ struct MyNFTView: View {
 }
 
 
-//Макс не забудь!
-//#Preview {
-//    MyNFTView(service: ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl()))
-//}
+#Preview {
+    let mockServices = MockServicesAssembly()
+    return MyNFTViewFactory(servicesAssembly: mockServices)
+        .environmentObject(NavigationModel())
+}

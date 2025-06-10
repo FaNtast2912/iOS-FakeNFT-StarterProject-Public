@@ -165,32 +165,14 @@ struct CartView: View {
     }
 }
 
-//МАКС Не забудь!
-//
-//#Preview("With NFTs") {
-//    let networkClient = DefaultNetworkClient()
-//    let nftStorage = NftStorageImpl()
-//    let servicesAssembly = ServicesAssembly(
-//        networkClient: networkClient,
-//        nftStorage: nftStorage
-//    )
-//    let viewModel = CartViewModel(servicesAssembly: servicesAssembly)
-//    
-//    CartView()
-//        .environmentObject(NavigationModel())
-//        .environmentObject(viewModel)
-//}
-//
-//#Preview("Empty Cart") {
-//    let networkClient = DefaultNetworkClient()
-//    let nftStorage = NftStorageImpl()
-//    let servicesAssembly = ServicesAssembly(
-//        networkClient: networkClient,
-//        nftStorage: nftStorage
-//    )
-//    let viewModel = CartViewModel(servicesAssembly: servicesAssembly)
-//    
-//    CartView()
-//        .environmentObject(NavigationModel())
-//        .environmentObject(viewModel)
-//}
+#Preview("With Items") {
+    let mockServices = MockServicesAssembly()
+    return CartViewFactory(servicesAssembly: mockServices)
+        .environmentObject(NavigationModel())
+}
+
+#Preview("Empty Cart") {
+    let mockServices = MockServicesAssembly()
+    return CartViewFactory(servicesAssembly: mockServices)
+        .environmentObject(NavigationModel())
+}

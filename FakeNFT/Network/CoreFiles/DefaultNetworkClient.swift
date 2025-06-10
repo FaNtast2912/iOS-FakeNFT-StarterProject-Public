@@ -20,7 +20,7 @@ struct DefaultNetworkClient: NetworkClient {
         self.encoder = encoder
     }
     
-    // MARK: - Реализация с использованием async/await
+    // MARK: - Основная реализация с async/await
     
     func send(request: NetworkRequest) async throws -> Data {
         guard let urlRequest = try create(request: request) else {
@@ -46,7 +46,7 @@ struct DefaultNetworkClient: NetworkClient {
         }
     }
     
-    func send<T: Decodable>(_ request: NetworkRequest, as type: T.Type) async throws -> T {
+    func send<T: Codable>(_ request: NetworkRequest, as type: T.Type) async throws -> T {
         let data = try await send(request: request)
         
         do {
@@ -56,7 +56,7 @@ struct DefaultNetworkClient: NetworkClient {
         }
     }
     
-    // MARK: - Устаревшая реализация с completion handlers
+    // MARK: - Старая реализация с completion handlers
     
     @discardableResult
     func send(request: NetworkRequest,
@@ -102,10 +102,10 @@ struct DefaultNetworkClient: NetworkClient {
     }
     
     @discardableResult
-    func send<T: Decodable>(request: NetworkRequest,
-                            type: T.Type,
-                            completionQueue: DispatchQueue,
-                            onResponse: @escaping (Result<T, Error>) -> Void) -> NetworkTask? {
+    func send<T: Codable>(request: NetworkRequest,
+                         type: T.Type,
+                         completionQueue: DispatchQueue,
+                         onResponse: @escaping (Result<T, Error>) -> Void) -> NetworkTask? {
         return send(request: request, completionQueue: completionQueue) { result in
             switch result {
             case .success(let data):
@@ -124,7 +124,7 @@ struct DefaultNetworkClient: NetworkClient {
         }
     }
     
-    // MARK: - Private
+    // MARK: - Private methods (остаются без изменений)
     
     private func create(request: NetworkRequest) throws -> URLRequest? {
         guard let endpoint = request.endpoint else {
@@ -177,13 +177,5 @@ struct DefaultNetworkClient: NetworkClient {
         } catch {
             throw NetworkClientError.parsingError
         }
-    }
-}
-
-
-// МАКС не забудь удалить!
-extension DefaultNetworkClient {
-    func send<T: Codable>(_ request: NetworkRequest, as type: T.Type) async throws -> T {
-        fatalError("Implement mapping from NetworkRequest to existing request format")
     }
 }
