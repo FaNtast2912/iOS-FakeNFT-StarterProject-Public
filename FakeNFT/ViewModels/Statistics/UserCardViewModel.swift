@@ -10,9 +10,9 @@ import Foundation
 final class UserCardViewModel: ObservableObject {
     @Published var user: User?
     @Published var isLoading = false
-    private let userService: UserByIdService
+    private let userService: UserByIdServiceProtocol
     
-    init(userService: UserByIdService) {
+    init(userService: UserByIdServiceProtocol) {
         self.userService = userService
     }
     

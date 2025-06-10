@@ -21,11 +21,11 @@ final class PaymentMethodViewModel: ObservableObject {
     
     // MARK: - Dependencies
     
-    private let cartNetworkService: CartNetworkService
+    private let cartNetworkService: CartNetworkServiceProtocol
     
     // MARK: - Initialization
     
-    init(cartNetworkService: CartNetworkService) {
+    init(cartNetworkService: CartNetworkServiceProtocol) {
         self.cartNetworkService = cartNetworkService
     }
     

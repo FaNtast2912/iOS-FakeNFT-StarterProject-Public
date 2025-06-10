@@ -12,7 +12,7 @@ struct UserCardView: View {
     @StateObject private var viewModel: UserCardViewModel
     @EnvironmentObject var navigationModel: NavigationModel
     
-    init(userId: String, userService: UserByIdService) {
+    init(userId: String, userService: UserByIdServiceProtocol) {
         self.userId = userId
         _viewModel = StateObject(wrappedValue: UserCardViewModel(userService: userService))
     }

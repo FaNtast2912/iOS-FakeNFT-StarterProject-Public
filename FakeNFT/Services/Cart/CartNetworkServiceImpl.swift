@@ -5,7 +5,7 @@
 //  Created by Maksim Zakharov on 10.06.2025.
 //
 
-final class CartNetworkServiceImpl: CartNetworkService {
+final class CartNetworkServiceImpl: CartNetworkServiceProtocol {
     let networkClient: NetworkClient
     
     enum CartNetworkServiceError: Error {

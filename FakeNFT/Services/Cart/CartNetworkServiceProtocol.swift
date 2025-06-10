@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol CartNetworkService: ServiceProtocol {
+protocol CartNetworkServiceProtocol: ServiceProtocol {
     func fetchOrder() async throws -> Order
     func updateOrder(nftIds: [String]) async throws -> Order
     func fetchCurrencies() async throws -> [CurrencyModel]

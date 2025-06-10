@@ -4,7 +4,7 @@
 //
 //  Created by Анна Браун on 06.06.2025.
 //
-final class MockUserService: UserService {
+final class MockUserService: UserServiceProtocol {
     func fetchAllUsers() async throws -> [User] {
         return [
             User(

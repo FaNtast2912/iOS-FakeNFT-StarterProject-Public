@@ -7,9 +7,8 @@
 
 import Foundation
 
-final class UserLikesServiceImpl: UserLikesService {
-    
-    private let networkClient: NetworkClient
+final class UserLikesServiceImpl: UserLikesServiceProtocol {
+    let networkClient: NetworkClient
     
     enum UserLikesError: Error {
         case getLikesError
@@ -30,12 +29,13 @@ final class UserLikesServiceImpl: UserLikesService {
     }
   
     func updateLikes(dto: Dto) async throws -> UserLikes {
-        let request = UpdateUserLikesRequest(dto: dto)
+        let request = UpdateUserLikesRequest()
+        var requestWithDto = request
+        requestWithDto.dto = dto
         do {
-            return try await networkClient.send(request, as: UserLikes.self)
+            return try await networkClient.send(requestWithDto, as: UserLikes.self)
         } catch {
             throw UserLikesError.updateLikesError
         }
     }
-    
 }

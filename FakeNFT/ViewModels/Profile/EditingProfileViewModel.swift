@@ -15,7 +15,7 @@ final class EditingProfileViewModel: ObservableObject {
     @Published var website: String
     @Published var loadingState: LoadingState = .loaded
     @Published var alertErrorPresented: Bool = false
-    private let profileService: ProfileService
+    private let profileService: ProfileServiceProtocol
     
     enum LoadingState {
         case loading

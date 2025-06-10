@@ -16,9 +16,9 @@ final class StatisticsViewModel: ObservableObject {
     }
     @Published var isLoading = false
 
-    private let userService: UserService
+    private let userService: UserServiceProtocol
 
-    init(userService: UserService) {
+    init(userService: UserServiceProtocol) {
         self.userService = userService
         sortOption = .initial
     }

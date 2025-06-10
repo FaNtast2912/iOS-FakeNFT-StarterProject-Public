@@ -6,7 +6,7 @@
 //
 import Foundation
 
-final class MockUserByIdService: UserByIdService {
+final class MockUserByIdService: UserByIdServiceProtocol {
         func fetchUser(by id: String) async throws -> User {
             try await Task.sleep(nanoseconds: 500_000_000)
             return User(

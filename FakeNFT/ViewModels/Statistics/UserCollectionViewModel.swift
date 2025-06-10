@@ -11,9 +11,9 @@ final class UserCollectionViewModel: ObservableObject {
     @Published var nfts: [Nft] = []
     @Published var isLoading = false
 
-    private let nftService: NftService
+    private let nftService: NftServiceProtocol
 
-    init(nftService: NftService) {
+    init(nftService: NftServiceProtocol) {
         self.nftService = nftService
     }
 

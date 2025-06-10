@@ -37,8 +37,8 @@ final class CartViewModel: ObservableObject {
     
     // MARK: - Dependencies
 
-    private let cartNetworkService: CartNetworkService
-    private let nftService: NftService
+    private let cartNetworkService: CartNetworkServiceProtocol
+    private let nftService: NftServiceProtocol
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Computed Properties
@@ -50,8 +50,8 @@ final class CartViewModel: ObservableObject {
     
     // MARK: - Initialization
     
-    init(cartNetworkService: CartNetworkService,
-         nftService: NftService) {
+    init(cartNetworkService: CartNetworkServiceProtocol,
+         nftService: NftServiceProtocol) {
         self.cartNetworkService = cartNetworkService
         self.nftService = nftService
     }

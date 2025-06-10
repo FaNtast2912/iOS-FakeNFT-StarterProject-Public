@@ -11,11 +11,11 @@ import Combine
 final class CartManager: ObservableObject {
     @Published private(set) var cartItems: [Nft] = []
     
-    private let cartNetworkService: CartNetworkService
+    private let cartNetworkService: CartNetworkServiceProtocol
     private let userDefaultsKey = "FakeNFT_CartItems"
     private var cancellables = Set<AnyCancellable>()
     
-    init(cartNetworkService: CartNetworkService) {
+    init(cartNetworkService: CartNetworkServiceProtocol) {
         self.cartNetworkService = cartNetworkService
         
         Task {

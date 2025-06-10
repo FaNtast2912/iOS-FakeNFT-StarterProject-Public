@@ -5,9 +5,9 @@ final class LikesManager: ObservableObject {
     @Published private(set) var likedNFTs: Set<String> = []
     @Published private(set) var isLoading = false
     
-    private let userLikesService: UserLikesService
+    private let userLikesService: UserLikesServiceProtocol
     
-    init(userLikesService: UserLikesService) {
+    init(userLikesService: UserLikesServiceProtocol) {
         self.userLikesService = userLikesService
     }
     

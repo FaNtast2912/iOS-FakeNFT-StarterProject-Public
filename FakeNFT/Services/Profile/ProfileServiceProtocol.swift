@@ -6,7 +6,7 @@
 
 import Foundation
 
-protocol ProfileService {
+protocol ProfileServiceProtocol {
     func fetchProfile() async throws -> Profile
     func updateProfile(dto: Dto) async throws -> Profile
 }

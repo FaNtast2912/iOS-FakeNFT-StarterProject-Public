@@ -6,7 +6,7 @@
 //
 import Foundation
 
-final class MockUserCollectionService: NftService {
+final class MockUserCollectionService: NftServiceProtocol {
 
     private let mockNfts: [Nft] = [
         Nft(

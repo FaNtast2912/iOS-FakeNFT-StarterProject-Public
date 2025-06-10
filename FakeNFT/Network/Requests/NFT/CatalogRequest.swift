@@ -9,14 +9,9 @@ import Foundation
 /// Запрос для получения списка коллекций
 struct CatalogRequest: NetworkRequest {
     var endpoint: URL? {
-        URL(string: RequestConstants.baseURL + RequestConstants.collections)
+        URL(string: "\(RequestConstants.baseURL)\(RequestConstants.collections)")
     }
     
-    var httpMethod: HttpMethod {
-        .get
-    }
-    
-    var dto: Dto? {
-        nil
-    }
+    var httpMethod: HttpMethod { .get }
+    var dto: Dto? { nil }
 }

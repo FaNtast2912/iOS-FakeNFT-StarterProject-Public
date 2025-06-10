@@ -6,7 +6,7 @@
 
 import Foundation
 
-protocol UserLikesService {
+protocol UserLikesServiceProtocol {
     func fetchLikes() async throws -> UserLikes
     func updateLikes(dto: Dto) async throws -> UserLikes
 }

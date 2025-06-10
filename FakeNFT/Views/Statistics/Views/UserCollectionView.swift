@@ -13,7 +13,7 @@ struct UserCollectionView: View {
     
     let user: User
     
-    init(user: User, nftService: NftService) {
+    init(user: User, nftService: NftServiceProtocol) {
         _viewModel = StateObject(wrappedValue: UserCollectionViewModel(nftService: nftService))
         self.user = user
     }

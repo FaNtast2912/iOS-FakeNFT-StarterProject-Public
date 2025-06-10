@@ -179,3 +179,11 @@ struct DefaultNetworkClient: NetworkClient {
         }
     }
 }
+
+
+// МАКС не забудь удалить!
+extension DefaultNetworkClient {
+    func send<T: Codable>(_ request: NetworkRequest, as type: T.Type) async throws -> T {
+        fatalError("Implement mapping from NetworkRequest to existing request format")
+    }
+}
