@@ -31,6 +31,7 @@ struct StatisticsView: View {
                 isShowingSortOptions = true
             }) {
                 Image("yp.sort")
+                    .tint(Color.ypBlack)
             }
             .frame(width: 42, height: 42)
             .padding(.bottom, 12)

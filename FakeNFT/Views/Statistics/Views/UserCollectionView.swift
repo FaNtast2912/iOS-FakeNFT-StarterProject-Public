@@ -10,11 +10,19 @@ import SwiftUI
 struct UserCollectionView: View {
     let user: User
     @StateObject private var viewModel: UserCollectionViewModel
+    @EnvironmentObject private var navigationModel: NavigationModel
+    @EnvironmentObject private var likesManager: LikesManagerWrapper
     
     init(user: User, viewModel: UserCollectionViewModel) {
         self.user = user
         self._viewModel = StateObject(wrappedValue: viewModel)
     }
+    
+    private let columns = [
+        GridItem(.flexible(), spacing: 2),
+        GridItem(.flexible(), spacing: 2),
+        GridItem(.flexible(), spacing: 2)
+    ]
     
     var body: some View {
         BaseContentView(
@@ -22,20 +30,35 @@ struct UserCollectionView: View {
             onRetry: { Task { await viewModel.loadNfts(for: user) } }
         ) { nfts in
             ScrollView {
-                LazyVStack {
+                LazyVGrid(columns: columns, spacing: AppConstants.UI.defaultSpacing) {
                     ForEach(nfts, id: \.id) { nft in
-                        // NFT card view
-                        Text(nft.name)
-                            .padding()
+                        UserCollectionCell(nft: nft)
                     }
                 }
             }
         }
-        .navigationTitle("\(user.name)'s Collection")
+        .padding(.horizontal, AppConstants.UI.defaultPadding)
+        .padding(.top, 20)
+        .navigationTitle("Коллекция NFT")
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarStyle(dismissAction: {
+            navigationModel.navigateBack()
+        })
         .task {
             if case .idle = viewModel.loadingState {
-                await viewModel.loadNfts(for: user)
+                async let loadNfts: Void = viewModel.loadNfts(for: user)
+                async let loadLikes: Void = likesManager.loadLikes()
+                
+                await loadNfts
+                await loadLikes
             }
+        }
+        .refreshable {
+            async let refreshNFTs: Void = viewModel.refresh()
+            async let refreshLikes: Void = likesManager.loadLikes()
+            
+            await refreshNFTs
+            await refreshLikes
         }
     }
 }

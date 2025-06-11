@@ -2,6 +2,9 @@ import SwiftUI
 
 struct UserCollectionCell: View {
     let nft: Nft
+    @EnvironmentObject private var cartManager: CartManagerWrapper
+    @EnvironmentObject private var likesManager: LikesManagerWrapper
+    
     var body: some View {
         contentView
             .foregroundStyle(Color.ypBlack)
@@ -20,39 +23,32 @@ struct UserCollectionCell: View {
     
     private var nftImageView: some View {
         ZStack(alignment: .topTrailing) {
-            if let firstURL = nft.images.first {
-                AsyncImage(url: firstURL) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 108, height: 108)
-                            .cornerRadius(12)
-                    default:
-                        Image("yp.mockNFTImg")
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 108, height: 108)
-                            .cornerRadius(12)
-                            .opacity(0.5)
-                    }
-                }
-            } else {
-               
-                Image("yp.mockNFTImg")
+            AsyncImage(url: nft.images.first) { image in
+                image
                     .resizable()
                     .scaledToFill()
-                    .frame(width: 108, height: 108)
-                    .cornerRadius(12)
-                    .opacity(0.5)
+            } placeholder: {
+                Rectangle()
+                    .fill(Color.ypLightGrey)
+                    .overlay {
+                        ProgressHUD(isLoading: true)
+                    }
             }
+            .frame(width: 108, height: 108)
+            .cornerRadius(AppConstants.UI.defaultCornerRadius)
             
-            Image("yp.favorites.noActive")
-                .frame(width: 40, height: 40)
+            Button {
+                likesManager.toggleLike(for: nft.id)
+            } label: {
+                Image(likesManager.isLiked(nft.id) ? .ypFavoritesActive : .ypFavoritesNoActive)
+                    .resizable()
+                    .frame(width: 18, height: 18)
+            }
+            .padding(8)
             
         }
     }
+    
     private var nftRatingView: some View {
         HStack(spacing: 3) {
             ForEach(1..<6) { index in
@@ -62,6 +58,7 @@ struct UserCollectionCell: View {
             }
         }
     }
+    
     private var nftDetailsView: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -71,10 +68,20 @@ struct UserCollectionCell: View {
                 Text("\(nft.price, specifier: "%.2f") ETH")
                     .font(.system(size: 10, weight: .medium))
             }
+            
             Spacer()
-            Image("yp.cart")
-                .frame(width: 40, height: 40)
-
+            
+            Button {
+                if cartManager.isInCart(nft) {
+                    cartManager.removeFromCart(nft)
+                } else {
+                    cartManager.addToCart(nft)
+                }
+            } label: {
+                Image(cartManager.isInCart(nft) ? .ypCartDelete : .ypCart)
+                    .resizable()
+                    .frame(width: 24, height: 24)
+            }
         }
         .frame(alignment: .center)
         
@@ -82,8 +89,7 @@ struct UserCollectionCell: View {
 }
 
 #Preview {
-    UserCollectionCell(
-        nft: Nft(
+    let mockNft = Nft(
             id: "a",
             name: "hjgguy dgbfdb",
             createdAt: "897 79",
@@ -93,5 +99,8 @@ struct UserCollectionCell: View {
             price: 14.98,
             author: ""
         )
-    )
+    let mockNetworkClient = DefaultNetworkClient()
+    let mockNftStorage = NftStorageImpl()
+    let mockServicesAssembly = ServicesAssembly(networkClient: mockNetworkClient, nftStorage: mockNftStorage)
+    UserCollectionCell(nft: mockNft)
 }
