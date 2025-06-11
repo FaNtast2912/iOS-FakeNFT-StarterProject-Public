@@ -12,6 +12,4 @@ struct FakeNFTApp: App {
                 .environmentObject(servicesAssembly)
         }
     }
-    
 }
-

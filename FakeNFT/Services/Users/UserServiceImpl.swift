@@ -22,6 +22,7 @@ final class UserServiceImpl: UserServiceProtocol {
         do {
             return try await networkClient.send(request, as: [User].self)
         } catch {
+            print("❌ Ошибка при получении пользователей:", error.localizedDescription)
             throw UserServiceError.getAllUsersError
         }
     }

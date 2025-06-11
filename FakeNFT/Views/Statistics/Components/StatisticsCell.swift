@@ -16,35 +16,18 @@ struct StatisticsCell: View {
             Text("\(rank)")
                 .font(.system(size: 15))
             HStack {
-                if
-                    !user.avatar.isEmpty,
-                    let url = URL(string: user.avatar)
-                {
-                    AsyncImage(url: url) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 28, height: 28)
-                                .clipShape(Circle())
-                        default:
-                            Image("yp.emptyUserPick")
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 28, height: 28)
-                                .clipShape(Circle())
-                                .opacity(0.5)
-                        }
-                    }
-                } else {
-                    Image("yp.userPickMock")
+                AsyncImage(url: URL(string: user.avatar)) { image in
+                    image
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 28, height: 28)
-                        .clipShape(Circle())
+                } placeholder: {
+                    Image("yp.emptyUserPick")
+                        .resizable()
+                        .scaledToFill()
                         .opacity(0.5)
                 }
+                .frame(width: 28, height: 28)
+                .clipShape(Circle())
                 Text(user.name)
                 Spacer()
                 Text("\(user.nfts.count)")

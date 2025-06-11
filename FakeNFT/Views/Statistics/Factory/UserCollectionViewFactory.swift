@@ -16,5 +16,7 @@ struct UserCollectionViewFactory: View {
             user: user,
             viewModel: servicesAssembly.makeUserCollectionViewModel()
         )
+        .environmentObject(servicesAssembly.likesManager)
+        .environmentObject(servicesAssembly.cartManager) 
     }
 }
