@@ -1,5 +1,5 @@
 //
-//  MainView.swift
+//  AppTabView.swift
 //  FakeNFT
 //
 //  Created by Olga Trofimova on 25.05.2025.
@@ -76,7 +76,61 @@ struct AppTabView: View {
             .navigationDestination(for: Screens.self) { screen in
                 navigationModel.destination(for: screen, with: servicesAssembly)
             }
+            .environmentObject(servicesAssembly.getCartManagerWrapper())
+            .environmentObject(servicesAssembly.getLikesManagerWrapper())
+            .onChange(of: navigationModel.selectedTab) { oldTab, newTab in
+                Task {
+                    await syncManagersOnTabChange(newTab: newTab)
+                }
+            }
         }
+        .task {
+            // Загружаем начальные данные при старте приложения
+            await loadInitialData()
+        }
+    }
+    
+    // MARK: - Private Methods
+    
+    private func loadInitialData() async {
+        async let loadCart: Void = servicesAssembly.getCartManagerWrapper().loadCart()
+        async let loadLikes: Void = servicesAssembly.getLikesManagerWrapper().loadLikes()
+        
+        await loadCart
+        await loadLikes
+    }
+    
+    /// Синхронизация менеджеров при переключении табов
+    private func syncManagersOnTabChange(newTab: Int) async {
+        let cartWrapper = servicesAssembly.getCartManagerWrapper()
+        let likesWrapper = servicesAssembly.getLikesManagerWrapper()
+        
+        switch newTab {
+        case 0: // Профиль
+            // Обновляем лайки для отображения любимых NFT
+            likesWrapper.refresh()
+            
+        case 1: // Каталог
+            // Обновляем оба менеджера для актуальных состояний кнопок
+            async let refreshCart: Void = cartWrapper.loadCart()
+            async let refreshLikes: Void = likesWrapper.loadLikes()
+            
+            await refreshCart
+            await refreshLikes
+            
+        case 2: // Корзина
+            // Обновляем оба менеджера для актуальных состояний кнопок
+            cartWrapper.refresh()
+            likesWrapper.refresh()
+            
+        case 3: // Статистика
+            // Обновляем лайки для статистики
+            likesWrapper.refresh()
+            
+        default:
+            print("❓ Неизвестный таб: \(newTab)")
+        }
+
     }
 }
 

@@ -10,6 +10,7 @@ import SwiftUI
 struct ProfileView: View {
     @StateObject private var viewModel: ProfileViewModel
     @EnvironmentObject private var navigationModel: NavigationModel
+    @EnvironmentObject private var likesManager: LikesManagerWrapper
     @State private var editProfileIsPresented: Bool = false
     
     init(viewModel: ProfileViewModel) {
@@ -35,7 +36,16 @@ struct ProfileView: View {
             )
         }
         .onChange(of: editProfileIsPresented) { _ in
-            Task { await viewModel.loadData() }
+            Task {
+                await viewModel.loadData()
+            }
+        }
+        .refreshable {
+            async let refreshProfile: Void = viewModel.refresh()
+            async let refreshLikes: Void = likesManager.loadLikes()
+            
+            await refreshProfile
+            await refreshLikes
         }
     }
     
@@ -85,7 +95,7 @@ struct ProfileView: View {
                     navigationModel.navigate(to: .myNFTView)
                 }
                 
-                ProfileListRowView(text: "Избранные NFT (\(viewModel.nftLikesCount))") {
+                ProfileListRowView(text: "Избранные NFT (\(likesManager.likesCount))") {
                     navigationModel.navigate(to: .myFavoriteNFTView)
                 }
                 
@@ -117,4 +127,3 @@ struct ProfileView: View {
     return ProfileViewFactory(servicesAssembly: mockServices)
         .environmentObject(NavigationModel())
 }
-

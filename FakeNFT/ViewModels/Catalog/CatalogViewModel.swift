@@ -10,11 +10,25 @@ import SwiftUI
 /// ViewModel для экрана каталога коллекций
 @MainActor
 final class CatalogViewModel: BaseViewModel<[NFTCollections]> {
-    @Published var sortOption: UnifiedSortOption?
+    @Published var sortOption: UnifiedSortOption = .collectionName(ascending: true) {
+        didSet {
+            UserDefaults.standard.set(sortOption.description, forKey: "catalogSortOption")
+            updateSortedCollections()
+        }
+    }
     @Published var sortedCollections: [NFTCollections] = []
     
     private var catalogService: CatalogServiceProtocol {
         servicesAssembly.catalogService
+    }
+    
+    override init(servicesAssembly: ServicesAssembly) {
+        super.init(servicesAssembly: servicesAssembly)
+        
+        // Load saved sort option
+        if let savedOption = UserDefaults.standard.string(forKey: "catalogSortOption") {
+            sortOption = UnifiedSortOption.from(string: savedOption) ?? .collectionName(ascending: true)
+        }
     }
     
     override func loadData() async {
@@ -31,16 +45,10 @@ final class CatalogViewModel: BaseViewModel<[NFTCollections]> {
     
     func sortCollections(by option: UnifiedSortOption) {
         sortOption = option
-        updateSortedCollections()
     }
     
     private func updateSortedCollections() {
         guard let collections = loadingState.data else { return }
-        
-        if let sortOption = sortOption {
-            sortedCollections = UnifiedSortingManager.shared.sort(items: collections, by: sortOption) as? [NFTCollections] ?? collections
-        } else {
-            sortedCollections = collections
-        }
+        sortedCollections = UnifiedSortingManager.shared.sort(items: collections, by: sortOption) as? [NFTCollections] ?? collections
     }
 }

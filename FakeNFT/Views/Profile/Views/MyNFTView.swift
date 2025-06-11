@@ -10,6 +10,7 @@ import SwiftUI
 struct MyNFTView: View {
     @StateObject private var viewModel: MyNFTViewModel
     @EnvironmentObject private var navigationModel: NavigationModel
+    @EnvironmentObject private var likesManager: LikesManagerWrapper
     
     init(viewModel: MyNFTViewModel) {
         self._viewModel = StateObject(wrappedValue: viewModel)
@@ -71,9 +72,11 @@ struct MyNFTView: View {
             }
         }
         .refreshable {
-            Task {
-                await viewModel.refresh()
-            }
+            async let refreshData: Void = viewModel.refresh()
+            async let refreshLikes: Void = likesManager.loadLikes()
+            
+            await refreshData
+            await refreshLikes
         }
     }
     
@@ -86,11 +89,11 @@ struct MyNFTView: View {
                         name: nft.name,
                         rating: nft.rating,
                         price: String(nft.price) + " ETH",
-                        isFavorite: viewModel.isLiked(id: nft.id),
+                        isFavorite: likesManager.isLiked(nft),
                         author: nft.author
                     ) {
                         Task {
-                            await viewModel.toggleLike(for: nft.id)
+                            await likesManager.toggleLike(for: nft)
                         }
                     }
                 }
@@ -99,11 +102,4 @@ struct MyNFTView: View {
         .padding(.horizontal, AppConstants.UI.defaultPadding)
         .scrollIndicators(.hidden)
     }
-}
-
-
-#Preview {
-    let mockServices = MockServicesAssembly()
-    return MyNFTViewFactory(servicesAssembly: mockServices)
-        .environmentObject(NavigationModel())
 }

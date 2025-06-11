@@ -12,5 +12,7 @@ struct PaymentMethodViewFactory: View {
     
     var body: some View {
         PaymentMethodView(viewModel: servicesAssembly.makePaymentMethodViewModel())
+            .environmentObject(servicesAssembly.getCartManagerWrapper())
+            .environmentObject(servicesAssembly.getLikesManagerWrapper())
     }
 }

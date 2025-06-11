@@ -12,5 +12,7 @@ struct CatalogListViewFactory: View {
     
     var body: some View {
         CatalogListView(viewModel: servicesAssembly.makeCatalogViewModel())
+            .environmentObject(servicesAssembly.getCartManagerWrapper())
+            .environmentObject(servicesAssembly.getLikesManagerWrapper())
     }
 }

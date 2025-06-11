@@ -10,10 +10,18 @@ import SwiftUI
 struct CartView: View {
     @StateObject private var viewModel: CartViewModel
     @EnvironmentObject var navigation: NavigationModel
+    @EnvironmentObject private var cartManager: CartManagerWrapper
     
     @State private var showDeleteConfirmation = false
     @State private var nftToDelete: Nft?
     @State private var showSortOptions = false
+    
+    // Доступные опции сортировки для корзины
+    private let sortOptions: [UnifiedSortOption] = [
+        .nftPrice(ascending: false),
+        .nftRating(ascending: false),
+        .nftName(ascending: false),
+    ]
     
     init(viewModel: CartViewModel) {
         self._viewModel = StateObject(wrappedValue: viewModel)
@@ -22,34 +30,65 @@ struct CartView: View {
     var body: some View {
         VStack(spacing: 0) {
             sortButton
-            
-            BaseContentView(
-                loadingState: viewModel.loadingState,
-                onRetry: { Task { await viewModel.loadData() } }
-            ) { nfts in
-                if nfts.isEmpty {
-                    emptyCartView
-                } else {
-                    nftListView(nfts: nfts)
+            if viewModel.isLoading && viewModel.nfts.isEmpty {
+                VStack {
+                    Spacer()
+                    ProgressView("Загрузка корзины...")
+                        .font(.system(size: 17, weight: .medium))
+                    Spacer()
                 }
+            } else if let error = viewModel.error {
+                VStack {
+                    Spacer()
+                    Text("Ошибка загрузки")
+                        .font(.system(size: 17, weight: .bold))
+                        .padding(.bottom, 8)
+                    Text(error.localizedDescription)
+                        .font(.system(size: 15))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom, 16)
+                    Button("Повторить") {
+                        Task {
+                            await viewModel.loadData()
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(Color.black)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    Spacer()
+                }
+            } else if viewModel.nfts.isEmpty {
+                emptyCartView
+            } else {
+                nftListView
             }
             
             paymentSummaryView
         }
-        .progressHUD(isLoading: viewModel.loadingState.isLoading || viewModel.isDeleting)
+        .progressHUD(isLoading: viewModel.isLoading || viewModel.isDeleting)
         .overlay(deleteConfirmationOverlay)
         .task {
-            if case .idle = viewModel.loadingState {
+            // Загружаем данные только при первом запуске, если корзина пуста
+            if viewModel.nfts.isEmpty && !viewModel.isLoading {
                 await viewModel.loadData()
             }
         }
-        .alert("Ошибка", isPresented: .constant(viewModel.loadingState.error != nil)) {
+        .refreshable {
+            // Pull-to-refresh для ручного обновления
+            await viewModel.refresh()
+        }
+        .alert("Ошибка", isPresented: .constant(viewModel.error != nil)) {
             Button("Повторить") {
-                Task { await viewModel.loadData() }
+                Task {
+                    await viewModel.refresh()
+                }
             }
             Button("Отмена", role: .cancel) {}
         } message: {
-            Text(viewModel.loadingState.error?.localizedDescription ?? "Произошла ошибка")
+            Text(viewModel.error?.localizedDescription ?? "Произошла ошибка")
         }
     }
     
@@ -63,17 +102,30 @@ struct CartView: View {
                     .foregroundColor(.black)
                     .padding(.trailing, 19.5)
             }
-            .disabled(viewModel.loadingState.isLoading || viewModel.isDeleting)
+            .disabled(viewModel.isLoading || viewModel.isDeleting)
             .confirmationDialog("Сортировка", isPresented: $showSortOptions) {
-                ForEach(CartViewModel.SortOption.allCases, id: \.self) { option in
-                    Button(option.rawValue) {
-                        viewModel.currentSortOption = option
+                ForEach(sortOptions, id: \.description) { option in
+                    Button(getSortOptionTitle(option)) {
+                        viewModel.setSortOption(option)
                     }
                 }
                 Button("Закрыть", role: .cancel) {}
             }
         }
         .padding(.top, 16)
+    }
+    
+    private func getSortOptionTitle(_ option: UnifiedSortOption) -> String {
+        switch option {
+        case .nftPrice(let ascending):
+            return ascending ? "По цене" : "По цене"
+        case .nftRating(let ascending):
+            return ascending ? "По рейтингу" : "По рейтингу"
+        case .nftName(let ascending):
+            return ascending ? "По названию" : "По названию"
+        default:
+            return "Неизвестно"
+        }
     }
     
     private var emptyCartView: some View {
@@ -86,10 +138,10 @@ struct CartView: View {
         }
     }
     
-    private func nftListView(nfts: [Nft]) -> some View {
+    private var nftListView: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
-                ForEach(viewModel.getSortedNFTs(), id: \.id) { nft in
+                ForEach(viewModel.sortedNfts, id: \.id) { nft in
                     NFTItemView(
                         nft: nft,
                         onDeleteTap: {
@@ -97,8 +149,8 @@ struct CartView: View {
                             showDeleteConfirmation = true
                         }
                     )
-                    .disabled(viewModel.isDeleting)
-                    .opacity(viewModel.isDeleting ? 0.6 : 1.0)
+                    .disabled(viewModel.isDeleting || viewModel.isLoading)
+                    .opacity((viewModel.isDeleting || viewModel.isLoading) ? 0.6 : 1.0)
                 }
             }
             .padding(.top, 36)
@@ -136,8 +188,8 @@ struct CartView: View {
                         .foregroundColor(.white)
                         .cornerRadius(16)
                 }
-                .disabled(viewModel.nfts.isEmpty || viewModel.loadingState.isLoading || viewModel.isDeleting)
-                .opacity((viewModel.nfts.isEmpty || viewModel.loadingState.isLoading || viewModel.isDeleting) ? 0.6 : 1.0)
+                .disabled(viewModel.nfts.isEmpty || viewModel.isLoading || viewModel.isDeleting)
+                .opacity((viewModel.nfts.isEmpty || viewModel.isLoading || viewModel.isDeleting) ? 0.6 : 1.0)
             }
             .padding(.horizontal, AppConstants.UI.defaultPadding)
         }

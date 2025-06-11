@@ -12,5 +12,7 @@ struct MyFavoriteNFTViewFactory: View {
     
     var body: some View {
         MyFavoriteNFTView(viewModel: servicesAssembly.makeMyFavoriteNFTViewModel())
+            .environmentObject(servicesAssembly.getCartManagerWrapper())
+            .environmentObject(servicesAssembly.getLikesManagerWrapper())
     }
 }

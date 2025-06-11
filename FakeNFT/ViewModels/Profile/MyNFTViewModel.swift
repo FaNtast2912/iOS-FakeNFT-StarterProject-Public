@@ -17,7 +17,6 @@ final class MyNFTViewModel: BaseViewModel<[Nft]> {
         }
     }
     @Published var sortedNfts: [Nft] = []
-    @Published var likesNftId: [String] = []
     
     private var profileService: ProfileServiceProtocol {
         servicesAssembly.profileService
@@ -25,10 +24,6 @@ final class MyNFTViewModel: BaseViewModel<[Nft]> {
     
     private var nftService: NftServiceProtocol {
         servicesAssembly.nftService
-    }
-    
-    private var userLikesService: UserLikesServiceProtocol {
-        servicesAssembly.userLikesService
     }
     
     override init(servicesAssembly: ServicesAssembly) {
@@ -45,9 +40,7 @@ final class MyNFTViewModel: BaseViewModel<[Nft]> {
         do {
             let profile = try await profileService.fetchProfile()
             let nfts = try await nftService.loadNfts(ids: profile.nfts)
-            let likes = try await userLikesService.fetchLikes()
             
-            likesNftId = likes.likes
             setLoaded(nfts)
             updateSortedNfts()
         } catch {
@@ -55,24 +48,7 @@ final class MyNFTViewModel: BaseViewModel<[Nft]> {
         }
     }
     
-    func isLiked(id: String) -> Bool {
-        return likesNftId.contains(id)
-    }
-    
-    func toggleLike(for nftId: String) async {
-        if likesNftId.contains(nftId) {
-            likesNftId.removeAll { $0 == nftId }
-        } else {
-            likesNftId.append(nftId)
-        }
-        
-        let dto = UserLikesRequestDto(likes: likesNftId)
-        do {
-            _ = try await userLikesService.updateLikes(dto: dto)
-        } catch {
-            print("Failed to update likes: \(error)")
-        }
-    }
+    // MARK: - Sorting
     
     func setSortOption(_ option: UnifiedSortOption) {
         currentSortOption = option

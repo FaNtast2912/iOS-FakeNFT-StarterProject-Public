@@ -30,13 +30,13 @@ struct MyFavoriteNFTCardView: View {
                 }
                 .frame(width: 80, height: 80)
                 .clipShape(.rect(cornerRadius: 12))
+                
                 Button {
                     completion()
                 } label: {
                     Image(isFavorite ? "yp.favorites.active" : "yp.favorites.noActive")
                         .padding(4)
                 }
-                
             }
             .padding(.trailing, 12)
             

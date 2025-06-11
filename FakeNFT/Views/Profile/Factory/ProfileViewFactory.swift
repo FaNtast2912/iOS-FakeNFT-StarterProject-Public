@@ -12,5 +12,7 @@ struct ProfileViewFactory: View {
     
     var body: some View {
         ProfileView(viewModel: servicesAssembly.makeProfileViewModel())
+            .environmentObject(servicesAssembly.getCartManagerWrapper())
+            .environmentObject(servicesAssembly.getLikesManagerWrapper())
     }
 }

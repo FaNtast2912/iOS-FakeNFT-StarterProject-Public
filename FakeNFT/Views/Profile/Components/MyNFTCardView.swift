@@ -31,6 +31,7 @@ struct MyNFTCardView: View {
                 }
                 .frame(width: 108, height: 108)
                 .clipShape(.rect(cornerRadius: 12))
+                
                 Button {
                     completion()
                 } label: {
@@ -63,11 +64,9 @@ struct MyNFTCardView: View {
                     Text(price)
                         .font(.system(size: 17, weight: .bold))
                 }
-                
             }
         }
         .padding(.vertical, 16)
-        
     }
 }
 

@@ -8,7 +8,10 @@ class ServicesAssembly: ObservableObject {
     
     // Lazy-инициализация менеджеров
     private lazy var _likesManager = LikesManager(userLikesService: userLikesService)
-    private lazy var _cartManager = CartManager(cartNetworkService: cartNetworkService)
+    private lazy var _cartManager = CartManager(
+        cartNetworkService: cartNetworkService,
+        nftService: nftService
+    )
     
     init(
         networkClient: NetworkClient,
@@ -58,6 +61,39 @@ class ServicesAssembly: ObservableObject {
         UserByIdServiceImpl(
             networkClient: networkClient
         )
+    }
+    func getLikesCount() async -> Int {
+        return await _likesManager.getLikesCount()
+    }
+
+    func getCartItemsCount() async -> Int {
+        return await _cartManager.getItemsCount()
+    }
+
+    // MARK: - для обновления состояния
+
+    func initializeManagers() async {
+        async let loadLikes: Void = safeLoadLikes()
+        async let loadCart: Void = safeLoadCart()
+        
+        await loadLikes
+        await loadCart
+    }
+
+    private func safeLoadLikes() async {
+        do {
+            try await _likesManager.loadLikes()
+        } catch {
+            print("❌ Ошибка загрузки лайков: \(error)")
+        }
+    }
+
+    private func safeLoadCart() async {
+        do {
+            try await _cartManager.loadCart()
+        } catch {
+            print("❌ Ошибка загрузки корзины: \(error)")
+        }
     }
 }
 

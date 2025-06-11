@@ -10,34 +10,25 @@ import Foundation
 @MainActor
 final class CartViewModel: BaseViewModel<[Nft]> {
     
-    // MARK: - Sort Options (сохраняем для совместимости)
+    @Published var currentSortOption: UnifiedSortOption = .nftPrice(ascending: true) {
+        didSet {
+            UserDefaults.standard.set(currentSortOption.description, forKey: "cartSortOption")
+            updateSortedNfts()
+        }
+    }
+    @Published var sortedNfts: [Nft] = []
+    @Published var isDeleting = false
     
-    enum SortOption: String, CaseIterable {
-        case price = "По цене"
-        case rating = "По рейтингу"
-        case name = "По названию"
+    override init(servicesAssembly: ServicesAssembly) {
+        super.init(servicesAssembly: servicesAssembly)
         
-        func toUnifiedSortOption() -> UnifiedSortOption {
-            switch self {
-            case .price: return .nftPrice(ascending: true)
-            case .rating: return .nftRating(ascending: true)
-            case .name: return .nftName(ascending: true)
-            }
+        // Load saved sort option
+        if let savedOption = UserDefaults.standard.string(forKey: "cartSortOption") {
+            currentSortOption = UnifiedSortOption.from(string: savedOption) ?? .nftPrice(ascending: true)
         }
     }
     
-    @Published var currentSortOption: SortOption = .price
-    @Published var isDeleting = false
-    
-    private var cartNetworkService: CartNetworkServiceProtocol {
-        servicesAssembly.cartNetworkService
-    }
-    
-    private var nftService: NftServiceProtocol {
-        servicesAssembly.nftService
-    }
-    
-    /// Получить NFTs (алиас для совместимости)
+    /// Получить NFTs (теперь из CartManager)
     var nfts: [Nft] {
         return loadingState.data ?? []
     }
@@ -58,15 +49,17 @@ final class CartViewModel: BaseViewModel<[Nft]> {
     }
     
     override func loadData() async {
-        print("[CartViewModel] Загрузка корзины...")
+        print("[CartViewModel] Загрузка корзины через CartManager...")
         setLoading()
         
         do {
-            let order = try await cartNetworkService.fetchOrder()
-            print("[CartViewModel] Получен заказ с \(order.nfts.count) NFT")
+            // Используем CartManager вместо прямого обращения к сервисам
+            try await servicesAssembly.cartManager.loadCart()
+            let cartItems = await servicesAssembly.cartManager.getCartItems()
             
-            let nfts = try await nftService.loadNfts(ids: order.nfts)
-            setLoaded(nfts)
+            print("[CartViewModel] Получено \(cartItems.count) NFT из CartManager")
+            setLoaded(cartItems)
+            updateSortedNfts()
             
         } catch {
             handleError(error)
@@ -85,21 +78,20 @@ final class CartViewModel: BaseViewModel<[Nft]> {
         isDeleting = true
         
         do {
-            let currentNfts = loadingState.data ?? []
-            let updatedNftIds = currentNfts.compactMap { nft in
-                nft.id != id ? nft.id : nil
+            // Находим NFT для удаления
+            guard let nftToDelete = nfts.first(where: { $0.id == id }) else {
+                print("[CartViewModel] NFT не найден для удаления")
+                isDeleting = false
+                return
             }
             
-            print("[CartViewModel] Текущее количество NFT: \(currentNfts.count)")
-            print("[CartViewModel] Новое количество NFT: \(updatedNftIds.count)")
+            // Используем CartManager для удаления
+            try await servicesAssembly.cartManager.removeFromCart(nftToDelete)
             
-            let updatedOrder = try await cartNetworkService.updateOrder(nftIds: updatedNftIds)
-            
-            print("[CartViewModel] Сервер подтвердил удаление")
-            print("[CartViewModel] Ответ сервера - количество NFT: \(updatedOrder.nfts.count)")
-            
-            let updatedNfts = try await nftService.loadNfts(ids: updatedOrder.nfts)
-            setLoaded(updatedNfts)
+            // Обновляем локальное состояние
+            let updatedItems = await servicesAssembly.cartManager.getCartItems()
+            setLoaded(updatedItems)
+            updateSortedNfts()
             
             isDeleting = false
             print("[CartViewModel] NFT успешно удален из корзины")
@@ -117,13 +109,11 @@ final class CartViewModel: BaseViewModel<[Nft]> {
         }
     }
     
-    func sortItems(by option: SortOption) {
-        print("[CartViewModel] Сортировка по: \(option.rawValue)")
+    func setSortOption(_ option: UnifiedSortOption) {
         currentSortOption = option
     }
     
-    func getSortedNFTs() -> [Nft] {
-        let unifiedOption = currentSortOption.toUnifiedSortOption()
-        return UnifiedSortingManager.shared.sort(items: nfts, by: unifiedOption) as? [Nft] ?? nfts
+    private func updateSortedNfts() {
+        sortedNfts = UnifiedSortingManager.shared.sort(items: nfts, by: currentSortOption) as? [Nft] ?? nfts
     }
 }
