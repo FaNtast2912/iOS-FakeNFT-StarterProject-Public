@@ -20,7 +20,6 @@ final class MyFavoriteNFTViewModel: BaseViewModel<[Nft]> {
     }
     
     override func loadData() async {
-        setLoading()
         
         do {
             let likes = try await userLikesService.fetchLikes()

@@ -67,11 +67,14 @@ struct MyNFTView: View {
         }
         .task {
             if case .idle = viewModel.loadingState {
+                viewModel.setLoading()
                 await viewModel.loadData()
             }
         }
         .refreshable {
-            await viewModel.refresh()
+            Task {
+                await viewModel.refresh()
+            }
         }
     }
     
