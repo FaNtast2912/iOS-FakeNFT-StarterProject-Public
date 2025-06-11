@@ -680,7 +680,6 @@
 		58DEB4FF2DF84C3F0096AF5F /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				58DEB5002DF84C460096AF5F /* Base */,
 				58DEB5012DF84C4C0096AF5F /* Profile */,
 				58DEB5022DF84C520096AF5F /* Catalog */,
 				58DEB5032DF84C5D0096AF5F /* Cart */,
@@ -688,13 +687,6 @@
 				58DEB5052DF84C700096AF5F /* Legacy */,
 			);
 			path = ViewModels;
-			sourceTree = "<group>";
-		};
-		58DEB5002DF84C460096AF5F /* Base */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Base;
 			sourceTree = "<group>";
 		};
 		58DEB5012DF84C4C0096AF5F /* Profile */ = {
@@ -812,7 +804,6 @@
 				58DEB50B2DF84CA20096AF5F /* Factory */,
 				58DEB50D2DF84CBD0096AF5F /* Views */,
 				58DEB50E2DF84CC50096AF5F /* Components */,
-				58DEB50F2DF84CCE0096AF5F /* Legacy */,
 				58DEB5452DF85C840096AF5F /* Modifiers */,
 				58DEB5442DF85C7C0096AF5F /* Extentions */,
 			);
@@ -838,13 +829,6 @@
 				D0E6FF9D2DF05F41004EA1E8 /* MyNFTCardView.swift */,
 			);
 			path = Components;
-			sourceTree = "<group>";
-		};
-		58DEB50F2DF84CCE0096AF5F /* Legacy */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Legacy;
 			sourceTree = "<group>";
 		};
 		58DEB5102DF84CD70096AF5F /* Catalog */ = {
@@ -899,7 +883,6 @@
 				58DEB5162DF84D070096AF5F /* Factory */,
 				58DEB5172DF84D0E0096AF5F /* Views */,
 				58DEB5182DF84D1B0096AF5F /* Components */,
-				58DEB5192DF84D270096AF5F /* Legacy */,
 			);
 			path = Cart;
 			sourceTree = "<group>";
@@ -933,20 +916,12 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
-		58DEB5192DF84D270096AF5F /* Legacy */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Legacy;
-			sourceTree = "<group>";
-		};
 		58DEB51A2DF84D320096AF5F /* Statistics */ = {
 			isa = PBXGroup;
 			children = (
 				58DEB51B2DF84D3B0096AF5F /* Factory */,
 				58DEB51C2DF84D420096AF5F /* Views */,
 				58DEB51D2DF84D490096AF5F /* Components */,
-				58DEB51E2DF84D510096AF5F /* Legacy */,
 			);
 			path = Statistics;
 			sourceTree = "<group>";
@@ -978,13 +953,6 @@
 				0A85EFEA2DE8929800F9B21D /* StatisticsCell.swift */,
 			);
 			path = Components;
-			sourceTree = "<group>";
-		};
-		58DEB51E2DF84D510096AF5F /* Legacy */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Legacy;
 			sourceTree = "<group>";
 		};
 		58DEB51F2DF84D6A0096AF5F /* Extentions */ = {
