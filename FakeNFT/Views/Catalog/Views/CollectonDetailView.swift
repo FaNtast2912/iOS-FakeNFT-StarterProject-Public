@@ -72,7 +72,7 @@ struct CollectionDetailView: View {
             navigationModel.navigateBack()
         } label: {
             Image("yp.chevron.backward")
-                .tint(.ypWhiteUniversal)
+                .tint(.ypBlack)
         }
     }
     
