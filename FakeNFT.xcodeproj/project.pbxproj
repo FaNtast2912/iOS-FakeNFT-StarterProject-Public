@@ -53,6 +53,8 @@
 		583D11AC2DF88D6800010D8B /* MockServicesAssembly.swift in Sources */ = {isa = PBXBuildFile; fileRef = 583D11AB2DF88D5900010D8B /* MockServicesAssembly.swift */; };
 		583D11AE2DF88DD200010D8B /* MockNetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 583D11AD2DF88DD000010D8B /* MockNetworkClient.swift */; };
 		583D11B02DF88DEF00010D8B /* MockNFTStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 583D11AF2DF88DE800010D8B /* MockNFTStorage.swift */; };
+		583D11CB2DF9843800010D8B /* CartManagerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 583D11CA2DF9843600010D8B /* CartManagerWrapper.swift */; };
+		583D11CD2DF9844100010D8B /* LikesManagerWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 583D11CC2DF9843F00010D8B /* LikesManagerWrapper.swift */; };
 		5851C8B92DEEC4E000FAC5DA /* ViewCornerRadiusExtention.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5851C8B72DEEC4C100FAC5DA /* ViewCornerRadiusExtention.swift */; };
 		58877EE72DEF036900BE87A3 /* LikeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58877EE62DEF036100BE87A3 /* LikeManager.swift */; };
 		58877EEB2DEF041600BE87A3 /* ProfileRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58877EEA2DEF040900BE87A3 /* ProfileRequest.swift */; };
@@ -219,6 +221,8 @@
 		583D11AB2DF88D5900010D8B /* MockServicesAssembly.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockServicesAssembly.swift; sourceTree = "<group>"; };
 		583D11AD2DF88DD000010D8B /* MockNetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockNetworkClient.swift; sourceTree = "<group>"; };
 		583D11AF2DF88DE800010D8B /* MockNFTStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockNFTStorage.swift; sourceTree = "<group>"; };
+		583D11CA2DF9843600010D8B /* CartManagerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartManagerWrapper.swift; sourceTree = "<group>"; };
+		583D11CC2DF9843F00010D8B /* LikesManagerWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikesManagerWrapper.swift; sourceTree = "<group>"; };
 		5851C8B72DEEC4C100FAC5DA /* ViewCornerRadiusExtention.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewCornerRadiusExtention.swift; sourceTree = "<group>"; };
 		58877EE62DEF036100BE87A3 /* LikeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeManager.swift; sourceTree = "<group>"; };
 		58877EEA2DEF040900BE87A3 /* ProfileRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRequest.swift; sourceTree = "<group>"; };
@@ -427,6 +431,15 @@
 				58018AEA2DF2F7FD0022D4CA /* NFTCollections.swift */,
 			);
 			path = Collections;
+			sourceTree = "<group>";
+		};
+		583D11C92DF9843000010D8B /* Wrapper */ = {
+			isa = PBXGroup;
+			children = (
+				583D11CC2DF9843F00010D8B /* LikesManagerWrapper.swift */,
+				583D11CA2DF9843600010D8B /* CartManagerWrapper.swift */,
+			);
+			path = Wrapper;
 			sourceTree = "<group>";
 		};
 		58DEB4E52DF848760096AF5F /* App */ = {
@@ -1041,6 +1054,7 @@
 		C942F5782DEA4FE600966062 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				583D11C92DF9843000010D8B /* Wrapper */,
 				58877EE62DEF036100BE87A3 /* LikeManager.swift */,
 				0AA503522DEC9ECE008CB0E1 /* SortingManagerUser.swift */,
 				C942F5762DEA4FE600966062 /* CartManager.swift */,
@@ -1351,6 +1365,7 @@
 				0AA5034E2DEC9E1B008CB0E1 /* UserCollectionViewModel.swift in Sources */,
 				0AA503532DEC9ED9008CB0E1 /* SortingManagerUser.swift in Sources */,
 				3F6806D129CBBE6B00B4F915 /* NetworkClient.swift in Sources */,
+				583D11CB2DF9843800010D8B /* CartManagerWrapper.swift in Sources */,
 				58877EEB2DEF041600BE87A3 /* ProfileRequest.swift in Sources */,
 				58DEB56B2DF86A230096AF5F /* Nft+Equatable.swift in Sources */,
 				5851C8B92DEEC4E000FAC5DA /* ViewCornerRadiusExtention.swift in Sources */,
@@ -1372,6 +1387,7 @@
 				D0E6FF602DEF050A004EA1E8 /* UserLikesServiceProtocol.swift in Sources */,
 				0A85EFEF2DE8AD0500F9B21D /* UserCardViewModel.swift in Sources */,
 				D0BA37DC2DE8F16300D88DD7 /* ProfileViewModel.swift in Sources */,
+				583D11CD2DF9844100010D8B /* LikesManagerWrapper.swift in Sources */,
 				58DEB55D2DF868930096AF5F /* UnifiedSortingManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
