@@ -31,8 +31,11 @@ final class ProfileViewModel: BaseViewModel<Profile> {
         
         do {
             let profile = try await profileService.fetchProfile()
+            
+            // Синхронизировать счетчики с менеджерами
             nftsCount = profile.nfts.count
-            nftLikesCount = profile.likes.count
+            nftLikesCount = await servicesAssembly.getLikesCount()
+            
             setLoaded(profile)
         } catch {
             handleError(error)
@@ -45,12 +48,20 @@ final class ProfileViewModel: BaseViewModel<Profile> {
         
         do {
             let updatedProfile = try await profileService.updateProfile(dto: dto)
+            
+            // Обновить счетчики из менеджеров
             nftsCount = updatedProfile.nfts.count
-            nftLikesCount = updatedProfile.likes.count
+            nftLikesCount = await servicesAssembly.getLikesCount()
+            
             setLoaded(updatedProfile)
         } catch {
             handleError(error)
             alertErrorPresented = true
         }
+    }
+    
+    /// Обновить счетчики из менеджеров (вызывать при изменениях)
+    func updateCounts() async {
+        nftLikesCount = await servicesAssembly.getLikesCount()
     }
 }

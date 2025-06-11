@@ -62,6 +62,39 @@ class ServicesAssembly: ObservableObject {
             networkClient: networkClient
         )
     }
+    func getLikesCount() async -> Int {
+        return await _likesManager.getLikesCount()
+    }
+
+    func getCartItemsCount() async -> Int {
+        return await _cartManager.getItemsCount()
+    }
+
+    // MARK: - для обновления состояния
+
+    func initializeManagers() async {
+        async let loadLikes: Void = safeLoadLikes()
+        async let loadCart: Void = safeLoadCart()
+        
+        await loadLikes
+        await loadCart
+    }
+
+    private func safeLoadLikes() async {
+        do {
+            try await _likesManager.loadLikes()
+        } catch {
+            print("❌ Ошибка загрузки лайков: \(error)")
+        }
+    }
+
+    private func safeLoadCart() async {
+        do {
+            try await _cartManager.loadCart()
+        } catch {
+            print("❌ Ошибка загрузки корзины: \(error)")
+        }
+    }
 }
 
 extension ServicesAssembly {

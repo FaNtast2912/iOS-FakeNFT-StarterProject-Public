@@ -10,6 +10,7 @@ import SwiftUI
 struct MyFavoriteNFTView: View {
     @StateObject private var viewModel: MyFavoriteNFTViewModel
     @EnvironmentObject private var navigationModel: NavigationModel
+    @EnvironmentObject private var likesManager: LikesManagerWrapper
     
     private let columns = [GridItem(.flexible(), spacing: 7), GridItem(.flexible(), spacing: 7)]
     
@@ -45,7 +46,11 @@ struct MyFavoriteNFTView: View {
             }
         }
         .refreshable {
-            await viewModel.refresh()
+            async let refreshData: Void = viewModel.refresh()
+            async let refreshLikes: Void = likesManager.loadLikes()
+            
+            await refreshData
+            await refreshLikes
         }
     }
     
@@ -58,10 +63,11 @@ struct MyFavoriteNFTView: View {
                         name: nft.name,
                         rating: nft.rating,
                         price: String(nft.price) + " ETH",
-                        isFavorite: true
+                        isFavorite: likesManager.isLiked(nft)
                     ) {
                         Task {
-                            await viewModel.removeLike(for: nft.id)
+                            await likesManager.removeLike(for: nft)
+                            await viewModel.loadData() // Перезагрузить список
                         }
                     }
                 }
