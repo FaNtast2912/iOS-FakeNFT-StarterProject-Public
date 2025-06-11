@@ -21,7 +21,6 @@ struct MyFavoriteNFTView: View {
         ZStack {
             BaseContentView(
                 loadingState: viewModel.loadingState,
-                loadingMessage: "Загрузка избранных NFT...",
                 onRetry: { Task { await viewModel.loadData() } }
             ) { nfts in
                 if nfts.isEmpty {

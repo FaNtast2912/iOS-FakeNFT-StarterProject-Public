@@ -28,7 +28,6 @@ struct CollectionDetailView: View {
                     
                     BaseContentView(
                         loadingState: viewModel.loadingState,
-                        loadingMessage: "Загрузка NFT...",
                         onRetry: { Task { await viewModel.loadData() } }
                     ) { nfts in
                         CollectionsListView(nfts: nfts)

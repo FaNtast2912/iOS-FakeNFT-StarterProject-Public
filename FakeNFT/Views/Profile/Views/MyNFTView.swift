@@ -19,7 +19,6 @@ struct MyNFTView: View {
         ZStack {
             BaseContentView(
                 loadingState: viewModel.loadingState,
-                loadingMessage: "Загрузка NFT...",
                 onRetry: { Task { await viewModel.loadData() } }
             ) { _ in
                 if viewModel.sortedNfts.isEmpty {
