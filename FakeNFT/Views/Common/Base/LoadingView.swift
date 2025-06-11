@@ -9,7 +9,7 @@ import SwiftUI
 struct LoadingView: View {
     let message: String
     
-    init(message: String = "Загрузка...") {
+    init(message: String = "") {
         self.message = message
     }
     
