@@ -73,8 +73,8 @@ struct CurrencyCellView: View {
     )
     .environmentObject({
         let networkClient = DefaultNetworkClient()
-        let cartNetworkService = CartNetworkServiceImpl(networkClient: networkClient)
-        return PaymentMethodViewModel(cartNetworkService: cartNetworkService)
+        let serviceAssembly = ServicesAssembly(networkClient: networkClient, nftStorage: NftStorageImpl())
+        return PaymentMethodViewModel(servicesAssembly: serviceAssembly)
     }())
 }
 
@@ -90,7 +90,7 @@ struct CurrencyCellView: View {
     )
     .environmentObject({
         let networkClient = DefaultNetworkClient()
-        let cartNetworkService = CartNetworkServiceImpl(networkClient: networkClient)
-        return PaymentMethodViewModel(cartNetworkService: cartNetworkService)
+        let serviceAssembly = ServicesAssembly(networkClient: networkClient, nftStorage: NftStorageImpl())
+        return PaymentMethodViewModel(servicesAssembly: serviceAssembly)
     }())
 }

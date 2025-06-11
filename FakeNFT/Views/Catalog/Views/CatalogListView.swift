@@ -2,25 +2,24 @@ import SwiftUI
 
 /// Основной экран каталога коллекций NFT
 struct CatalogListView: View {
-    @StateObject private var viewModel = CatalogViewModel()
+    @StateObject private var viewModel: CatalogViewModel
     @EnvironmentObject private var navigationModel: NavigationModel
     @State private var showingSortOptions = false
+    
+    init(viewModel: CatalogViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+    }
     
     var body: some View {
         NavigationView {
             ZStack {
-                Color.ypWhite
-                    .ignoresSafeArea()
+                Color.ypWhite.ignoresSafeArea()
                 
-                switch viewModel.loadingState {
-                case .idle, .loading:
-                    loadingView
-                    
-                case .loaded(let collections):
+                BaseContentView(
+                    loadingState: viewModel.loadingState,
+                    onRetry: { Task { await viewModel.loadData() } }
+                ) { collections in
                     collectionsList(collections: collections)
-                    
-                case .error(let message):
-                    errorView(message: message)
                 }
             }
             .toolbar {
@@ -30,17 +29,17 @@ struct CatalogListView: View {
             }
             .confirmationDialog("Сортировка", isPresented: $showingSortOptions, titleVisibility: .visible) {
                 Button("По названию") {
-                    viewModel.sortCollections(by: .name(ascending: true))
+                    viewModel.sortCollections(by: .collectionName(ascending: true))
                 }
                 Button("По количеству") {
-                    viewModel.sortCollections(by: .nftCount(ascending: false))
+                    viewModel.sortCollections(by: .collectionNftCount(ascending: false))
                 }
                 Button("Закрыть", role: .cancel) {}
             }
         }
         .task {
             if case .idle = viewModel.loadingState {
-                await viewModel.loadCollections()
+                await viewModel.loadData()
             }
         }
         .refreshable {
@@ -48,66 +47,20 @@ struct CatalogListView: View {
         }
     }
     
-    // MARK: - Loading View
-    
-    private var loadingView: some View {
-        VStack {
-            Spacer()
-            ProgressHUD(isLoading: true)
-            Spacer()
-        }
-    }
-    
-    // MARK: - Collections List
-    
     private func collectionsList(collections: [NFTCollections]) -> some View {
         ScrollView {
-            LazyVStack(spacing: 8) {
-                ForEach(collections) { collection in
+            LazyVStack(spacing: AppConstants.UI.defaultSpacing) {
+                ForEach(viewModel.sortedCollections) { collection in
                     CatalogRowView(collection: collection)
                         .onTapGesture {
-                            // Устанавливаем выбранную коллекцию перед навигацией
                             navigationModel.selectedCollection = collection
                             navigationModel.navigate(to: .collectionDetailView)
                         }
                 }
             }
-            .padding([.horizontal, .top], 16)
+            .padding([.horizontal, .top], AppConstants.UI.defaultPadding)
         }
     }
-    
-    // MARK: - Error View
-    
-    private func errorView(message: String) -> some View {
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.system(size: 48))
-                .foregroundColor(.ypRedUniversal)
-            
-            Text("Ошибка загрузки")
-                .font(.headline)
-                .foregroundColor(.ypBlackUniversal)
-            
-            Text(message)
-                .font(.subheadline)
-                .foregroundColor(.ypGreyUniversal)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-            
-            Button("Попробовать снова") {
-                Task {
-                    await viewModel.loadCollections()
-                }
-            }
-            .foregroundColor(.ypBlueUniversal)
-            .padding(.horizontal, 24)
-            .padding(.vertical, 12)
-            .background(Color.ypBlueUniversal.opacity(0.1))
-            .cornerRadius(8, corners: .allCorners)
-        }
-    }
-    
-    // MARK: - Sort Button
     
     private var sortButton: some View {
         Button {
@@ -122,6 +75,7 @@ struct CatalogListView: View {
 // MARK: - Preview
 
 #Preview {
-    CatalogListView()
+    let mockServices = MockServicesAssembly()
+    return CatalogListViewFactory(servicesAssembly: mockServices)
         .environmentObject(NavigationModel())
 }

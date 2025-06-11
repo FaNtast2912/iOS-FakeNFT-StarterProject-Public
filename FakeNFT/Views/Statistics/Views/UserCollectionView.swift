@@ -8,57 +8,73 @@
 import SwiftUI
 
 struct UserCollectionView: View {
-    @StateObject private var viewModel: UserCollectionViewModel
-    @EnvironmentObject var navigationModel: NavigationModel
-    
     let user: User
+    @StateObject private var viewModel: UserCollectionViewModel
+    @EnvironmentObject private var navigationModel: NavigationModel
+    @EnvironmentObject private var likesManager: LikesManagerWrapper
     
-    init(user: User, nftService: NftService) {
-        _viewModel = StateObject(wrappedValue: UserCollectionViewModel(nftService: nftService))
+    init(user: User, viewModel: UserCollectionViewModel) {
         self.user = user
+        self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
-    let columns = [
+    private let columns = [
         GridItem(.flexible(), spacing: 2),
         GridItem(.flexible(), spacing: 2),
         GridItem(.flexible(), spacing: 2)
     ]
     
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 8) {
-                ForEach(user.nfts, id: \.self) { nftId in
-                    if let nft = viewModel.nfts.first(where: { $0.id == nftId }) {
+        BaseContentView(
+            loadingState: viewModel.loadingState,
+            onRetry: { Task { await viewModel.loadNfts(for: user) } }
+        ) { nfts in
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: AppConstants.UI.defaultSpacing) {
+                    ForEach(nfts, id: \.id) { nft in
                         UserCollectionCell(nft: nft)
                     }
                 }
             }
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, AppConstants.UI.defaultPadding)
         .padding(.top, 20)
         .navigationTitle("Коллекция NFT")
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarStyle(dismissAction: {
             navigationModel.navigateBack()
         })
-        .progressHUD(isLoading: viewModel.isLoading)
         .task {
-            await viewModel.loadNfts(for: user)
+            if case .idle = viewModel.loadingState {
+                async let loadNfts: Void = viewModel.loadNfts(for: user)
+                async let loadLikes: Void = likesManager.loadLikes()
+                
+                await loadNfts
+                await loadLikes
+            }
+        }
+        .refreshable {
+            async let refreshNFTs: Void = viewModel.refresh()
+            async let refreshLikes: Void = likesManager.loadLikes()
+            
+            await refreshNFTs
+            await refreshLikes
         }
     }
 }
 
 #Preview {
-    UserCollectionView(
-        user: User(
-            id: "1",
-            name: "Mock User",
-            avatar: "",
-            description: "Дизайнер из Казани, люблю цифровое искусство и бейглы. В моей коллекции уже 100+ NFT, и еще больше — на моём сайте. Открыт к коллаборациям.",
-            website: "https://example.com",
-            nfts: ["a", "c", "c", "a", "d"],
-            rating: "3"
-        ),
-        nftService: MockUserCollectionService()
+    let mockServices = MockServicesAssembly()
+    let mockUser = User(
+        id: "1",
+        name: "Mock User",
+        avatar: "https://example.com/avatar.jpg",
+        description: "Mock user description",
+        website: "https://example.com",
+        nfts: ["1", "2", "3"],
+        rating: "4"
     )
+    
+    return UserCollectionViewFactory(user: mockUser, servicesAssembly: mockServices)
+        .environmentObject(NavigationModel())
 }

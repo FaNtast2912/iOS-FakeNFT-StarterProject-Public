@@ -7,26 +7,28 @@
 import Foundation
 
 @MainActor
-final class UserCardViewModel: ObservableObject {
-    @Published var user: User?
-    @Published var isLoading = false
-    private let userService: UserByIdService
+final class UserCardViewModel: BaseViewModel<User> {
+    private var userByIdService: UserByIdServiceProtocol {
+        servicesAssembly.userByIdService
+    }
     
-    init(userService: UserByIdService) {
-        self.userService = userService
+    override func loadData() async {
+        // Should not be called without user ID
+        fatalError("Use loadUser(by:) instead")
     }
     
     func loadUser(by id: String) async {
-        isLoading = true
-        defer { isLoading = false }
+        setLoading()
+        
         do {
-            user = try await userService.fetchUser(by: id)
+            let user = try await userByIdService.fetchUser(by: id)
+            setLoaded(user)
         } catch {
-            print("Ошибка загрузки пользователя: \(error)")
+            handleError(error)
         }
     }
-
+    
     func loadMockUser(user: User) {
-        self.user = user
+        setLoaded(user)
     }
 }

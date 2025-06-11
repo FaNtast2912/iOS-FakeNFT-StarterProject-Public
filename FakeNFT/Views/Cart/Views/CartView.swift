@@ -8,36 +8,59 @@
 import SwiftUI
 
 struct CartView: View {
+    @StateObject private var viewModel: CartViewModel
     @EnvironmentObject var navigation: NavigationModel
-    @EnvironmentObject var viewModel: CartViewModel
+    @EnvironmentObject private var cartManager: CartManagerWrapper
     
     @State private var showDeleteConfirmation = false
     @State private var nftToDelete: Nft?
     @State private var showSortOptions = false
     
-    private enum Constants {
-        static let sortButtonImageSize: CGFloat = 21
-        static let sortButtonImageHeight: CGFloat = 12.6
-        static let sortButtonTrailingPadding: CGFloat = 19.5
-        static let emptyCartFontSize: CGFloat = 17
-        static let nftListTopPadding: CGFloat = 36
-        static let nftListHorizontalPadding: CGFloat = 16
-        static let nftListSpacing: CGFloat = 16
-        static let paymentSummaryHeight: CGFloat = 76
-        static let paymentSummaryCornerRadius: CGFloat = 12
-        static let paymentSummaryHorizontalPadding: CGFloat = 16
-        static let nftCountFontSize: CGFloat = 15
-        static let priceFontSize: CGFloat = 17
-        static let payButtonWidth: CGFloat = 240
-        static let payButtonHeight: CGFloat = 44
-        static let payButtonCornerRadius: CGFloat = 16
+    // Доступные опции сортировки для корзины
+    private let sortOptions: [UnifiedSortOption] = [
+        .nftPrice(ascending: false),
+        .nftRating(ascending: false),
+        .nftName(ascending: false),
+    ]
+    
+    init(viewModel: CartViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
     var body: some View {
         VStack(spacing: 0) {
             sortButton
-            
-            if viewModel.nfts.isEmpty && !viewModel.isLoading {
+            if viewModel.isLoading && viewModel.nfts.isEmpty {
+                VStack {
+                    Spacer()
+                    ProgressView("Загрузка корзины...")
+                        .font(.system(size: 17, weight: .medium))
+                    Spacer()
+                }
+            } else if let error = viewModel.error {
+                VStack {
+                    Spacer()
+                    Text("Ошибка загрузки")
+                        .font(.system(size: 17, weight: .bold))
+                        .padding(.bottom, 8)
+                    Text(error.localizedDescription)
+                        .font(.system(size: 15))
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom, 16)
+                    Button("Повторить") {
+                        Task {
+                            await viewModel.loadData()
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(Color.black)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    Spacer()
+                }
+            } else if viewModel.nfts.isEmpty {
                 emptyCartView
             } else {
                 nftListView
@@ -47,51 +70,43 @@ struct CartView: View {
         }
         .progressHUD(isLoading: viewModel.isLoading || viewModel.isDeleting)
         .overlay(deleteConfirmationOverlay)
-        .onAppear {
-            viewModel.loadCartItems()
+        .task {
+            // Загружаем данные только при первом запуске, если корзина пуста
+            if viewModel.nfts.isEmpty && !viewModel.isLoading {
+                await viewModel.loadData()
+            }
+        }
+        .refreshable {
+            // Pull-to-refresh для ручного обновления
+            await viewModel.refresh()
         }
         .alert("Ошибка", isPresented: .constant(viewModel.error != nil)) {
             Button("Повторить") {
-                if viewModel.nfts.isEmpty {
-                    viewModel.loadCartItems()
-                } else {
-                    viewModel.error = nil
+                Task {
+                    await viewModel.refresh()
                 }
             }
-            Button("Отмена", role: .cancel) {
-                viewModel.error = nil
-            }
+            Button("Отмена", role: .cancel) {}
         } message: {
             Text(viewModel.error?.localizedDescription ?? "Произошла ошибка")
         }
     }
     
-    // MARK: - Private Subviews
-    
     private var sortButton: some View {
         HStack {
             Spacer()
-            Button(
-                action: { showSortOptions.toggle() },
-                label: {
-                    Image("yp.sort")
-                        .resizable()
-                        .frame(
-                            width: Constants.sortButtonImageSize,
-                            height: Constants.sortButtonImageHeight
-                        )
-                        .foregroundColor(.black)
-                        .padding(.trailing, Constants.sortButtonTrailingPadding)
-                }
-            )
+            Button(action: { showSortOptions.toggle() }) {
+                Image("yp.sort")
+                    .resizable()
+                    .frame(width: 21, height: 12.6)
+                    .foregroundColor(.black)
+                    .padding(.trailing, 19.5)
+            }
             .disabled(viewModel.isLoading || viewModel.isDeleting)
-            .confirmationDialog(
-                "Сортировка",
-                isPresented: $showSortOptions
-            ) {
-                ForEach(CartViewModel.SortOption.allCases, id: \.self) { option in
-                    Button(option.rawValue) {
-                        viewModel.currentSortOption = option
+            .confirmationDialog("Сортировка", isPresented: $showSortOptions) {
+                ForEach(sortOptions, id: \.description) { option in
+                    Button(getSortOptionTitle(option)) {
+                        viewModel.setSortOption(option)
                     }
                 }
                 Button("Закрыть", role: .cancel) {}
@@ -100,11 +115,24 @@ struct CartView: View {
         .padding(.top, 16)
     }
     
+    private func getSortOptionTitle(_ option: UnifiedSortOption) -> String {
+        switch option {
+        case .nftPrice(let ascending):
+            return ascending ? "По цене" : "По цене"
+        case .nftRating(let ascending):
+            return ascending ? "По рейтингу" : "По рейтингу"
+        case .nftName(let ascending):
+            return ascending ? "По названию" : "По названию"
+        default:
+            return "Неизвестно"
+        }
+    }
+    
     private var emptyCartView: some View {
         VStack {
             Spacer()
             Text("Корзина пуста")
-                .font(.system(size: Constants.emptyCartFontSize, weight: .bold))
+                .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.ypBlackUniversal)
             Spacer()
         }
@@ -112,8 +140,8 @@ struct CartView: View {
     
     private var nftListView: some View {
         ScrollView {
-            LazyVStack(spacing: Constants.nftListSpacing) {
-                ForEach(viewModel.getSortedNFTs(), id: \.id) { nft in
+            LazyVStack(spacing: 16) {
+                ForEach(viewModel.sortedNfts, id: \.id) { nft in
                     NFTItemView(
                         nft: nft,
                         onDeleteTap: {
@@ -121,12 +149,12 @@ struct CartView: View {
                             showDeleteConfirmation = true
                         }
                     )
-                    .disabled(viewModel.isDeleting)
-                    .opacity(viewModel.isDeleting ? 0.6 : 1.0)
+                    .disabled(viewModel.isDeleting || viewModel.isLoading)
+                    .opacity((viewModel.isDeleting || viewModel.isLoading) ? 0.6 : 1.0)
                 }
             }
-            .padding(.top, Constants.nftListTopPadding)
-            .padding(.horizontal, Constants.nftListHorizontalPadding)
+            .padding(.top, 36)
+            .padding(.horizontal, AppConstants.UI.defaultPadding)
         }
     }
     
@@ -134,40 +162,36 @@ struct CartView: View {
         ZStack {
             Rectangle()
                 .fill(Color(UIColor.systemGray6))
-                .frame(height: Constants.paymentSummaryHeight)
-                .cornerRadius(Constants.paymentSummaryCornerRadius)
+                .frame(height: 76)
+                .cornerRadius(12)
             
             HStack {
                 VStack(alignment: .leading) {
                     Text("\(viewModel.nfts.count) NFT")
-                        .font(.system(size: Constants.nftCountFontSize, weight: .regular))
+                        .font(.system(size: 15, weight: .regular))
                         .padding(.bottom, 2)
                     
                     Text(viewModel.formattedTotalPrice)
-                        .font(.system(size: Constants.priceFontSize, weight: .bold))
+                        .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.ypGreenUniversal)
                 }
                 
                 Spacer()
                 
-                Button(
-                    action: { navigation.navigate(to: .paymentMethodView) },
-                    label: {
-                        Text("К оплате")
-                            .frame(
-                                width: Constants.payButtonWidth,
-                                height: Constants.payButtonHeight
-                            )
-                            .font(.system(size: Constants.priceFontSize, weight: .bold))
-                            .background(Color.black)
-                            .foregroundColor(.white)
-                            .cornerRadius(Constants.payButtonCornerRadius)
-                    }
-                )
+                Button(action: {
+                    navigation.navigate(to: .paymentMethodView)
+                }) {
+                    Text("К оплате")
+                        .frame(width: 240, height: 44)
+                        .font(.system(size: 17, weight: .bold))
+                        .background(Color.black)
+                        .foregroundColor(.white)
+                        .cornerRadius(16)
+                }
                 .disabled(viewModel.nfts.isEmpty || viewModel.isLoading || viewModel.isDeleting)
                 .opacity((viewModel.nfts.isEmpty || viewModel.isLoading || viewModel.isDeleting) ? 0.6 : 1.0)
             }
-            .padding(.horizontal, Constants.paymentSummaryHorizontalPadding)
+            .padding(.horizontal, AppConstants.UI.defaultPadding)
         }
     }
     
@@ -177,13 +201,13 @@ struct CartView: View {
                 DeleteNFTConfirmationView(
                     nftImage: Image("mockImageNFT"),
                     onDelete: {
-                        print("[CartView] Подтверждение удаления NFT: \(nft.name)")
-                        viewModel.deleteNFT(nft.id)
+                        Task {
+                            await viewModel.deleteNFT(nft.id)
+                        }
                         showDeleteConfirmation = false
                         nftToDelete = nil
                     },
                     onCancel: {
-                        print("[CartView] Отмена удаления NFT")
                         showDeleteConfirmation = false
                         nftToDelete = nil
                     }
@@ -193,40 +217,14 @@ struct CartView: View {
     }
 }
 
-#Preview("With NFTs") {
-    let networkClient = DefaultNetworkClient()
-    let cartNetworkService = CartNetworkServiceImpl(networkClient: networkClient)
-    let nftStorage = NftStorageImpl()
-    let servicesAssembly = ServicesAssembly(
-        networkClient: networkClient,
-        nftStorage: nftStorage
-    )
-    
-    let viewModel = CartViewModel(
-        cartNetworkService: cartNetworkService,
-        nftService: servicesAssembly.nftService
-    )
-    
-    CartView()
+#Preview("With Items") {
+    let mockServices = MockServicesAssembly()
+    return CartViewFactory(servicesAssembly: mockServices)
         .environmentObject(NavigationModel())
-        .environmentObject(viewModel)
 }
 
 #Preview("Empty Cart") {
-    let networkClient = DefaultNetworkClient()
-    let cartNetworkService = CartNetworkServiceImpl(networkClient: networkClient)
-    let nftStorage = NftStorageImpl()
-    let servicesAssembly = ServicesAssembly(
-        networkClient: networkClient,
-        nftStorage: nftStorage
-    )
-    
-    let viewModel = CartViewModel(
-        cartNetworkService: cartNetworkService,
-        nftService: servicesAssembly.nftService
-    )
-    
-    CartView()
+    let mockServices = MockServicesAssembly()
+    return CartViewFactory(servicesAssembly: mockServices)
         .environmentObject(NavigationModel())
-        .environmentObject(viewModel)
 }

@@ -1,59 +1,67 @@
 import SwiftUI
 
 struct StatisticsView: View {
-    @EnvironmentObject var viewModel: StatisticsViewModel
-    @EnvironmentObject var navigationModel: NavigationModel
+    @StateObject private var viewModel: StatisticsViewModel
+    @EnvironmentObject private var navigationModel: NavigationModel
     @State private var isShowingSortOptions = false
+    
+    init(viewModel: StatisticsViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
+    }
     
     var body: some View {
         ZStack {
-            VStack(alignment: .trailing) {
-                Button(action: {
-                    isShowingSortOptions = true
-                }) {
-                    Image("yp.sort")
-                }
-                .frame(width: 42, height: 42)
-                .padding(.bottom, 12)
-                
-                ScrollView {
-                    LazyVStack(spacing: 8) {
-                        ForEach(Array(viewModel.sortedUsers.enumerated()), id: \.element.id) { index, user in
-                            StatisticsCell(user: user, rank: index + 1)
-                                .onTapGesture {
-                                    navigationModel.navigate(to: .userCard(user: user))
-                                }
-                        }
+            BaseContentView(
+                loadingState: viewModel.loadingState,
+                onRetry: { Task { await viewModel.loadData() } }
+            ) { _ in
+                statisticsContent
+            }
+        }
+        .task {
+            if case .idle = viewModel.loadingState {
+                await viewModel.loadData()
+            }
+        }
+    }
+    
+    private var statisticsContent: some View {
+        VStack(alignment: .trailing) {
+            Button(action: {
+                isShowingSortOptions = true
+            }) {
+                Image("yp.sort")
+                    .tint(Color.ypBlack)
+            }
+            .frame(width: 42, height: 42)
+            .padding(.bottom, 12)
+            
+            ScrollView {
+                LazyVStack(spacing: AppConstants.UI.defaultSpacing) {
+                    ForEach(Array(viewModel.sortedUsers.enumerated()), id: \.element.id) { index, user in
+                        StatisticsCell(user: user, rank: index + 1)
+                            .onTapGesture {
+                                navigationModel.navigate(to: .userCard(user: user))
+                            }
                     }
                 }
             }
-            .padding(.horizontal, 16)
-            
-            if isShowingSortOptions {
-                Color.ypGreyUniversal.opacity(0.5)
-                    .edgesIgnoringSafeArea(.all)
-                    .transition(.opacity)
-                    .animation(.easeInOut(duration: 0.2), value: isShowingSortOptions)
-            }
         }
-        .progressHUD(isLoading: viewModel.isLoading)
+        .padding(.horizontal, AppConstants.UI.defaultPadding)
         .confirmationDialog("Сортировка", isPresented: $isShowingSortOptions, titleVisibility: .visible) {
             Button("По имени") {
-                viewModel.updateSortOption(.name)
+                viewModel.updateSortOption(.userName)
             }
             Button("По рейтингу") {
-                viewModel.updateSortOption(.rating)
+                viewModel.updateSortOption(.userRating)
             }
             Button("Закрыть", role: .cancel) {}
-        }
-        .task {
-            await viewModel.loadUsers()
         }
     }
 }
 
 #Preview {
-    StatisticsView()
-        .environmentObject(StatisticsViewModel(userService: MockUserService())
-    )
+    let mockServices = MockServicesAssembly()
+    return StatisticsViewFactory(servicesAssembly: mockServices)
+        .environmentObject(NavigationModel())
 }

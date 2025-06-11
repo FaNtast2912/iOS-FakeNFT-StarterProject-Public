@@ -9,8 +9,7 @@ struct FakeNFTApp: App {
         WindowGroup {
             AppTabView(servicesAssembly: servicesAssembly)
                 .environmentObject(navigation)
+                .environmentObject(servicesAssembly)
         }
     }
-    
 }
-

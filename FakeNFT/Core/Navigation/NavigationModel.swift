@@ -101,40 +101,42 @@ extension NavigationModel {
     func destination(for screen: Screens, with services: ServicesAssembly) -> some View {
         switch screen {
             
-            // Catalog
         case .catalogListView:
-            CatalogListView()
+            CatalogListViewFactory(servicesAssembly: services)
+            
         case .collectionDetailView:
             if let collection = selectedCollection {
-                CollectionDetailView(collection: collection)
+                CollectionDetailViewFactory(collection: collection, servicesAssembly: services)
             } else {
-                Text("Коллекция не найдена")
-                    .foregroundColor(.ypRedUniversal)
+                ErrorView(message: "Коллекция не найдена") { [weak self] in
+                    self?.navigateBack()
+                }
             }
             
-            // Nft(profile)
         case .myNFTView:
-            MyNFTView(service: services)
+            MyNFTViewFactory(servicesAssembly: services)
+            
         case .myFavoriteNFTView:
-            MyFavoriteNFTView(service: services)
+            MyFavoriteNFTViewFactory(servicesAssembly: services)
             
-            // Statistics
         case .statisticsView:
-            StatisticsView()
-        case .userCard(let user):
-            UserCardView(userId: user.id, userService: services.userByIdService)
-        case .userCollection(let user):
-            UserCollectionView(user: user, nftService: services.nftService)
+            StatisticsViewFactory(servicesAssembly: services)
             
-            // Cart
+        case .userCard(let user):
+            UserCardViewFactory(userId: user.id, servicesAssembly: services)
+            
+        case .userCollection(let user):
+            UserCollectionViewFactory(user: user, servicesAssembly: services)
+            
         case .cartView:
-            CartView()
+            CartViewFactory(servicesAssembly: services)
+            
         case .paymentMethodView:
-            PaymentMethodView()
+            PaymentMethodViewFactory(servicesAssembly: services)
+            
         case .paymentDoneView:
             PaymentDoneView()
             
-            // WebView
         case .webView(let url):
             WebViewScreen(url: url)
         }

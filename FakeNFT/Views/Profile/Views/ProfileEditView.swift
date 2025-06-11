@@ -8,121 +8,131 @@
 import SwiftUI
 
 struct ProfileEditView: View {
-    @StateObject private var profileEditVM: EditingProfileViewModel
-    @ObservedObject private var profileVM: ProfileViewModel
+    @StateObject private var viewModel: EditingProfileViewModel
     @Environment(\.dismiss) private var dismiss
     
-    init(profileVM: ProfileViewModel, service: ServicesAssembly) {
-        self.profileVM = profileVM
-        _profileEditVM = StateObject(wrappedValue: EditingProfileViewModel(
-            name: profileVM.profile.name,
-            description: profileVM.profile.description ?? "",
-            avatar: profileVM.profile.avatar,
-            website: profileVM.profile.website,
-            service: service
-        ))
+    init(viewModel: EditingProfileViewModel) {
+        self._viewModel = StateObject(wrappedValue: viewModel)
     }
     
     var body: some View {
         ZStack {
             VStack {
-                HStack {
-                    Spacer()
-                    Button {
-                        Task {
-                            await profileEditVM.updateProfileInfo()
-                            await profileVM.fetchProfile()
-                            dismiss()
-                        }
-                    } label: {
-                        Image("yp.close")
-                    }
-                    .padding(.top, 16)
-                    .foregroundStyle(Color.ypBlack)
-                    .disabled(profileEditVM.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || profileEditVM.website.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
-                .padding(.bottom, 22)
-                
-                VStack {
-                    ZStack {
-                        AsyncImage(url: URL(string: profileEditVM.avatar)) { image in
-                            image
-                                .profileImageViewStyle()
-                        } placeholder: {
-                            ZStack {
-                                Circle()
-                                    .foregroundStyle(.gray)
-                                    .frame(width: 70, height: 70)
-                            }
-                        }
-                        Text("Сменить фото")
-                            .multilineTextAlignment(.center)
-                            .font(.system(size: 10, weight: .medium))
-                    }
-                    .foregroundStyle(Color.ypWhite)
-                    .frame(width: 70, height: 70)
-                    
-                    Button("Загрузить изображение") {
-                        Task {
-                            await profileEditVM.updateAvatar()
-                        }
-                    }
-                    .font(.system(size: 17, weight: .regular))
-                    .foregroundStyle(Color.ypBlack)
-                }
-                
-                VStack(alignment: .leading, spacing: 22) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Имя")
-                        TextField("Имя", text: $profileEditVM.name)
-                            .profileTextViewStyle(showError: profileEditVM.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Описание")
-                        TextField("Описание", text: $profileEditVM.description, axis: .vertical)
-                            .lineLimit(5, reservesSpace: true)
-                            .profileTextViewStyle()
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Сайт")
-                        TextField("Сайт", text: $profileEditVM.website)
-                            .profileTextViewStyle(showError: profileEditVM.website.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    }
-                }
-                .font(.system(size: 22, weight: .bold))
+                headerView
+                avatarSection
+                formFields
                 Spacer()
             }
-            .padding(.horizontal, 16)
+            .padding(.horizontal, AppConstants.UI.defaultPadding)
             .toolbar(.hidden, for: .navigationBar)
-            .alert( isPresented: $profileEditVM.alertErrorPresented) {
-                Alert(
-                    title: Text("Не удалось обновить данные"),
-                    primaryButton: .default(Text("Отмена")),
-                    secondaryButton: .cancel(Text("Повторить"), action: {
-                        Task {
-                            await profileEditVM.updateProfileInfo()
-                            profileVM.updateMockProfile(
-                                name: profileEditVM.name,
-                                avatar: profileEditVM.avatar,
-                                description: profileEditVM.description,
-                                website: profileEditVM.website
-                            )
-                            dismiss()
-                        }
-                    })
-                )
+            .alert("Не удалось обновить данные", isPresented: $viewModel.alertErrorPresented) {
+                Button("Отмена", role: .cancel) {}
+                Button("Повторить") {
+                    Task {
+                        await viewModel.saveProfile()
+                        dismiss()
+                    }
+                }
             }
             
-            ProgressHUD(isLoading: profileEditVM.loadingState == .loading)
-                .opacity(profileEditVM.loadingState == .loading ? 1 : 0)
+            // Loading overlay
+            if viewModel.loadingState.isLoading {
+                ProgressHUD(isLoading: true)
+            }
         }
-        
+    }
+    
+    private var headerView: some View {
+        HStack {
+            Spacer()
+            Button {
+                Task {
+                    await viewModel.saveProfile()
+                    dismiss()
+                }
+            } label: {
+                Image("yp.close")
+            }
+            .padding(.top, 16)
+            .foregroundStyle(Color.ypBlack)
+            .disabled(
+                viewModel.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                viewModel.website.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ||
+                viewModel.loadingState.isLoading
+            )
+        }
+        .padding(.bottom, 22)
+    }
+    
+    private var avatarSection: some View {
+        VStack {
+            ZStack {
+                AsyncImage(url: URL(string: viewModel.avatar)) { image in
+                    image.profileImageViewStyle()
+                } placeholder: {
+                    ZStack {
+                        Circle()
+                            .foregroundStyle(.gray)
+                            .frame(width: 70, height: 70)
+                    }
+                }
+                Text("Сменить фото")
+                    .multilineTextAlignment(.center)
+                    .font(.system(size: 10, weight: .medium))
+            }
+            .foregroundStyle(Color.ypWhite)
+            .frame(width: 70, height: 70)
+            
+            Button("Загрузить изображение") {
+                Task {
+                    await viewModel.updateAvatar()
+                }
+            }
+            .font(.system(size: 17, weight: .regular))
+            .foregroundStyle(Color.ypBlack)
+        }
+    }
+    
+    private var formFields: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Имя")
+                TextField("Имя", text: $viewModel.name)
+                    .profileTextViewStyle(
+                        showError: viewModel.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    )
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Описание")
+                TextField("Описание", text: $viewModel.description, axis: .vertical)
+                    .lineLimit(5, reservesSpace: true)
+                    .profileTextViewStyle()
+            }
+            
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Сайт")
+                TextField("Сайт", text: $viewModel.website)
+                    .profileTextViewStyle(
+                        showError: viewModel.website.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                    )
+            }
+        }
+        .font(.system(size: 22, weight: .bold))
     }
 }
 
 #Preview {
-    let service = ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl())
-    ProfileEditView(profileVM: ProfileViewModel(service: service), service: service)
+    let mockServices = MockServicesAssembly()
+    let mockProfile = Profile(
+        name: "Mock User",
+        avatar: "https://example.com/avatar.jpg",
+        description: "Mock description",
+        website: "https://example.com",
+        nfts: ["1", "2"],
+        likes: ["1"],
+        id: "1"
+    )
+    return ProfileEditViewFactory(profile: mockProfile, servicesAssembly: mockServices)
+        .environmentObject(NavigationModel())
 }

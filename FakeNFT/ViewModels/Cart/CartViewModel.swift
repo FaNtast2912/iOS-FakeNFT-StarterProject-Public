@@ -6,206 +6,114 @@
 //
 
 import Foundation
-import Combine
 
 @MainActor
-final class CartViewModel: ObservableObject {
+final class CartViewModel: BaseViewModel<[Nft]> {
     
-    // MARK: - Sort Options
+    @Published var currentSortOption: UnifiedSortOption = .nftPrice(ascending: true) {
+        didSet {
+            UserDefaults.standard.set(currentSortOption.description, forKey: "cartSortOption")
+            updateSortedNfts()
+        }
+    }
+    @Published var sortedNfts: [Nft] = []
+    @Published var isDeleting = false
     
-    enum SortOption: String, CaseIterable {
-        case price = "По цене"
-        case rating = "По рейтингу"
-        case name = "По названию"
+    override init(servicesAssembly: ServicesAssembly) {
+        super.init(servicesAssembly: servicesAssembly)
         
-        func toProductSortOption() -> ProductSortOption {
-            switch self {
-            case .price: return .price(ascending: true)
-            case .rating: return .rating(ascending: true)
-            case .name: return .name(ascending: true)
-            }
+        // Load saved sort option
+        if let savedOption = UserDefaults.standard.string(forKey: "cartSortOption") {
+            currentSortOption = UnifiedSortOption.from(string: savedOption) ?? .nftPrice(ascending: true)
         }
     }
     
-    // MARK: - Published Properties
+    /// Получить NFTs (теперь из CartManager)
+    var nfts: [Nft] {
+        return loadingState.data ?? []
+    }
     
-    @Published var nfts: [Nft] = []
-    @Published var isLoading = false
-    @Published var error: Error?
-    @Published var currentSortOption: SortOption = .price
-    @Published var isDeleting = false
+    /// Состояние загрузки (алиас для совместимости)
+    var isLoading: Bool {
+        return loadingState.isLoading
+    }
     
-    // MARK: - Dependencies
-
-    private let cartNetworkService: CartNetworkService
-    private let nftService: NftService
-    private var cancellables = Set<AnyCancellable>()
-    
-    // MARK: - Computed Properties
+    /// Ошибка (алиас для совместимости)
+    var error: Error? {
+        return loadingState.error
+    }
     
     var formattedTotalPrice: String {
         let total = nfts.reduce(0) { $0 + $1.price }
         return String(format: "%.2f ETH", total)
     }
     
-    // MARK: - Initialization
-    
-    init(cartNetworkService: CartNetworkService,
-         nftService: NftService) {
-        self.cartNetworkService = cartNetworkService
-        self.nftService = nftService
-    }
-    
-    // MARK: - Public Methods
-    
-    func loadCartItems() {
-        print("[CartViewModel] Загрузка корзины...")
-        isLoading = true
-        error = nil
+    override func loadData() async {
+        print("[CartViewModel] Загрузка корзины через CartManager...")
+        setLoading()
         
-        Task {
-            do {
-                let order = try await cartNetworkService.fetchOrder()
-                print("[CartViewModel] Получен заказ с \(order.nfts.count) NFT")
-                
-                await loadNftsFromOrder(order.nfts)
-                
-            } catch let networkError as NetworkClientError {
-                await handleNetworkError(networkError, context: "загрузка корзины")
-            } catch {
-                await handleGenericError(error, context: "загрузка корзины")
-            }
+        do {
+            // Используем CartManager вместо прямого обращения к сервисам
+            try await servicesAssembly.cartManager.loadCart()
+            let cartItems = await servicesAssembly.cartManager.getCartItems()
+            
+            print("[CartViewModel] Получено \(cartItems.count) NFT из CartManager")
+            setLoaded(cartItems)
+            updateSortedNfts()
+            
+        } catch {
+            handleError(error)
         }
     }
     
-    func deleteNFT(_ id: String) {
+    /// Загрузить корзину (алиас для совместимости)
+    func loadCartItems() {
+        Task {
+            await loadData()
+        }
+    }
+    
+    func deleteNFT(_ id: String) async {
         print("[CartViewModel] Начало удаления NFT: \(id)")
         isDeleting = true
-        error = nil
         
-        Task { [weak self] in
-            guard let self = self else { return }
-            do {
-                let updatedNftIds = nfts.compactMap { nft in
-                    nft.id != id ? nft.id : nil
-                }
-                
-                print("[CartViewModel] Текущее количество NFT: \(nfts.count)")
-                print("[CartViewModel] Новое количество NFT: \(updatedNftIds.count)")
-                print("[CartViewModel] Отправка обновленного списка на сервер: \(updatedNftIds)")
-                
-                let updatedOrder = try await cartNetworkService.updateOrder(nftIds: updatedNftIds)
-                
-                print("[CartViewModel] Сервер подтвердил удаление")
-                print("[CartViewModel] Ответ сервера - количество NFT: \(updatedOrder.nfts.count)")
-                print("[CartViewModel] Новый список на сервере: \(updatedOrder.nfts)")
-                
-                await loadNftsFromOrder(updatedOrder.nfts)
-                
-                await MainActor.run {
-                    self.isDeleting = false
-                    print("[CartViewModel] NFT успешно удален из корзины")
-                }
-                
-            } catch let networkError as NetworkClientError {
-                await handleNetworkError(networkError, context: "удаление NFT")
-                await MainActor.run { self.isDeleting = false }
-            } catch {
-                await handleGenericError(error, context: "удаление NFT")
-                await MainActor.run { self.isDeleting = false }
+        do {
+            // Находим NFT для удаления
+            guard let nftToDelete = nfts.first(where: { $0.id == id }) else {
+                print("[CartViewModel] NFT не найден для удаления")
+                isDeleting = false
+                return
             }
+            
+            // Используем CartManager для удаления
+            try await servicesAssembly.cartManager.removeFromCart(nftToDelete)
+            
+            // Обновляем локальное состояние
+            let updatedItems = await servicesAssembly.cartManager.getCartItems()
+            setLoaded(updatedItems)
+            updateSortedNfts()
+            
+            isDeleting = false
+            print("[CartViewModel] NFT успешно удален из корзины")
+            
+        } catch {
+            handleError(error)
+            isDeleting = false
         }
     }
     
-    func sortItems(by option: SortOption) {
-        print("[CartViewModel] Сортировка по: \(option.rawValue)")
+    /// Удалить NFT (старый синхронный метод для совместимости)
+    func deleteNFT(_ id: String) {
+        Task {
+            await deleteNFT(id)
+        }
+    }
+    
+    func setSortOption(_ option: UnifiedSortOption) {
         currentSortOption = option
     }
     
-    func getSortedNFTs() -> [Nft] {
-        let option = currentSortOption.toProductSortOption()
-        return SortingManager.shared.sort(products: nfts, by: option)
-    }
-    
-    // MARK: - Error Handling
-    
-    @MainActor
-    private func handleNetworkError(_ error: NetworkClientError, context: String) {
-        isLoading = false
-        print("[CartViewModel] NetworkClientError при \(context): \(error)")
-        
-        self.error = error
-        
-        switch error {
-        case .httpStatusCode(let statusCode):
-            print("[CartViewModel] HTTP статус код: \(statusCode)")
-        case .urlRequestError(let urlError):
-            print("[CartViewModel] URL ошибка: \(urlError)")
-        case .urlSessionError:
-            print("[CartViewModel] URL Session ошибка")
-        case .parsingError:
-            print("[CartViewModel] Ошибка парсинга данных")
-        case .invalidEndpoint:
-            print("[CartViewModel] Некорректный endpoint")
-        case .invalidResponse:
-            print("[CartViewModel] Некорректный ответ сервера")
-        }
-    }
-    
-    @MainActor
-    private func handleGenericError(_ error: Error, context: String) {
-        isLoading = false
-        print("[CartViewModel] Общая ошибка при \(context): \(error)")
-        self.error = error
-    }
-    
-    // MARK: - Private Methods
-    
-    @MainActor
-    private func loadNftsFromOrder(_ nftIds: [String]) async {
-        print("[CartViewModel] Загрузка \(nftIds.count) NFT по ID...")
-        
-        var loadedNfts: [Nft] = []
-        
-        await withTaskGroup(of: Nft?.self) { group in
-            for nftId in nftIds {
-                group.addTask { [weak self] in
-                    await self?.loadSingleNft(id: nftId)
-                }
-            }
-            
-            for await nft in group {
-                if let nft = nft {
-                    loadedNfts.append(nft)
-                }
-            }
-        }
-        
-        nfts = loadedNfts
-        isLoading = false
-        print("[CartViewModel] Корзина обновлена: \(loadedNfts.count) NFT")
-    }
-    
-    func loadNfts(for user: User) async {
-        isLoading = true
-        defer { isLoading = false }
-
-        var loadedNfts: [Nft] = []
-
-        for id in user.nfts {
-            do {
-                let nft = try await nftService.loadNft(id: id)
-                loadedNfts.append(nft)
-            } catch {
-                print("Ошибка загрузки NFT с id=\(id): \(error)")
-            }
-        }
-        nfts = loadedNfts
-    }
-    
-    private func loadSingleNft(id: String) async -> Nft? {
-        isLoading = true
-        defer { isLoading = false }
-        return try? await nftService.loadNft(id: id)
+    private func updateSortedNfts() {
+        sortedNfts = UnifiedSortingManager.shared.sort(items: nfts, by: currentSortOption) as? [Nft] ?? nfts
     }
 }

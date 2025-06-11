@@ -10,8 +10,8 @@ import SwiftUI
 /// Ячейка NFT в коллекции
 struct NFTItemViewCatalog: View {
     let nft: Nft
-    @EnvironmentObject private var cartManager: CartManager
-    @EnvironmentObject private var likesManager: LikesManager
+    @EnvironmentObject private var cartManager: CartManagerWrapper
+    @EnvironmentObject private var likesManager: LikesManagerWrapper
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -37,13 +37,14 @@ struct NFTItemViewCatalog: View {
                 Button {
                     likesManager.toggleLike(for: nft.id)
                 } label: {
-                    Image(systemName:"heart.fill")
+                    Image(systemName: "heart.fill")
                         .foregroundColor(likesManager.isLiked(nft.id) ? .ypRedUniversal : .ypWhiteUniversal)
                         .font(.system(size: 14))
                         .frame(width: 24, height: 24)
                         .clipShape(Circle())
                 }
                 .padding(6)
+                .disabled(likesManager.isLoading)
             }
             
             // Информация о NFT
@@ -63,26 +64,23 @@ struct NFTItemViewCatalog: View {
                         Text("\(nft.price, specifier: "%.2f") ETH")
                             .font(.system(size: 10, weight: .medium))
                             .foregroundColor(.ypBlack)
-                        
                     }
                     Spacer()
                     
                     Button {
-                        if cartManager.isInCart(nft) {
-                            cartManager.removeFromCart(nft)
-                        } else {
-                            cartManager.addToCart(nft)
-                        }
+                        cartManager.toggleCart(nft)
                     } label: {
                         Image(cartManager.isInCart(nft) ? .ypCartDelete : .ypCart)
                             .tint(.ypBlack)
                             .font(.system(size: 12))
                     }
+                    .disabled(cartManager.isLoading)
                 }
             }
             .padding(.top, 8)
         }
         .frame(width: 108, height: 192)
+        .opacity((cartManager.isLoading || likesManager.isLoading) ? 0.7 : 1.0)
     }
 }
 
@@ -104,8 +102,7 @@ struct NFTItemViewCatalog: View {
     let mockServicesAssembly = ServicesAssembly(networkClient: mockNetworkClient, nftStorage: mockNftStorage)
     
     NFTItemViewCatalog(nft: sampleNFT)
-        .environmentObject(mockServicesAssembly.cartManager)
-        .environmentObject(mockServicesAssembly.likesManager)
+        .environmentObject(mockServicesAssembly.getCartManagerWrapper())
+        .environmentObject(mockServicesAssembly.getLikesManagerWrapper())
         .padding()
-        .previewLayout(.sizeThatFits)
 }

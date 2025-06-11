@@ -5,9 +5,8 @@
 //  Created by Maksim Zakharov on 10.06.2025.
 //
 
-final class ProfileServiceImpl: ProfileService {
-    
-    private let networkClient: NetworkClient
+final class ProfileServiceImpl: ProfileServiceProtocol {
+    let networkClient: NetworkClient
     
     enum ProfileError: Error {
         case getProfileError
@@ -28,12 +27,13 @@ final class ProfileServiceImpl: ProfileService {
     }
   
     func updateProfile(dto: Dto) async throws -> Profile {
-        let request = UpdateProfileRequest(dto: dto)
+        let request = UpdateProfileRequest()
+        var requestWithDto = request
+        requestWithDto.dto = dto
         do {
-            return try await networkClient.send(request, as: Profile.self)
+            return try await networkClient.send(requestWithDto, as: Profile.self)
         } catch {
             throw ProfileError.updateProfileError
         }
     }
-    
 }

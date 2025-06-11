@@ -8,50 +8,48 @@
 import Foundation
 
 @MainActor
-final class EditingProfileViewModel: ObservableObject {
+final class EditingProfileViewModel: BaseViewModel<Profile> {
     @Published var name: String
     @Published var description: String
     @Published var avatar: String
     @Published var website: String
-    @Published var loadingState: LoadingState = .loaded
     @Published var alertErrorPresented: Bool = false
-    private let profileService: ProfileService
     
-    enum LoadingState {
-        case loading
-        case loaded
-        case error
+    private var profileService: ProfileServiceProtocol {
+        servicesAssembly.profileService
     }
     
-    init(
-        name: String,
-        description: String,
-        avatar: String,
-        website: String,
-        service: ServicesAssembly
-    ) {
-        self.name = name
-        self.description = description
-        self.avatar = avatar
-        self.website = website
-        profileService = service.profileService
+    init(profile: Profile, servicesAssembly: ServicesAssembly) {
+        self.name = profile.name
+        self.description = profile.description ?? ""
+        self.avatar = profile.avatar
+        self.website = profile.website
+        
+        super.init(servicesAssembly: servicesAssembly)
+        
+        // Set initial state
+        setLoaded(profile)
+    }
+    
+    override func loadData() async {
+        // Not used in this context - profile is passed in constructor
     }
     
     func updateAvatar() async {
         avatar = "https://lh6.ggpht.com/WeTiwh_IjTAP6F3Q3ECOh3OuXqdr28RVqB_K2o7dp51FRQsSqsODym2LJJ4IDyWugQ=w300"
     }
     
-    func updateProfileInfo() async {
+    func saveProfile() async {
+        setLoading()
+        
         let dto = UpdateProfileDto(avatar: avatar, name: name, description: description, website: website)
-        loadingState = .loading
+        
         do {
-            _ = try await profileService.updateProfile(dto: dto)
-            loadingState = .loaded
+            let updatedProfile = try await profileService.updateProfile(dto: dto)
+            setLoaded(updatedProfile)
         } catch {
-            loadingState = .error
-            alertErrorPresented = loadingState == .error
-            print(String(describing: error.localizedDescription))
+            handleError(error)
+            alertErrorPresented = true
         }
     }
 }
-

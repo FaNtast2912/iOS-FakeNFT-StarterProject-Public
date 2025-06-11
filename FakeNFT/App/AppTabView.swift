@@ -1,5 +1,5 @@
 //
-//  MainView.swift
+//  AppTabView.swift
 //  FakeNFT
 //
 //  Created by Olga Trofimova on 25.05.2025.
@@ -8,22 +8,8 @@
 import SwiftUI
 
 struct AppTabView: View {
-    @StateObject private var navigationModel = NavigationModel()
-    @StateObject private var cartViewModel: CartViewModel = {
-        let networkClient = DefaultNetworkClient()
-        let cartNetworkService = CartNetworkServiceImpl(networkClient: networkClient)
-        let nftStorage = NftStorageImpl()
-        let servicesAssembly = ServicesAssembly(
-            networkClient: networkClient,
-            nftStorage: nftStorage
-        )
-        
-        return CartViewModel(
-            cartNetworkService: cartNetworkService,
-            nftService: servicesAssembly.nftService
-        )
-    }()
-    private var servicesAssembly: ServicesAssembly
+    @EnvironmentObject private var navigationModel: NavigationModel
+    @ObservedObject private var servicesAssembly: ServicesAssembly
     
     init(servicesAssembly: ServicesAssembly) {
         self.servicesAssembly = servicesAssembly
@@ -34,37 +20,20 @@ struct AppTabView: View {
         let tabBarAppearance = UITabBarAppearance()
         tabBarAppearance.configureWithOpaqueBackground()
         
-        // Настройка фона
         tabBarAppearance.backgroundColor = UIColor(.ypWhite)
         
-        // Настройка обычного состояния (не выбран)
         tabBarAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [
             .foregroundColor: UIColor(Color.ypBlack)
         ]
         tabBarAppearance.stackedLayoutAppearance.normal.iconColor = UIColor(Color.ypBlack)
         
-        // Настройка выбранного состояния
         tabBarAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [
             .foregroundColor: UIColor(Color.ypBlueUniversal)
         ]
         tabBarAppearance.stackedLayoutAppearance.selected.iconColor = UIColor(Color.ypBlueUniversal)
         
-        // Настройка компактного режима (для маленьких экранов)
-        tabBarAppearance.compactInlineLayoutAppearance.normal.titleTextAttributes = [
-            .foregroundColor: UIColor(Color.ypBlack)
-        ]
-        tabBarAppearance.compactInlineLayoutAppearance.normal.iconColor = UIColor(Color.ypBlack)
-        
-        tabBarAppearance.compactInlineLayoutAppearance.selected.titleTextAttributes = [
-            .foregroundColor: UIColor(Color.ypBlueUniversal)
-        ]
-        tabBarAppearance.compactInlineLayoutAppearance.selected.iconColor = UIColor(Color.ypBlueUniversal)
-        
-        // Применение настроек
         UITabBar.appearance().standardAppearance = tabBarAppearance
         UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-        
-        // Дополнительные настройки
         UITabBar.appearance().tintColor = UIColor(Color.ypBlueUniversal)
         UITabBar.appearance().unselectedItemTintColor = UIColor(Color.ypBlack)
     }
@@ -72,7 +41,7 @@ struct AppTabView: View {
     var body: some View {
         NavigationStack(path: $navigationModel.path) {
             TabView(selection: $navigationModel.selectedTab) {
-                ProfileView(servicesAssembly: servicesAssembly)
+                ProfileViewFactory(servicesAssembly: servicesAssembly)
                     .tabItem {
                         Text("Профиль")
                         Image("yp.profileIcon")
@@ -80,7 +49,7 @@ struct AppTabView: View {
                     }
                     .tag(0)
                 
-                CatalogListView()
+                CatalogListViewFactory(servicesAssembly: servicesAssembly)
                     .tabItem {
                         Text("Каталог")
                         Image("yp.catalogIcon")
@@ -88,8 +57,7 @@ struct AppTabView: View {
                     }
                     .tag(1)
                 
-                CartView()
-                    .environmentObject(cartViewModel)
+                CartViewFactory(servicesAssembly: servicesAssembly)
                     .tabItem {
                         Text("Корзина")
                         Image("yp.cartIcon")
@@ -97,8 +65,7 @@ struct AppTabView: View {
                     }
                     .tag(2)
                 
-                StatisticsView()
-                    .environmentObject(StatisticsViewModel(userService: servicesAssembly.userService))
+                StatisticsViewFactory(servicesAssembly: servicesAssembly)
                     .tabItem {
                         Text("Статистика")
                         Image("yp.statisticsIcon")
@@ -106,30 +73,72 @@ struct AppTabView: View {
                     }
                     .tag(3)
             }
-            // Общая обработка навигации для всех табов
             .navigationDestination(for: Screens.self) { screen in
                 navigationModel.destination(for: screen, with: servicesAssembly)
             }
+            .environmentObject(servicesAssembly.getCartManagerWrapper())
+            .environmentObject(servicesAssembly.getLikesManagerWrapper())
+            .onChange(of: navigationModel.selectedTab) { oldTab, newTab in
+                Task {
+                    await syncManagersOnTabChange(newTab: newTab)
+                }
+            }
         }
-        .environmentObject(navigationModel)
-        .environmentObject(servicesAssembly)
-        .environmentObject(servicesAssembly.likesManager)
-        .environmentObject(servicesAssembly.cartManager)
+        .task {
+            // Загружаем начальные данные при старте приложения
+            await loadInitialData()
+        }
+    }
+    
+    // MARK: - Private Methods
+    
+    private func loadInitialData() async {
+        async let loadCart: Void = servicesAssembly.getCartManagerWrapper().loadCart()
+        async let loadLikes: Void = servicesAssembly.getLikesManagerWrapper().loadLikes()
+        
+        await loadCart
+        await loadLikes
+    }
+    
+    /// Синхронизация менеджеров при переключении табов
+    private func syncManagersOnTabChange(newTab: Int) async {
+        let cartWrapper = servicesAssembly.getCartManagerWrapper()
+        let likesWrapper = servicesAssembly.getLikesManagerWrapper()
+        
+        switch newTab {
+        case 0: // Профиль
+            // Обновляем лайки для отображения любимых NFT
+            likesWrapper.refresh()
+            
+        case 1: // Каталог
+            // Обновляем оба менеджера для актуальных состояний кнопок
+            async let refreshCart: Void = cartWrapper.loadCart()
+            async let refreshLikes: Void = likesWrapper.loadLikes()
+            
+            await refreshCart
+            await refreshLikes
+            
+        case 2: // Корзина
+            // Обновляем оба менеджера для актуальных состояний кнопок
+            cartWrapper.refresh()
+            likesWrapper.refresh()
+            
+        case 3: // Статистика
+            // Обновляем лайки для статистики
+            likesWrapper.refresh()
+            
+        default:
+            print("❓ Неизвестный таб: \(newTab)")
+        }
+
     }
 }
 
-//#Preview {
-//HEAD:FakeNFT/Scenes /Common/Views/AppTabView.swift
-//    AppTabView(servicesAssembly: ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl()))
-//        .environmentObject(NavigationModel())
-//        .environmentObject({
-//            let networkClient = DefaultNetworkClient()
-//            let cartNetworkService = DefaultCartNetworkService(networkClient: networkClient)
-//            return PaymentMethodViewModel(cartNetworkService: cartNetworkService)
-//        }())
-//////
-//    let services = ServicesAssembly(networkClient: DefaultNetworkClient(), nftStorage: NftStorageImpl())
-//    return AppTabView(servicesAssembly: services)
-//        .environmentObject(NavigationModel(services: services))
-// feature/new-statistics-screen:FakeNFT/Scenes/Common/Views/AppTabView.swift
-//}
+#Preview {
+    let mockServices = MockServicesAssembly()
+    let navigationModel = NavigationModel()
+    return AppTabView(
+        servicesAssembly: mockServices
+    )
+    .environmentObject(navigationModel)
+}
