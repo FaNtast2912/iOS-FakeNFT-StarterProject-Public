@@ -8,11 +8,12 @@
 import SwiftUI
 
 struct AppTabView: View {
-    @StateObject private var navigationModel = NavigationModel()
-    private let servicesAssembly: ServicesAssembly
+    @ObservedObject private var navigationModel: NavigationModel
+    @ObservedObject private var servicesAssembly: ServicesAssembly
     
-    init(servicesAssembly: ServicesAssembly) {
+    init(servicesAssembly: ServicesAssembly, navigationModel: NavigationModel) {
         self.servicesAssembly = servicesAssembly
+        self.navigationModel = navigationModel
         configureTabBarAppearance()
     }
     
@@ -77,15 +78,14 @@ struct AppTabView: View {
                 navigationModel.destination(for: screen, with: servicesAssembly)
             }
         }
-        .environmentObject(navigationModel)
-        .environmentObject(servicesAssembly)
-        .environmentObject(servicesAssembly.likesManager)
-        .environmentObject(servicesAssembly.cartManager)
     }
 }
 
-
 #Preview {
     let mockServices = MockServicesAssembly()
-    return AppTabView(servicesAssembly: mockServices)
+    let navigationModel = NavigationModel()
+    return AppTabView(
+        servicesAssembly: mockServices,
+        navigationModel: navigationModel
+    )
 }

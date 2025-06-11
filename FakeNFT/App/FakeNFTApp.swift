@@ -7,8 +7,7 @@ struct FakeNFTApp: App {
     
     var body: some Scene {
         WindowGroup {
-            AppTabView(servicesAssembly: servicesAssembly)
-                .environmentObject(navigation)
+            AppTabView(servicesAssembly: servicesAssembly, navigationModel: navigation)
         }
     }
     

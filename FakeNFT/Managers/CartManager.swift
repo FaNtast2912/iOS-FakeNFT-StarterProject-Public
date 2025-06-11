@@ -9,7 +9,7 @@ import Foundation
 
 @MainActor
 final class CartManager: ObservableObject {
-    @Published private(set) var cartItems: [Nft] = []
+    @Published private(set) var cartItems: [Nft] = [] // гонка данных МАКС не забудь!
     @Published private(set) var isLoading = false
     
     private let cartNetworkService: CartNetworkServiceProtocol
