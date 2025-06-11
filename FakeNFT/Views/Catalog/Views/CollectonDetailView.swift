@@ -149,5 +149,6 @@ struct CollectionDetailView: View {
     return NavigationView {
         CollectionDetailViewFactory(collection: mockCollection, servicesAssembly: mockServices)
             .environmentObject(NavigationModel())
+            .environmentObject(mockServices)
     }
 }
