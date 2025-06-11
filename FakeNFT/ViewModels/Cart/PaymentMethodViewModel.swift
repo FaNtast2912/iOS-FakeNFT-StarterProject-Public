@@ -73,8 +73,8 @@ final class PaymentMethodViewModel: BaseViewModel<[CurrencyModel]> {
             if result.success {
                 print("[PaymentViewModel] Платеж успешно обработан")
                 
-                // Очищаем корзину после успешной оплаты
-                _ = try await cartNetworkService.updateOrder(nftIds: [])
+                // Очищаем корзинку
+                try await servicesAssembly.cartManager.clearCart()
                 
                 paymentSuccess = true
                 return true

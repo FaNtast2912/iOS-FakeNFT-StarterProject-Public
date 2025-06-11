@@ -11,26 +11,42 @@ struct NFTItemView: View {
     let nft: Nft
     let onDeleteTap: () -> Void
     
-    private var nftImage: String {
-        let images = ["mockImageNFT", "mockImageNFT2", "mockImageNFT3"]
-        guard !images.isEmpty else { return "mockImageNFT" }
-        let index = abs(Int(nft.id) ?? 0) % images.count
-        return images[index]
-    }
-    
     var body: some View {
         HStack(spacing: 16) {
-            AsyncImage(url: nft.images.first) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Rectangle()
-                    .fill(Color.ypLightGrey)
-                    .overlay {
-                        ProgressView()
-                            .tint(.ypBlueUniversal)
-                    }
+            // Используем только реальные изображения
+            AsyncImage(url: nft.images.first) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                case .failure(let error):
+                    // При ошибке загрузки показываем placeholder
+                    Rectangle()
+                        .fill(Color.ypLightGrey)
+                        .overlay {
+                            Image(systemName: "photo")
+                                .foregroundColor(.gray)
+                                .font(.title2)
+                        }
+                case .empty:
+                    // Пока загружается
+                    Rectangle()
+                        .fill(Color.ypLightGrey)
+                        .overlay {
+                            ProgressView()
+                                .tint(.ypBlueUniversal)
+                        }
+                @unknown default:
+                    // Fallback placeholder
+                    Rectangle()
+                        .fill(Color.ypLightGrey)
+                        .overlay {
+                            Image(systemName: "questionmark")
+                                .foregroundColor(.gray)
+                                .font(.title2)
+                        }
+                }
             }
             .frame(width: 108, height: 108)
             .clipped()

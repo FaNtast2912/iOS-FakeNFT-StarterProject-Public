@@ -10,6 +10,7 @@ import SwiftUI
 struct PaymentMethodView: View {
     @StateObject private var viewModel: PaymentMethodViewModel
     @EnvironmentObject var navigationModel: NavigationModel
+    @EnvironmentObject private var cartManager: CartManagerWrapper
     
     private let columns = [
         GridItem(.flexible()),
@@ -48,7 +49,7 @@ struct PaymentMethodView: View {
         .alert("Ошибка оплаты", isPresented: $viewModel.showPaymentError) {
             Button("Повторить") {
                 Task {
-                    if await viewModel.processPayment() {
+                    if await processPayment() {
                         navigationModel.navigate(to: .paymentDoneView)
                     }
                 }
@@ -122,7 +123,7 @@ struct PaymentMethodView: View {
             
             Button(action: {
                 Task {
-                    if await viewModel.processPayment() {
+                    if await processPayment() {
                         navigationModel.navigate(to: .paymentDoneView)
                     }
                 }
@@ -134,7 +135,7 @@ struct PaymentMethodView: View {
                     .background(viewModel.selectedCurrency != nil ? Color.black : Color.gray)
                     .cornerRadius(12)
             }
-            .disabled(viewModel.selectedCurrency == nil || viewModel.loadingState.isLoading)
+            .disabled(viewModel.selectedCurrency == nil || viewModel.loadingState.isLoading || cartManager.isLoading)
         }
         .padding(16)
         .frame(maxWidth: .infinity)
@@ -142,6 +143,19 @@ struct PaymentMethodView: View {
             Color(.systemGray6)
                 .edgesIgnoringSafeArea(.bottom)
         )
+    }
+    
+    // MARK: - Payment Processing
+    
+    private func processPayment() async -> Bool {
+        let success = await viewModel.processPayment()
+        
+        if success {
+            // После успешной оплаты обновляем состояние CartManager
+            cartManager.loadCart()
+        }
+        
+        return success
     }
 }
 
