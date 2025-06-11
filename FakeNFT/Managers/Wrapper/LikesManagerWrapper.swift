@@ -135,6 +135,21 @@ final class LikesManagerWrapper: ObservableObject {
             isLoading = false
         }
     }
+    
+    // MARK: - Асинхронная версия для особых случаев ;-)
+
+    func toggleLikeAsync(for nft: Nft) async {
+        await toggleLikeAsync(for: nft.id)
+    }
+
+    func toggleLikeAsync(for nftId: String) async {
+        guard !isLoading else { return }
+        
+        await performAction { [weak self] in
+            try await self?.likesManager.toggleLike(for: nftId)
+        }
+    }
+    
 }
 
 // MARK: - ServicesAssembly Extension

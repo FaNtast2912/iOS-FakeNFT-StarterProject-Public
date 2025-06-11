@@ -66,7 +66,7 @@ struct MyFavoriteNFTView: View {
                         isFavorite: likesManager.isLiked(nft)
                     ) {
                         Task {
-                            await likesManager.removeLike(for: nft)
+                            await likesManager.toggleLikeAsync(for: nft)
                             await viewModel.loadData() // Перезагрузить список
                         }
                     }

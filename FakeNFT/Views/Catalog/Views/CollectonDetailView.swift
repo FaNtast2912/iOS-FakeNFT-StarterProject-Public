@@ -125,7 +125,7 @@ struct CollectionDetailView: View {
     // MARK: - Private Methods
     
     private func loadCartData() async {
-        servicesAssembly.getCartManagerWrapper().loadCart()
+        await servicesAssembly.getCartManagerWrapper().loadCart()
     }
     
     private func loadLikesData() async {
