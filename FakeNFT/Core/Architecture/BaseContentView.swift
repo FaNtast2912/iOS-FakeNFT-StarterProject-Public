@@ -9,18 +9,15 @@ import SwiftUI
 
 struct BaseContentView<Data: Equatable, Content: View>: View {
     let loadingState: LoadingState<Data>
-    let loadingMessage: String
     let onRetry: () -> Void
     @ViewBuilder let content: (Data) -> Content
     
     init(
         loadingState: LoadingState<Data>,
-        loadingMessage: String = "Загрузка...",
         onRetry: @escaping () -> Void,
         @ViewBuilder content: @escaping (Data) -> Content
     ) {
         self.loadingState = loadingState
-        self.loadingMessage = loadingMessage
         self.onRetry = onRetry
         self.content = content
     }
@@ -28,7 +25,7 @@ struct BaseContentView<Data: Equatable, Content: View>: View {
     var body: some View {
         switch loadingState {
         case .idle, .loading:
-            LoadingView(message: loadingMessage)
+            LoadingView()
             
         case .loaded(let data):
             content(data)

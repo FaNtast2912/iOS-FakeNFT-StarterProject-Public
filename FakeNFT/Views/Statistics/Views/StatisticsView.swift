@@ -13,7 +13,6 @@ struct StatisticsView: View {
         ZStack {
             BaseContentView(
                 loadingState: viewModel.loadingState,
-                loadingMessage: "Загрузка пользователей...",
                 onRetry: { Task { await viewModel.loadData() } }
             ) { _ in
                 statisticsContent

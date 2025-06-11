@@ -15,7 +15,6 @@ final class MyFavoriteNFTViewModel: BaseViewModel<[Nft]> {
     }
     
     override func loadData() async {
-        setLoading()
         
         do {
             // Получаем лайкнутые ID из LikesManager через ServicesAssembly

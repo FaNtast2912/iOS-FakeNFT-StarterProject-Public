@@ -36,7 +36,6 @@ final class MyNFTViewModel: BaseViewModel<[Nft]> {
     }
     
     override func loadData() async {
-        setLoading()
         
         do {
             let profile = try await profileService.fetchProfile()

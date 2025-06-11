@@ -27,7 +27,6 @@ struct PaymentMethodView: View {
             
             BaseContentView(
                 loadingState: viewModel.loadingState,
-                loadingMessage: "Загрузка валют...",
                 onRetry: { Task { await viewModel.loadData() } }
             ) { currencies in
                 if currencies.isEmpty {

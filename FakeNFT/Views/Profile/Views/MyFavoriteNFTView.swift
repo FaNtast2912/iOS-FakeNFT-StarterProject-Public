@@ -22,7 +22,6 @@ struct MyFavoriteNFTView: View {
         ZStack {
             BaseContentView(
                 loadingState: viewModel.loadingState,
-                loadingMessage: "Загрузка избранных NFT...",
                 onRetry: { Task { await viewModel.loadData() } }
             ) { nfts in
                 if nfts.isEmpty {
@@ -42,6 +41,7 @@ struct MyFavoriteNFTView: View {
         .padding(.horizontal, AppConstants.UI.defaultPadding)
         .task {
             if case .idle = viewModel.loadingState {
+                viewModel.setLoading()
                 await viewModel.loadData()
             }
         }
