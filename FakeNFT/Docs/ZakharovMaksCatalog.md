@@ -3,6 +3,7 @@
 Группа: 1
 Эпик: Каталог
 Ссылка на доску: https://github.com/users/FaNtast2912/projects/2
+Cсылка на видео-демонстрацию эпика "каталог": https://disk.yandex.ru/i/C6BlVRlDCIZr0w
 
 # Декомпозиция эпика Каталог
 
