@@ -30,14 +30,7 @@ struct CartView: View {
     var body: some View {
         VStack(spacing: 0) {
             sortButton
-            if viewModel.isLoading && viewModel.nfts.isEmpty {
-                VStack {
-                    Spacer()
-                    ProgressView("Загрузка корзины...")
-                        .font(.system(size: 17, weight: .medium))
-                    Spacer()
-                }
-            } else if let error = viewModel.error {
+            if let error = viewModel.error {
                 VStack {
                     Spacer()
                     Text("Ошибка загрузки")
