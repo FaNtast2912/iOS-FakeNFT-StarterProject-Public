@@ -16,5 +16,7 @@ struct UserCardViewFactory: View {
             userId: userId,
             viewModel: servicesAssembly.makeUserCardViewModel()
         )
+        .environmentObject(servicesAssembly.getCartManagerWrapper())
+        .environmentObject(servicesAssembly.getLikesManagerWrapper())
     }
 }

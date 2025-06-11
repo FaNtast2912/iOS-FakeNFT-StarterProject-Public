@@ -1,5 +1,5 @@
 //
-//  MainView.swift
+//  AppTabView.swift
 //  FakeNFT
 //
 //  Created by Olga Trofimova on 25.05.2025.
@@ -14,6 +14,7 @@ struct AppTabView: View {
     init(servicesAssembly: ServicesAssembly, navigationModel: NavigationModel) {
         self.servicesAssembly = servicesAssembly
         self.navigationModel = navigationModel
+        
         configureTabBarAppearance()
     }
     
@@ -77,7 +78,24 @@ struct AppTabView: View {
             .navigationDestination(for: Screens.self) { screen in
                 navigationModel.destination(for: screen, with: servicesAssembly)
             }
+            .environmentObject(servicesAssembly.getCartManagerWrapper())
+            .environmentObject(servicesAssembly.getLikesManagerWrapper())
         }
+        .task {
+            // Загружаем начальные данные при старте приложения
+            await loadInitialData()
+        }
+    }
+    
+    // MARK: - Private Methods
+    
+    private func loadInitialData() async {
+        // Загружаем данные параллельно
+        async let loadCart: Void = servicesAssembly.getCartManagerWrapper().loadCart()
+        async let loadLikes: Void = servicesAssembly.getLikesManagerWrapper().loadLikes()
+        
+        await loadCart
+        await loadLikes
     }
 }
 

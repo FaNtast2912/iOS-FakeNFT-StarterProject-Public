@@ -43,22 +43,27 @@ struct CollectionDetailView: View {
                     backButton
                 }
             }
-            .environmentObject(servicesAssembly.likesManager)
         }
+        .environmentObject(servicesAssembly.getCartManagerWrapper())
+        .environmentObject(servicesAssembly.getLikesManagerWrapper())
         .task {
             if case .idle = viewModel.loadingState {
                 async let loadNFTs: Void = viewModel.loadData()
-                async let loadLikes: Void = servicesAssembly.likesManager.loadLikes()
+                async let loadCart: Void = loadCartData()
+                async let loadLikes: Void = loadLikesData()
                 
                 await loadNFTs
+                await loadCart
                 await loadLikes
             }
         }
         .refreshable {
             async let refreshNFTs: Void = viewModel.refresh()
-            async let refreshLikes: Void = servicesAssembly.likesManager.loadLikes()
+            async let refreshCart: Void = servicesAssembly.getCartManagerWrapper().refresh()
+            async let refreshLikes: Void = servicesAssembly.getLikesManagerWrapper().refresh()
             
             await refreshNFTs
+            await refreshCart
             await refreshLikes
         }
     }
@@ -117,8 +122,17 @@ struct CollectionDetailView: View {
         .padding(.horizontal, AppConstants.UI.defaultPadding)
         .padding(.top, AppConstants.UI.defaultPadding)
     }
+    
+    // MARK: - Private Methods
+    
+    private func loadCartData() async {
+        servicesAssembly.getCartManagerWrapper().loadCart()
+    }
+    
+    private func loadLikesData() async {
+        servicesAssembly.getLikesManagerWrapper().loadLikes()
+    }
 }
-
 
 #Preview {
     let mockServices = MockServicesAssembly()

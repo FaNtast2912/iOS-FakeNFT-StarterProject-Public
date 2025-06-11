@@ -11,5 +11,7 @@ struct StatisticsViewFactory: View {
     
     var body: some View {
         StatisticsView(viewModel: servicesAssembly.makeStatisticsViewModel())
+            .environmentObject(servicesAssembly.getCartManagerWrapper())
+            .environmentObject(servicesAssembly.getLikesManagerWrapper())
     }
 }

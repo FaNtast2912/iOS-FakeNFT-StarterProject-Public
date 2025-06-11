@@ -12,5 +12,7 @@ struct CartViewFactory: View {
     
     var body: some View {
         CartView(viewModel: servicesAssembly.makeCartViewModel())
+            .environmentObject(servicesAssembly.getCartManagerWrapper())
+            .environmentObject(servicesAssembly.getLikesManagerWrapper())
     }
 }
