@@ -46,7 +46,7 @@ struct DefaultNetworkClient: NetworkClient {
         }
     }
     
-    func send<T: Decodable>(request: NetworkRequest, type: T.Type) async throws -> T {
+    func send<T: Decodable>(_ request: NetworkRequest, as type: T.Type) async throws -> T {
         let data = try await send(request: request)
         
         do {

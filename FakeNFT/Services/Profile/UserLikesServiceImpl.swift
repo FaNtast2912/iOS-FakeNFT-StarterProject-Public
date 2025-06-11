@@ -23,7 +23,7 @@ final class UserLikesServiceImpl: UserLikesService {
     func fetchLikes() async throws -> UserLikes {
         let request = UserLikesRequest()
         do {
-            return try await networkClient.send(request: request, type: UserLikes.self)
+            return try await networkClient.send(request, as: UserLikes.self)
         } catch {
             throw UserLikesError.getLikesError
         }
@@ -32,7 +32,7 @@ final class UserLikesServiceImpl: UserLikesService {
     func updateLikes(dto: Dto) async throws -> UserLikes {
         let request = UpdateUserLikesRequest(dto: dto)
         do {
-            return try await networkClient.send(request: request, type: UserLikes.self)
+            return try await networkClient.send(request, as: UserLikes.self)
         } catch {
             throw UserLikesError.updateLikesError
         }

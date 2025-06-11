@@ -21,7 +21,7 @@ final class ProfileServiceImpl: ProfileService {
     func fetchProfile() async throws -> Profile {
         let request = ProfileRequest()
         do {
-            return try await networkClient.send(request: request, type: Profile.self)
+            return try await networkClient.send(request, as: Profile.self)
         } catch {
             throw ProfileError.getProfileError
         }
@@ -30,7 +30,7 @@ final class ProfileServiceImpl: ProfileService {
     func updateProfile(dto: Dto) async throws -> Profile {
         let request = UpdateProfileRequest(dto: dto)
         do {
-            return try await networkClient.send(request: request, type: Profile.self)
+            return try await networkClient.send(request, as: Profile.self)
         } catch {
             throw ProfileError.updateProfileError
         }
