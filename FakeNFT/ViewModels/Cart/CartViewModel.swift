@@ -10,26 +10,23 @@ import Foundation
 @MainActor
 final class CartViewModel: BaseViewModel<[Nft]> {
     
-    // MARK: - Sort Options (сохраняем для совместимости)
-    
-    enum SortOption: String, CaseIterable {
-        case price = "По цене"
-        case rating = "По рейтингу"
-        case name = "По названию"
-        
-        func toUnifiedSortOption() -> UnifiedSortOption {
-            switch self {
-            case .price: return .nftPrice(ascending: true)
-            case .rating: return .nftRating(ascending: true)
-            case .name: return .nftName(ascending: true)
-            }
+    @Published var currentSortOption: UnifiedSortOption = .nftPrice(ascending: true) {
+        didSet {
+            UserDefaults.standard.set(currentSortOption.description, forKey: "cartSortOption")
+            updateSortedNfts()
         }
     }
-    
-    @Published var currentSortOption: SortOption = .price
+    @Published var sortedNfts: [Nft] = []
     @Published var isDeleting = false
     
-    // Убрана дублирующая логика - используем CartManager через ServicesAssembly
+    override init(servicesAssembly: ServicesAssembly) {
+        super.init(servicesAssembly: servicesAssembly)
+        
+        // Load saved sort option
+        if let savedOption = UserDefaults.standard.string(forKey: "cartSortOption") {
+            currentSortOption = UnifiedSortOption.from(string: savedOption) ?? .nftPrice(ascending: true)
+        }
+    }
     
     /// Получить NFTs (теперь из CartManager)
     var nfts: [Nft] {
@@ -62,6 +59,7 @@ final class CartViewModel: BaseViewModel<[Nft]> {
             
             print("[CartViewModel] Получено \(cartItems.count) NFT из CartManager")
             setLoaded(cartItems)
+            updateSortedNfts()
             
         } catch {
             handleError(error)
@@ -93,6 +91,7 @@ final class CartViewModel: BaseViewModel<[Nft]> {
             // Обновляем локальное состояние
             let updatedItems = await servicesAssembly.cartManager.getCartItems()
             setLoaded(updatedItems)
+            updateSortedNfts()
             
             isDeleting = false
             print("[CartViewModel] NFT успешно удален из корзины")
@@ -110,13 +109,11 @@ final class CartViewModel: BaseViewModel<[Nft]> {
         }
     }
     
-    func sortItems(by option: SortOption) {
-        print("[CartViewModel] Сортировка по: \(option.rawValue)")
+    func setSortOption(_ option: UnifiedSortOption) {
         currentSortOption = option
     }
     
-    func getSortedNFTs() -> [Nft] {
-        let unifiedOption = currentSortOption.toUnifiedSortOption()
-        return UnifiedSortingManager.shared.sort(items: nfts, by: unifiedOption) as? [Nft] ?? nfts
+    private func updateSortedNfts() {
+        sortedNfts = UnifiedSortingManager.shared.sort(items: nfts, by: currentSortOption) as? [Nft] ?? nfts
     }
 }

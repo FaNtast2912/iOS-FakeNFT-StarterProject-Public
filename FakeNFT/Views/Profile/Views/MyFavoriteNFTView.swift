@@ -67,7 +67,7 @@ struct MyFavoriteNFTView: View {
                     ) {
                         Task {
                             await likesManager.toggleLikeAsync(for: nft)
-                            await viewModel.loadData() // Перезагрузить список
+                            await viewModel.loadData()
                         }
                     }
                 }

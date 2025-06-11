@@ -16,6 +16,13 @@ struct CartView: View {
     @State private var nftToDelete: Nft?
     @State private var showSortOptions = false
     
+    // Доступные опции сортировки для корзины
+    private let sortOptions: [UnifiedSortOption] = [
+        .nftPrice(ascending: false),
+        .nftRating(ascending: false),
+        .nftName(ascending: false),
+    ]
+    
     init(viewModel: CartViewModel) {
         self._viewModel = StateObject(wrappedValue: viewModel)
     }
@@ -23,14 +30,14 @@ struct CartView: View {
     var body: some View {
         VStack(spacing: 0) {
             sortButton
-            if cartManager.isLoading && cartManager.items.isEmpty {
+            if viewModel.isLoading && viewModel.nfts.isEmpty {
                 VStack {
                     Spacer()
                     ProgressView("Загрузка корзины...")
                         .font(.system(size: 17, weight: .medium))
                     Spacer()
                 }
-            } else if let error = cartManager.error {
+            } else if let error = viewModel.error {
                 VStack {
                     Spacer()
                     Text("Ошибка загрузки")
@@ -42,7 +49,9 @@ struct CartView: View {
                         .multilineTextAlignment(.center)
                         .padding(.bottom, 16)
                     Button("Повторить") {
-                        cartManager.refresh()
+                        Task {
+                            await viewModel.loadData()
+                        }
                     }
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
@@ -51,33 +60,35 @@ struct CartView: View {
                     .cornerRadius(8)
                     Spacer()
                 }
-            } else if cartManager.items.isEmpty {
+            } else if viewModel.nfts.isEmpty {
                 emptyCartView
             } else {
-                nftListView(nfts: cartManager.items)
+                nftListView
             }
             
             paymentSummaryView
         }
-        .progressHUD(isLoading: cartManager.isLoading || viewModel.isDeleting)
+        .progressHUD(isLoading: viewModel.isLoading || viewModel.isDeleting)
         .overlay(deleteConfirmationOverlay)
         .task {
             // Загружаем данные только при первом запуске, если корзина пуста
-            if cartManager.items.isEmpty && !cartManager.isLoading {
-                cartManager.loadCart()
+            if viewModel.nfts.isEmpty && !viewModel.isLoading {
+                await viewModel.loadData()
             }
         }
         .refreshable {
             // Pull-to-refresh для ручного обновления
-            cartManager.refresh()
+            await viewModel.refresh()
         }
-        .alert("Ошибка", isPresented: .constant(cartManager.error != nil)) {
+        .alert("Ошибка", isPresented: .constant(viewModel.error != nil)) {
             Button("Повторить") {
-                cartManager.refresh()
+                Task {
+                    await viewModel.refresh()
+                }
             }
             Button("Отмена", role: .cancel) {}
         } message: {
-            Text(cartManager.error?.localizedDescription ?? "Произошла ошибка")
+            Text(viewModel.error?.localizedDescription ?? "Произошла ошибка")
         }
     }
     
@@ -91,17 +102,30 @@ struct CartView: View {
                     .foregroundColor(.black)
                     .padding(.trailing, 19.5)
             }
-            .disabled(cartManager.isLoading || viewModel.isDeleting)
+            .disabled(viewModel.isLoading || viewModel.isDeleting)
             .confirmationDialog("Сортировка", isPresented: $showSortOptions) {
-                ForEach(CartViewModel.SortOption.allCases, id: \.self) { option in
-                    Button(option.rawValue) {
-                        viewModel.currentSortOption = option
+                ForEach(sortOptions, id: \.description) { option in
+                    Button(getSortOptionTitle(option)) {
+                        viewModel.setSortOption(option)
                     }
                 }
                 Button("Закрыть", role: .cancel) {}
             }
         }
         .padding(.top, 16)
+    }
+    
+    private func getSortOptionTitle(_ option: UnifiedSortOption) -> String {
+        switch option {
+        case .nftPrice(let ascending):
+            return ascending ? "По цене" : "По цене"
+        case .nftRating(let ascending):
+            return ascending ? "По рейтингу" : "По рейтингу"
+        case .nftName(let ascending):
+            return ascending ? "По названию" : "По названию"
+        default:
+            return "Неизвестно"
+        }
     }
     
     private var emptyCartView: some View {
@@ -114,10 +138,10 @@ struct CartView: View {
         }
     }
     
-    private func nftListView(nfts: [Nft]) -> some View {
+    private var nftListView: some View {
         ScrollView {
             LazyVStack(spacing: 16) {
-                ForEach(getSortedNFTs(from: nfts), id: \.id) { nft in
+                ForEach(viewModel.sortedNfts, id: \.id) { nft in
                     NFTItemView(
                         nft: nft,
                         onDeleteTap: {
@@ -125,19 +149,13 @@ struct CartView: View {
                             showDeleteConfirmation = true
                         }
                     )
-                    .disabled(viewModel.isDeleting || cartManager.isLoading)
-                    .opacity((viewModel.isDeleting || cartManager.isLoading) ? 0.6 : 1.0)
+                    .disabled(viewModel.isDeleting || viewModel.isLoading)
+                    .opacity((viewModel.isDeleting || viewModel.isLoading) ? 0.6 : 1.0)
                 }
             }
             .padding(.top, 36)
             .padding(.horizontal, AppConstants.UI.defaultPadding)
         }
-    }
-    
-    /// Получить отсортированные NFT из CartManager
-    private func getSortedNFTs(from nfts: [Nft]) -> [Nft] {
-        let unifiedOption = viewModel.currentSortOption.toUnifiedSortOption()
-        return UnifiedSortingManager.shared.sort(items: nfts, by: unifiedOption) as? [Nft] ?? nfts
     }
     
     private var paymentSummaryView: some View {
@@ -149,13 +167,11 @@ struct CartView: View {
             
             HStack {
                 VStack(alignment: .leading) {
-                    // Используем cartManager для получения актуального количества
-                    Text("\(cartManager.itemsCount) NFT")
+                    Text("\(viewModel.nfts.count) NFT")
                         .font(.system(size: 15, weight: .regular))
                         .padding(.bottom, 2)
                     
-                    // Используем cartManager для получения актуальной суммы
-                    Text(String(format: "%.2f ETH", cartManager.totalPrice))
+                    Text(viewModel.formattedTotalPrice)
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.ypGreenUniversal)
                 }
@@ -172,8 +188,8 @@ struct CartView: View {
                         .foregroundColor(.white)
                         .cornerRadius(16)
                 }
-                .disabled(cartManager.isEmpty || cartManager.isLoading || viewModel.isDeleting)
-                .opacity((cartManager.isEmpty || cartManager.isLoading || viewModel.isDeleting) ? 0.6 : 1.0)
+                .disabled(viewModel.nfts.isEmpty || viewModel.isLoading || viewModel.isDeleting)
+                .opacity((viewModel.nfts.isEmpty || viewModel.isLoading || viewModel.isDeleting) ? 0.6 : 1.0)
             }
             .padding(.horizontal, AppConstants.UI.defaultPadding)
         }
@@ -186,8 +202,7 @@ struct CartView: View {
                     nftImage: Image("mockImageNFT"),
                     onDelete: {
                         Task {
-                            // Используем только CartManager для удаления
-                            cartManager.removeFromCart(nft)
+                            await viewModel.deleteNFT(nft.id)
                         }
                         showDeleteConfirmation = false
                         nftToDelete = nil
