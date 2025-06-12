@@ -1,0 +1,39 @@
+//
+//  ProfileServiceImpl.swift
+//  FakeNFT
+//
+//  Created by Maksim Zakharov on 10.06.2025.
+//
+
+final class ProfileServiceImpl: ProfileServiceProtocol {
+    let networkClient: NetworkClient
+    
+    enum ProfileError: Error {
+        case getProfileError
+        case updateProfileError
+    }
+
+    init(networkClient: NetworkClient) {
+        self.networkClient = networkClient
+    }
+    
+    func fetchProfile() async throws -> Profile {
+        let request = ProfileRequest()
+        do {
+            return try await networkClient.send(request, as: Profile.self)
+        } catch {
+            throw ProfileError.getProfileError
+        }
+    }
+  
+    func updateProfile(dto: Dto) async throws -> Profile {
+        let request = UpdateProfileRequest()
+        var requestWithDto = request
+        requestWithDto.dto = dto
+        do {
+            return try await networkClient.send(requestWithDto, as: Profile.self)
+        } catch {
+            throw ProfileError.updateProfileError
+        }
+    }
+}
