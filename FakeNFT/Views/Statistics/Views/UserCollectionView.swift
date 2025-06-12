@@ -54,9 +54,9 @@ struct UserCollectionView: View {
             }
         }
         .refreshable {
-            async let refreshNFTs: Void = viewModel.refresh()
+            async let refreshNFTs: Void = viewModel.loadNfts(for: user)
             async let refreshLikes: Void = likesManager.loadLikes()
-            
+
             await refreshNFTs
             await refreshLikes
         }
